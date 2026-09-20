@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Redirecting... | Universal Business Platform</title>
+  <script>
+    // GitHub Pages SPA router redirect
+    // Redirects deep links and query parameters back to index.html smoothly
+    (function() {
+      const path = window.location.pathname;
+      const search = window.location.search;
+      const hash = window.location.hash;
+
+      // Extract repository base if deployed under a GitHub project page (e.g., /repo-name/)
+      const segments = path.split('/').filter(Boolean);
+      let repoBase = '/';
+      let subPath = '';
+
+      if (window.location.hostname.endsWith('github.io')) {
+        if (segments.length > 0) {
+          repoBase = '/' + segments[0] + '/';
+          subPath = segments.slice(1).join('/');
+        }
+      } else {
+        if (segments.length > 0) {
+          subPath = segments.join('/');
+        }
+      }
+
+      // If subPath is admin or points to admin, redirect to admin/
+      if (subPath.startsWith('admin')) {
+        window.location.replace(repoBase + 'admin/index.html' + search + hash);
+        return;
+      }
+
+      // If subPath exists and is not index.html, pass it as ?slug=
+      let destination = repoBase + 'index.html';
+      if (subPath && subPath !== 'index.html') {
+        const cleanSlug = subPath.replace(/\/+$/, '');
+        const params = new URLSearchParams(search);
+        if (!params.has('slug') && !params.has('b') && !params.has('business')) {
+          params.set('slug', cleanSlug);
+        }
+        destination += '?' + params.toString() + hash;
+      } else {
+        destination += search + hash;
+      }
+
+      window.location.replace(destination);
+    })();
+  </script>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #090d16; color: #f8fafc; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center;">
+  <div>
+    <div style="font-size: 40px; margin-bottom: 12px;">⚡</div>
+    <h2>Loading Client Experience...</h2>
+    <p style="color: #94a3b8; font-size: 14px;">Redirecting you to the active portal...</p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="World-Class Universal Config-Driven White-Label Platform for Student Admissions, MOVE-X Logistics, Reservations, Food & E-Commerce." />
+  <title>Universal Business Platform</title>
+
+  <!-- Security: Content-Security-Policy & Frame Protection -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: https: blob:; font-src 'self' https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https:;" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+
+  <!-- Frame-Busting Defense against Clickjacking -->
+  <script>
+    if (window.top !== window.self) {
+      window.top.location = window.self.location;
+    }
+  </script>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Google Identity Services (GIS) OAuth 2.0 SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Ambient Glow Meshes -->
+  <div class="ambient-glow-mesh"></div>
+
+  <!-- =========================================================================
+       CANVAS CONFETTI PARTICLE OVERLAY
+       ========================================================================= -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- =========================================================================
+       SHOWCASE & CONTROLS BAR (FOR CLIENT DEMOS, REBRANDING & ADMIN DASHBOARD)
+       ========================================================================= -->
+  <div class="showcase-bar" id="showcase-bar">
+    <div class="showcase-bar-left">
+      <span>⚡ <strong>White-Label Engine:</strong></span>
+      <div class="showcase-select-wrapper">
+        <select id="showcase-select" class="showcase-select" onchange="UniversalApp.switchVertical(this.value)">
+          <option value="student_management">🎓 1. School Fee & Student Admission System</option>
+          <option value="movex_booking">🚚 2. MOVE-X Logistics & Vehicle Booking (V0 Plan)</option>
+          <option value="hotel_booking">🏨 3. Hotel & Table / Seat Reservation</option>
+          <option value="food_order">🍔 4. Restaurant Food Ordering App</option>
+          <option value="ecommerce">🛍️ 5. Quick-Commerce / E-Commerce Retail Store</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+      <!-- Direct Link to Multi-Vendor Admin Dashboard -->
+      <a href="admin.html" target="_blank" class="pill-btn" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); border: none; font-weight: 800; text-decoration: none;">
+        🔐 Admin & Vendor Dashboard
+      </a>
+
+      <!-- Quick 5-Minute Rebrand & Client Generator -->
+      <button class="pill-btn" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; font-weight: 800;" onclick="UniversalApp.openRebrandingModal()">
+        ⚙️ 5-Min Client Generator
+      </button>
+
+      <button class="pill-btn" id="pwa-install-btn" style="display: none; background: #10b981; border-color: #10b981;" onclick="UniversalApp.installPwaApp()">📲 Install App</button>
+      <button class="pill-btn" id="sound-toggle-btn" onclick="UniversalApp.toggleSound()">🔊 Sound: ON</button>
+      <button class="pill-btn" id="theme-toggle-btn" onclick="UniversalApp.toggleTheme()">🌙 Dark</button>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       NAVBAR & AUTHENTICATION BADGE
+       ========================================================================= -->
+  <nav class="navbar" id="main-navbar">
+    <div class="nav-container">
+      <a href="#" class="brand">
+        <img id="brand-logo-img" class="brand-logo-img" src="" alt="Brand Logo" style="display: none;" />
+        <span class="brand-icon" id="brand-icon">🎓</span>
+        <div class="brand-info">
+          <h1 id="brand-title">BrightStar Academy</h1>
+          <p id="brand-tagline">Online Admissions & Fee Portal</p>
+        </div>
+      </a>
+
+      <div class="nav-actions">
+        <!-- Global Universal Multi-Entity Search Button -->
+        <button class="pill-btn nav-search-pill" onclick="UniversalApp.openUniversalSearch()">
+          🔍 Search Records
+        </button>
+
+        <!-- Google OAuth Profile Container -->
+        <div id="nav-auth-container"></div>
+
+        <button class="cart-badge-btn" onclick="UniversalApp.toggleCart()">
+          🛒 <span id="cart-btn-label">Cart</span>
+          <span class="badge-count" id="cart-count">0</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- =========================================================================
+       HERO SECTION WITH TRUST BADGES & ANIMATED GLOW
+       ========================================================================= -->
+  <header class="hero">
+    <div class="hero-content">
+      <div class="hero-badge-wrap">
+        <span class="hero-badge" id="hero-badge">ADMISSION PORTAL</span>
+        <span class="status-live-dot">● LIVE SYSTEM</span>
+      </div>
+      <h2 id="hero-headline">Online Student Admissions & Fee Portal</h2>
+      <p id="hero-subtext">Apply online for new admissions, pay term fees securely, and track academic & co-curricular activity milestones.</p>
+
+      <!-- Enterprise Trust & Security Badges -->
+      <div class="trust-badge-row">
+        <div class="trust-badge-item">
+          <span class="trust-icon">🔒</span>
+          <span>256-Bit SSL Encrypted</span>
+        </div>
+        <div class="trust-badge-item">
+          <span class="trust-icon">⚡</span>
+          <span>Real-Time Google Sheets Sync</span>
+        </div>
+        <div class="trust-badge-item">
+          <span class="trust-icon">🏛️</span>
+          <span>5-Min Multi-Tenant Ready</span>
+        </div>
+        <div class="trust-badge-item">
+          <span class="trust-icon">💳</span>
+          <span>Direct Merchant UPI (0% Fee)</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================================================
+       MAIN CONTENT CONTAINER (Dynamically injected per vertical)
+       ========================================================================= -->
+  <main class="main-wrapper" id="vertical-container">
+    <!-- Active Vertical Module Renders Here -->
+  </main>
+
+  <!-- =========================================================================
+       SLIDE-OUT SHOPPING / BOOKING CART DRAWER
+       ========================================================================= -->
+  <div class="cart-drawer" id="cart-drawer">
+    <div class="cart-header">
+      <h3 style="font-size: 1.15rem; color: var(--text-main);">🛍️ Your Selection</h3>
+      <button class="modal-close" onclick="UniversalApp.toggleCart()" style="position: static;">✕</button>
+    </div>
+    
+    <div class="cart-items-list" id="cart-items-list">
+      <!-- Items populated via JS -->
+    </div>
+
+    <!-- PROMO CODE & FREE DELIVERY PROGRESS -->
+    <div style="padding: 0 24px; background: var(--surface-card);">
+      <div class="promo-input-group">
+        <input type="text" id="cart_promo_input" class="form-control" placeholder="Promo code (e.g. WELCOME10)" style="padding: 8px 12px; font-size: 13px;" />
+        <button class="btn btn-primary" style="padding: 8px 14px; font-size: 13px;" onclick="UniversalApp.applyPromoCode()">Apply</button>
+      </div>
+      <div style="font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between;">
+        <span>Free Express Delivery:</span>
+        <span style="color: var(--success-color); font-weight: 700;">Unlocked!</span>
+      </div>
+      <div class="free-shipping-meter">
+        <div class="free-shipping-progress" style="width: 100%;"></div>
+      </div>
+    </div>
+
+    <div class="cart-footer">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 14px; font-weight: 800;">
+        <span>Total Payable:</span>
+        <span id="cart-total-amt" style="color: var(--primary-color); font-size: 1.3rem;">$0.00</span>
+      </div>
+      <button class="btn btn-primary" style="width: 100%; font-size: 15px;" onclick="UniversalApp.openCartCheckout()">
+        Proceed to Checkout →
+      </button>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       UNIVERSAL MODAL OVERLAY
+       ========================================================================= -->
+  <div class="modal-overlay" id="app-modal" onclick="if(event.target === this) UniversalApp.closeModal()">
+    <div class="modal-box">
+      <button class="modal-close" onclick="UniversalApp.closeModal()">✕</button>
+      <div id="modal-body">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       TOAST CONTAINER
+       ========================================================================= -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- =========================================================================
+       FOOTER
+       ========================================================================= -->
+  <footer>
+    <div style="max-width: 1200px; margin: 0 auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 18px; text-align: left;">
+        <div>
+          <p style="font-weight: 900; color: var(--text-main); font-size: 16px;" id="footer-brand">BrightStar Academy</p>
+          <p style="margin: 4px 0; font-size: 12px; color: var(--text-muted);">Enterprise Multi-Tenant White-Label Architecture &bull; Pure HTML/CSS/JS Engine</p>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <a href="admin.html" class="btn btn-outline" style="padding: 8px 16px; font-size: 12px; text-decoration: none;">
+            🔐 Admin & Vendor Console
+          </a>
+          <button class="btn btn-outline" style="padding: 8px 16px; font-size: 12px;" onclick="UniversalApp.openUniversalSearch()">
+            🔍 Quick Lookup
+          </button>
+        </div>
+      </div>
+      <div style="border-top: 1px solid var(--border-color); padding-top: 14px; font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+        <span>© 2026 All Rights Reserved. Engineered for production deployment.</span>
+        <span>Hosted via GitHub Pages Static Architecture &bull; 99.9% Uptime SLA</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- =========================================================================
+       SCRIPTS LOADER
+       ========================================================================= -->
+  <script src="config.js"></script>
+  <script src="modules/student-management.js"></script>
+  <script src="modules/movex-booking.js"></script>
+  <script src="modules/hotel-booking.js"></script>
+  <script src="modules/food-ordering.js"></script>
+  <script src="modules/ecommerce.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

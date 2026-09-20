@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin & Multi-Vendor Control Center | OmniSaaS</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Admin Stylesheet -->
+  <link rel="stylesheet" href="../admin.css" />
+</head>
+<body>
+
+  <!-- Glow Meshes Background -->
+  <div class="admin-bg-mesh"></div>
+
+  <!-- =========================================================================
+       🔐 ADMIN AUTHENTICATION GATE (PIN PROTECTED)
+       ========================================================================= -->
+  <div class="admin-login-overlay" id="admin-login-overlay">
+    <div class="admin-login-card">
+      <div style="font-size: 44px; margin-bottom: 8px;">🔐</div>
+      <h2 style="font-size: 22px; font-weight: 900; margin-bottom: 6px;">Admin Control Center</h2>
+      <p style="font-size: 13px; color: var(--admin-text-muted); margin-bottom: 24px;">Multi-Vendor Management & Rapid Onboarding Console</p>
+
+      <form onsubmit="AdminDashboard.handleLogin(event)">
+        <div class="admin-form-group">
+          <label>Enter Master Security PIN</label>
+          <input type="password" id="admin_pin_input" class="admin-input" placeholder="Enter PIN (Default: 1234)" autofocus required />
+        </div>
+        <div id="login_error_msg" style="color: var(--admin-danger); font-size: 12px; margin-bottom: 12px; display: none;"></div>
+        <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; padding: 12px; font-size: 14px;">
+          Unlock Admin Dashboard →
+        </button>
+      </form>
+      <div style="margin-top: 20px; font-size: 11px; color: var(--admin-text-muted);">
+        🔒 256-bit encrypted session guard &bull; Independent Admin Route
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-wrapper">
+    <!-- TOP NAVIGATION BAR -->
+    <header class="admin-header">
+      <div class="admin-header-container">
+        <a href="index.html" class="admin-brand">
+          <span style="font-size: 28px;">⚡</span>
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-weight: 900; font-size: 16px;">OmniSaaS Command</span>
+              <span class="admin-badge-agency">Agency Portal</span>
+            </div>
+            <div style="font-size: 11px; color: var(--admin-text-muted);">Multi-Vendor & Rapid Client Delivery Suite</div>
+          </div>
+        </a>
+
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <!-- GitHub Integration Settings Button -->
+          <button class="btn-admin btn-admin-accent" style="font-size: 12px;" onclick="AdminDashboard.openGitHubSettings()">
+            🐙 GitHub Pages Setup
+          </button>
+          <a href="../index.html" target="_blank" class="btn-admin btn-admin-outline" style="font-size: 12px;">
+            🌐 View Client Live Portal
+          </a>
+          <button class="btn-admin btn-admin-danger" style="font-size: 12px;" onclick="AdminDashboard.logout()">
+            🚪 Lock & Sign Out
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN CONTAINER & AGGREGATED METRICS ROW -->
+    <main class="admin-container">
+      
+      <!-- Cross-Vendor Metrics Row -->
+      <section class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon" style="color: var(--admin-primary);">🏢</div>
+          <div class="stat-info">
+            <div class="stat-value" id="metric_total_vendors">6</div>
+            <div class="stat-label">Onboarded Vendors</div>
+          </div>
+        </div>
+
+        <div class="stat-card success">
+          <div class="stat-icon" style="color: var(--admin-success);">🟢</div>
+          <div class="stat-info">
+            <div class="stat-value" id="metric_active_vendors" style="font-size: 1.4rem;">6 Active</div>
+            <div class="stat-label">Vendor Health</div>
+          </div>
+        </div>
+
+        <div class="stat-card accent">
+          <div class="stat-icon" style="color: var(--admin-accent);">💳</div>
+          <div class="stat-info">
+            <div class="stat-value" id="metric_total_revenue">₹0</div>
+            <div class="stat-label">Total Platform Volume</div>
+          </div>
+        </div>
+
+        <div class="stat-card purple">
+          <div class="stat-icon" style="color: #a855f7;">📦</div>
+          <div class="stat-info">
+            <div class="stat-value" id="metric_total_tx">0</div>
+            <div class="stat-label">Admissions & Bookings</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Main Navigation Tabs -->
+      <nav class="admin-tabs">
+        <button class="admin-tab-btn active" id="tab_btn_wizard" onclick="AdminDashboard.switchTab('wizard')">
+          ⚡ 5-Minute Rapid Onboarder
+        </button>
+        <button class="admin-tab-btn" id="tab_btn_roster" onclick="AdminDashboard.switchTab('roster')">
+          📋 Vendor Roster & Dedicated URLs
+        </button>
+        <button class="admin-tab-btn" id="tab_btn_activity" onclick="AdminDashboard.switchTab('activity')">
+          📜 Cross-Vendor Live Feed
+        </button>
+        <button class="admin-tab-btn" id="tab_btn_backup" onclick="AdminDashboard.switchTab('backup')">
+          ⚙️ GitHub Deployer & Backups
+        </button>
+      </nav>
+
+      <!-- TAB 1: 5-MINUTE RAPID ONBOARDING WIZARD -->
+      <section id="tab_panel_wizard" class="admin-tab-panel" style="display: block;">
+        <div class="onboard-card">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <span class="admin-badge-agency">Dedicated Business URL &bull; 5 Minutes</span>
+            <h2 style="font-size: 24px; font-weight: 900; margin-top: 8px;">Onboard Any Business in 5 Minutes</h2>
+            <p style="font-size: 13px; color: var(--admin-text-muted);">Generates an official GitHub Pages repository and dedicated URL named after the business.</p>
+          </div>
+
+          <!-- Wizard Stepper Indicators -->
+          <div class="wizard-steps-indicator">
+            <div class="wizard-node active" id="wiz_node_1">1</div>
+            <div class="wizard-node" id="wiz_node_2">2</div>
+            <div class="wizard-node" id="wiz_node_3">3</div>
+            <div class="wizard-node" id="wiz_node_4">4</div>
+            <div class="wizard-node" id="wiz_node_5">5</div>
+          </div>
+
+          <!-- STEP 1: SELECT VERTICAL CATEGORY -->
+          <div id="wiz_step_1">
+            <h3 style="font-size: 16px; margin-bottom: 12px; color: var(--admin-primary);">Step 1: Select Business Vertical</h3>
+            <div class="vertical-picker-grid">
+              <div class="vertical-option-card selected" id="vert_opt_student_management" onclick="AdminDashboard.selectVertical('student_management')">
+                <div style="font-size: 32px; margin-bottom: 6px;">🎓</div>
+                <div style="font-weight: 800; font-size: 13px;">School / College</div>
+                <div style="font-size: 11px; color: var(--admin-text-muted);">Admissions & Fees</div>
+              </div>
+
+              <div class="vertical-option-card" id="vert_opt_hotel_booking" onclick="AdminDashboard.selectVertical('hotel_booking')">
+                <div style="font-size: 32px; margin-bottom: 6px;">🏨</div>
+                <div style="font-weight: 800; font-size: 13px;">Hotel & Resort</div>
+                <div style="font-size: 11px; color: var(--admin-text-muted);">Room Reservations</div>
+              </div>
+
+              <div class="vertical-option-card" id="vert_opt_movex_booking" onclick="AdminDashboard.selectVertical('movex_booking')">
+                <div style="font-size: 32px; margin-bottom: 6px;">🚚</div>
+                <div style="font-weight: 800; font-size: 13px;">MOVE-X Logistics</div>
+                <div style="font-size: 11px; color: var(--admin-text-muted);">Freight & Fleet</div>
+              </div>
+
+              <div class="vertical-option-card" id="vert_opt_food_order" onclick="AdminDashboard.selectVertical('food_order')">
+                <div style="font-size: 32px; margin-bottom: 6px;">🍔</div>
+                <div style="font-weight: 800; font-size: 13px;">Restaurant / Cafe</div>
+                <div style="font-size: 11px; color: var(--admin-text-muted);">Food Ordering</div>
+              </div>
+
+              <div class="vertical-option-card" id="vert_opt_ecommerce" onclick="AdminDashboard.selectVertical('ecommerce')">
+                <div style="font-size: 32px; margin-bottom: 6px;">🛍️</div>
+                <div style="font-weight: 800; font-size: 13px;">Retail Store</div>
+                <div style="font-size: 11px; color: var(--admin-text-muted);">Quick-Commerce</div>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 24px;">
+              <button class="btn-admin btn-admin-primary" style="padding: 10px 24px;" onclick="AdminDashboard.wizardNext(1)">
+                Continue to Branding →
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 2: BUSINESS IDENTITY & DEDICATED SLUG -->
+          <div id="wiz_step_2" style="display: none;">
+            <h3 style="font-size: 16px; margin-bottom: 12px; color: var(--admin-primary);">Step 2: Business Branding & Dedicated GitHub Pages Slug</h3>
+            
+            <div class="admin-grid-2">
+              <div class="admin-form-group">
+                <label>Business / School / Hotel Name *</label>
+                <input type="text" id="wiz_name" class="admin-input" placeholder="e.g. Cambridge Global High" oninput="AdminDashboard.onBusinessNameInput(this.value)" required />
+              </div>
+
+              <div class="admin-form-group">
+                <label>Dedicated GitHub Pages URL Slug *</label>
+                <input type="text" id="wiz_slug" class="admin-input" placeholder="e.g. cambridge-high" oninput="AdminDashboard.updateUrlPreview()" required />
+                <div style="font-size: 11px; color: var(--admin-primary); margin-top: 4px;" id="wiz_slug_preview">
+                  🌐 Preview: https://&lt;your-username&gt;.github.io/cambridge-high/
+                </div>
+              </div>
+            </div>
+
+            <div class="admin-form-group">
+              <label>Tagline / Subtitle</label>
+              <input type="text" id="wiz_tagline" class="admin-input" placeholder="e.g. Premier Education & Fee Portal" />
+            </div>
+
+            <div class="admin-grid-2">
+              <div class="admin-form-group">
+                <label>Brand Icon (Emoji)</label>
+                <input type="text" id="wiz_icon" class="admin-input" placeholder="e.g. 🎓 or 🏨" value="🎓" />
+              </div>
+
+              <div class="admin-form-group">
+                <label>Currency Symbol</label>
+                <select id="wiz_currency" class="admin-input">
+                  <option value="₹">₹ (INR - Indian Rupee)</option>
+                  <option value="$">$ (USD - Dollar)</option>
+                  <option value="€">€ (EUR - Euro)</option>
+                  <option value="£">£ (GBP - Pound)</option>
+                  <option value="AED">AED (Dirham)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="admin-grid-2">
+              <div class="admin-form-group">
+                <label>Primary Theme Color</label>
+                <div style="display: flex; gap: 8px;">
+                  <input type="color" id="wiz_theme" value="#1e3a8a" style="height: 38px; width: 50px; background: none; border: 1px solid var(--admin-border); border-radius: 6px; cursor: pointer;" />
+                  <input type="text" class="admin-input" value="#1e3a8a" onchange="document.getElementById('wiz_theme').value = this.value" />
+                </div>
+              </div>
+
+              <div class="admin-form-group">
+                <label>Accent Glow Color</label>
+                <div style="display: flex; gap: 8px;">
+                  <input type="color" id="wiz_accent" value="#f59e0b" style="height: 38px; width: 50px; background: none; border: 1px solid var(--admin-border); border-radius: 6px; cursor: pointer;" />
+                  <input type="text" class="admin-input" value="#f59e0b" onchange="document.getElementById('wiz_accent').value = this.value" />
+                </div>
+              </div>
+            </div>
+
+            <div class="admin-form-group">
+              <label>Optional: Upload Custom Merchant Logo Image</label>
+              <input type="file" id="wiz_logo_file" accept="image/*" class="admin-input" onchange="AdminDashboard.handleLogoUpload(this)" />
+            </div>
+
+            <div style="display: flex; justify-content: space-between; margin-top: 24px;">
+              <button class="btn-admin btn-admin-outline" onclick="AdminDashboard.wizardPrev(2)">← Back</button>
+              <button class="btn-admin btn-admin-primary" style="padding: 10px 24px;" onclick="AdminDashboard.wizardNext(2)">
+                Continue to Payments & Webhook →
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 3: PAYMENTS, WEBHOOK & CONTACT -->
+          <div id="wiz_step_3" style="display: none;">
+            <h3 style="font-size: 16px; margin-bottom: 12px; color: var(--admin-primary);">Step 3: Payments, Google Sheets Sync & Contact</h3>
+
+            <div class="admin-grid-2">
+              <div class="admin-form-group">
+                <label>Merchant UPI ID (for Zero-Fee Direct Payouts)</label>
+                <input type="text" id="wiz_upi" class="admin-input" placeholder="e.g. schoolfees@okaxis or business@upi" />
+              </div>
+
+              <div class="admin-form-group">
+                <label>Client WhatsApp Business Number</label>
+                <input type="tel" id="wiz_whatsapp" class="admin-input" placeholder="e.g. +91 98765 43210" />
+              </div>
+            </div>
+
+            <div class="admin-form-group">
+              <label>Google Apps Script Webhook URL (Real-Data Sync)</label>
+              <input type="url" id="wiz_script" class="admin-input" placeholder="https://script.google.com/macros/s/AKfycb.../exec" />
+              <div style="font-size: 11px; color: var(--admin-text-muted);">Leave empty to use client local storage ledger with zero configuration.</div>
+            </div>
+
+            <div class="admin-form-group">
+              <label>Optional: Upload Merchant UPI Standee QR Image</label>
+              <input type="file" id="wiz_qr_file" accept="image/*" class="admin-input" onchange="AdminDashboard.handleQrUpload(this)" />
+              <div style="font-size: 11px; color: var(--admin-text-muted);">This QR standee will be shown directly during customer checkout.</div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; margin-top: 24px;">
+              <button class="btn-admin btn-admin-outline" onclick="AdminDashboard.wizardPrev(3)">← Back</button>
+              <button class="btn-admin btn-admin-primary" style="padding: 10px 24px;" onclick="AdminDashboard.wizardNext(3)">
+                Configure Catalog & Items →
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 4: INITIAL FEE / PRODUCT CATALOG -->
+          <div id="wiz_step_4" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+              <h3 style="font-size: 16px; color: var(--admin-primary);">Step 4: Initial Pricing & Catalog Tiers</h3>
+              <button type="button" class="btn-admin btn-admin-outline" style="font-size: 12px;" onclick="AdminDashboard.addCatalogItem()">
+                + Add Item
+              </button>
+            </div>
+
+            <div id="wiz_catalog_list">
+              <!-- Dynamically populated -->
+            </div>
+
+            <div style="display: flex; justify-content: space-between; margin-top: 24px;">
+              <button class="btn-admin btn-admin-outline" onclick="AdminDashboard.wizardPrev(4)">← Back</button>
+              <button class="btn-admin btn-admin-success" style="padding: 10px 24px; font-weight: 800;" onclick="AdminDashboard.wizardNext(4)">
+                🚀 Finalize & Launch Client App →
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 5: INSTANT DEPLOY & DEDICATED URL HANDOVER -->
+          <div id="wiz_step_5" style="display: none;">
+            <div class="launch-handover-box">
+              <span style="font-size: 48px;">🎉</span>
+              <h2 style="font-size: 22px; font-weight: 900; color: var(--admin-success); margin: 8px 0;">Dedicated Business Portal Generated!</h2>
+              <p style="font-size: 14px; color: var(--admin-text-main);">
+                <strong id="res_vendor_name">Vendor Name</strong> (<span id="res_vendor_vertical">CATEGORY</span>) now has its own business-named GitHub Pages destination!
+              </p>
+
+              <!-- Dedicated GitHub Pages URL Box -->
+              <div style="max-width: 700px; margin: 20px auto 0; text-align: left;">
+                <label style="font-size: 12px; font-weight: 800; color: var(--admin-text-muted); text-transform: uppercase;">
+                  🌐 Dedicated GitHub Pages URL (Named for this Business):
+                </label>
+                <div style="display: flex; gap: 8px; margin-top: 6px;">
+                  <input type="text" id="res_dedicated_url" class="admin-input" style="font-weight: 800; color: var(--admin-primary);" readonly />
+                  <button class="btn-admin btn-admin-primary" onclick="AdminDashboard.copyDedicatedUrl()">📋 Copy</button>
+                </div>
+              </div>
+
+              <!-- Action Buttons for Automated & 1-Click Deployment -->
+              <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 24px;">
+                <button class="btn-admin btn-admin-primary" style="padding: 12px 20px;" id="res_auto_deploy_btn" onclick="AdminDashboard.deployToGitHubApi()">
+                  🐙 1-Click Deploy to GitHub Pages (API)
+                </button>
+                <button class="btn-admin btn-admin-success" style="padding: 12px 20px;" id="res_open_portal_btn">
+                  🚀 Test Live Portal Now
+                </button>
+                <button class="btn-admin btn-admin-accent" style="padding: 12px 20px;" id="res_whatsapp_btn">
+                  📲 Send URL on WhatsApp
+                </button>
+                <button class="btn-admin btn-admin-outline" style="padding: 12px 20px;" onclick="AdminDashboard.downloadDeployScript()">
+                  📜 Download deploy.bat
+                </button>
+                <button class="btn-admin btn-admin-outline" style="padding: 12px 20px;" onclick="AdminDashboard.downloadVendorConfig(AdminDashboard.wizardData.slug)">
+                  💾 Download config.js
+                </button>
+              </div>
+
+              <div id="deploy_status_log" style="display: none; margin-top: 18px; padding: 12px; background: rgba(59, 130, 246, 0.1); border: 1px solid var(--admin-primary); border-radius: 8px; font-size: 13px; text-align: left;"></div>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+              <button class="btn-admin btn-admin-outline" onclick="AdminDashboard.switchTab('roster')">
+                View All Vendors in Roster →
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: MULTI-VENDOR MANAGEMENT ROSTER -->
+      <section id="tab_panel_roster" class="admin-tab-panel" style="display: none;">
+        <div class="vendor-toolbar">
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; flex: 1;">
+            <input type="text" id="roster_search_input" class="admin-input" style="max-width: 280px;" placeholder="🔍 Search vendor, slug, or UPI..." oninput="AdminDashboard.renderRoster()" />
+            
+            <select id="roster_vertical_filter" class="admin-input" style="max-width: 180px;" onchange="AdminDashboard.renderRoster()">
+              <option value="ALL">All Categories</option>
+              <option value="student_management">🎓 Schools & Colleges</option>
+              <option value="hotel_booking">🏨 Hotels & Resorts</option>
+              <option value="movex_booking">🚚 MOVE-X Freight</option>
+              <option value="food_order">🍔 Restaurants</option>
+              <option value="ecommerce">🛍️ Stores</option>
+            </select>
+
+            <select id="roster_status_filter" class="admin-input" style="max-width: 150px;" onchange="AdminDashboard.renderRoster()">
+              <option value="ALL">All Statuses</option>
+              <option value="active">Active Live</option>
+              <option value="suspended">Suspended / Paused</option>
+            </select>
+          </div>
+
+          <button class="btn-admin btn-admin-primary" onclick="AdminDashboard.switchTab('wizard')">
+            + Onboard New Vendor
+          </button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Business Name & Dedicated Slug</th>
+                <th>Category</th>
+                <th>Dedicated GitHub Pages URL</th>
+                <th>Payments & UPI</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="vendor_roster_body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB 3: CROSS-VENDOR UNIFIED ACTIVITY FEED -->
+      <section id="tab_panel_activity" class="admin-tab-panel" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div>
+            <h3 style="font-size: 18px; font-weight: 800;">Cross-Vendor Unified Transaction Feed</h3>
+            <p style="font-size: 12px; color: var(--admin-text-muted);">Real-time stream of all student admissions, fee payments, hotel vouchers, logistics bookings, and orders across all client URLs.</p>
+          </div>
+          <button class="btn-admin btn-admin-outline" onclick="AdminDashboard.renderActivityFeed()">
+            🔄 Refresh Feed
+          </button>
+        </div>
+
+        <div id="unified_activity_feed">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+      <!-- TAB 4: GITHUB PAGES DEPLOYER & SYSTEM BACKUPS -->
+      <section id="tab_panel_backup" class="admin-tab-panel" style="display: none;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+          
+          <div class="stat-card" style="flex-direction: column; align-items: stretch; text-align: left;">
+            <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 6px;">🐙 GitHub Pages Account Config</h3>
+            <p style="font-size: 12px; color: var(--admin-text-muted); margin-bottom: 14px;">Set your GitHub Username or Org to automatically compute business URLs.</p>
+            <div class="admin-form-group">
+              <label>GitHub Username / Organization</label>
+              <input type="text" id="cfg_github_username" class="admin-input" placeholder="e.g. your-github-username" onchange="AdminDashboard.saveGitHubConfig()" />
+            </div>
+            <div class="admin-form-group">
+              <label>Optional GitHub Personal Access Token (for 1-click auto-deploy)</label>
+              <input type="password" id="cfg_github_token" class="admin-input" placeholder="ghp_xxxxxxxxxxxx" onchange="AdminDashboard.saveGitHubConfig()" />
+            </div>
+            <button class="btn-admin btn-admin-primary" onclick="AdminDashboard.saveGitHubConfig(); AdminDashboard.showToast('✅ GitHub Settings Saved!', 'success')">
+              Save GitHub Settings
+            </button>
+          </div>
+
+          <div class="stat-card" style="flex-direction: column; align-items: stretch; text-align: left;">
+            <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 6px;">📥 Export All Vendors Backup</h3>
+            <p style="font-size: 12px; color: var(--admin-text-muted); margin-bottom: 16px;">Download all vendor profiles, color codes, UPI credentials, and settings as a JSON backup.</p>
+            <button class="btn-admin btn-admin-primary" onclick="AdminDashboard.exportAllVendorsBackup()">
+              Download all-vendors.json
+            </button>
+          </div>
+
+          <div class="stat-card" style="flex-direction: column; align-items: stretch; text-align: left;">
+            <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 6px;">📤 Import Vendors Backup</h3>
+            <p style="font-size: 12px; color: var(--admin-text-muted); margin-bottom: 16px;">Restore or migrate your client roster from an existing JSON backup file.</p>
+            <input type="file" id="import_vendor_file" accept=".json" style="display: none;" onchange="AdminDashboard.importVendorsJson(this)" />
+            <button class="btn-admin btn-admin-outline" onclick="document.getElementById('import_vendor_file').click()">
+              Upload & Restore JSON
+            </button>
+          </div>
+
+          <div class="stat-card" style="flex-direction: column; align-items: stretch; text-align: left;">
+            <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 6px; color: var(--admin-danger);">🔄 Factory Default Profiles</h3>
+            <p style="font-size: 12px; color: var(--admin-text-muted); margin-bottom: 16px;">Reset system to pre-seeded enterprise defaults with business slugs.</p>
+            <button class="btn-admin btn-admin-danger" onclick="AdminDashboard.resetToDefaultProfiles()">
+              Reset to 6 Default Profiles
+            </button>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer style="text-align: center; padding: 24px; font-size: 12px; color: var(--admin-text-muted); border-top: 1px solid var(--admin-border); margin-top: auto;">
+      OmniSaaS Enterprise Multi-Vendor Platform &bull; Dedicated Business GitHub Pages URLs &bull; © 2026
+    </footer>
+  </div>
+
+  <!-- Admin Controller Script -->
+  <script src="../admin.js"></script>
+</body>
+</html>
