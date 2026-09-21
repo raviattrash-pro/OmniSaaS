@@ -203,21 +203,28 @@ const AdminDashboard = {
   },
 
   getSavedProfiles() {
+    const configGlobal = (window.MASTER_CONFIG && Array.isArray(window.MASTER_CONFIG.vendorProfiles)) ? window.MASTER_CONFIG.vendorProfiles : [];
     const saved = localStorage.getItem('saved_client_profiles');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
+          const merged = [...parsed];
+          for (const bp of configGlobal) {
+            if (!merged.some(p => p.id === bp.id || (p.slug && bp.slug && p.slug.toLowerCase() === bp.slug.toLowerCase()))) {
+              merged.push(bp);
+            }
+          }
           // Guarantee every profile has a dedicated slug
           let updated = false;
-          parsed.forEach(p => {
+          merged.forEach(p => {
             if (!p.slug) {
               p.slug = this.slugify(p.businessName || p.id);
               updated = true;
             }
           });
-          if (updated) localStorage.setItem('saved_client_profiles', JSON.stringify(parsed));
-          return parsed;
+          if (updated) localStorage.setItem('saved_client_profiles', JSON.stringify(merged));
+          return merged;
         }
       } catch (e) {
         console.error('Failed to parse saved_client_profiles', e);

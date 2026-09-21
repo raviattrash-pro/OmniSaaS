@@ -43,6 +43,70 @@ const MASTER_CONFIG = {
   enableGoogleAuth: true,
   googleClientId: "939865483008-0uas0dhk55a1a0ppefo8svilqfe6a5qj.apps.googleusercontent.com",
 
+  // 🌐 GLOBAL VENDOR PROFILES (Permanently active for all visitors and incognito windows)
+  vendorProfiles: [
+    {
+      id: "profile_helloschool",
+      slug: "helloschool",
+      businessName: "helloSchool",
+      vertical: "student_management",
+      tagline: "Admissions 2026-27 & Digital Fee Portal",
+      logoIcon: "🎓",
+      themeColor: "#1e3a8a",
+      accentColor: "#f59e0b",
+      currency: "₹",
+      upiId: "payments@upi",
+      whatsappNumber: "+919876543210",
+      googleScriptUrl: "https://script.google.com/macros/s/AKfycbybFqjzb480F0xfDD9CxUyblL5750FqT3x143HikFypoFXCFrJMgmyekaNq7G4_Zzo2/exec",
+      isProductionClientMode: true
+    },
+    {
+      id: "profile_mytestschool",
+      slug: "my-test-school",
+      businessName: "My Test School",
+      vertical: "student_management",
+      tagline: "Official Digital Admissions & Student Fee Portal",
+      logoIcon: "🏫",
+      themeColor: "#047857",
+      accentColor: "#f59e0b",
+      currency: "₹",
+      upiId: "payments@upi",
+      whatsappNumber: "+919876543210",
+      googleScriptUrl: "https://script.google.com/macros/s/AKfycbybFqjzb480F0xfDD9CxUyblL5750FqT3x143HikFypoFXCFrJMgmyekaNq7G4_Zzo2/exec",
+      isProductionClientMode: true
+    },
+    {
+      id: "profile_dps",
+      slug: "dps-school",
+      businessName: "Delhi Public School (DPS)",
+      vertical: "student_management",
+      tagline: "Excellence in K-12 Education & Online Fee Portal",
+      logoIcon: "🏛️",
+      themeColor: "#047857",
+      accentColor: "#f59e0b",
+      currency: "₹",
+      upiId: "payments@dpsdelhi.edu",
+      whatsappNumber: "+919811223344",
+      googleScriptUrl: "https://script.google.com/macros/s/AKfycbybFqjzb480F0xfDD9CxUyblL5750FqT3x143HikFypoFXCFrJMgmyekaNq7G4_Zzo2/exec",
+      isProductionClientMode: true
+    },
+    {
+      id: "profile_stxaviers",
+      slug: "st-xaviers",
+      businessName: "St. Xavier's International Collegiate",
+      vertical: "student_management",
+      tagline: "Admissions 2026-27 & Digital Student Portal",
+      logoIcon: "🎓",
+      themeColor: "#1e3a8a",
+      accentColor: "#38bdf8",
+      currency: "₹",
+      upiId: "admissions@stxaviers.edu",
+      whatsappNumber: "+919876543210",
+      googleScriptUrl: "https://script.google.com/macros/s/AKfycbybFqjzb480F0xfDD9CxUyblL5750FqT3x143HikFypoFXCFrJMgmyekaNq7G4_Zzo2/exec",
+      isProductionClientMode: true
+    }
+  ],
+
   // =========================================================================
   // 🏢 VERTICAL CONFIGURATIONS & PRESETS
   // =========================================================================

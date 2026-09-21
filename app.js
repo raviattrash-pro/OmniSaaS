@@ -383,16 +383,26 @@ const ClientProfileManager = {
   ],
 
   getProfiles() {
+    const configGlobal = (window.MASTER_CONFIG && Array.isArray(window.MASTER_CONFIG.vendorProfiles)) ? window.MASTER_CONFIG.vendorProfiles : [];
+    const baseProfiles = [...configGlobal, ...this.defaultProfiles];
     const saved = localStorage.getItem('saved_client_profiles');
     if (!saved) {
-      localStorage.setItem('saved_client_profiles', JSON.stringify(this.defaultProfiles));
-      return this.defaultProfiles;
+      return baseProfiles;
     }
     try {
       const parsed = JSON.parse(saved);
-      return Array.isArray(parsed) && parsed.length > 0 ? parsed : this.defaultProfiles;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const merged = [...parsed];
+        for (const bp of baseProfiles) {
+          if (!merged.some(p => p.id === bp.id || (p.slug && bp.slug && p.slug.toLowerCase() === bp.slug.toLowerCase()))) {
+            merged.push(bp);
+          }
+        }
+        return merged;
+      }
+      return baseProfiles;
     } catch(e) {
-      return this.defaultProfiles;
+      return baseProfiles;
     }
   },
 
