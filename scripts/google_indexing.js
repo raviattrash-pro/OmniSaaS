@@ -184,6 +184,7 @@ function getServiceAccountCredentials() {
   const possiblePaths = [
     path.join(__dirname, '..', 'service_account.json'),
     path.join(__dirname, 'service_account.json'),
+    path.join(process.env.USERPROFILE || 'C:\\Users\\ASUS', 'Downloads', 'service_account.json'),
     process.env.GOOGLE_APPLICATION_CREDENTIALS || ''
   ];
 
