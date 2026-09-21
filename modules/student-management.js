@@ -512,6 +512,9 @@ const StudentManagementModule = {
     if (tabMap[tabName] !== undefined && allBtns[tabMap[tabName]]) {
       allBtns[tabMap[tabName]].classList.add('active');
     }
+
+    if (tabName === 'idcard') this.populateStudentIdDropdown();
+    if (tabName === 'fees') this.populateFeeQuickDropdown();
   },
 
   onScholarshipChange(val) {
@@ -706,6 +709,7 @@ const StudentManagementModule = {
     this.goToStep(1);
     document.getElementById('admissionWizardForm').reset();
     this.populateStudentIdDropdown();
+    this.populateFeeQuickDropdown();
   },
 
   populateStudentIdDropdown() {
@@ -721,6 +725,22 @@ const StudentManagementModule = {
     select.innerHTML = `<option value="">-- Choose from Registered Students (${admissions.length}) --</option>` +
       admissions.map((s, idx) => `
         <option value="${s.orderId}">${s.studentName} (${s.gradeApplied}) - Roll: ${s.rollNo}</option>
+      `).join('');
+  },
+
+  populateFeeQuickDropdown() {
+    const select = document.getElementById('fee_quick_student_select');
+    if (!select) return;
+    const admissions = this._safeParse('student_admissions');
+
+    if (admissions.length === 0) {
+      select.innerHTML = `<option value="">-- No registered students yet. Type details below --</option>`;
+      return;
+    }
+
+    select.innerHTML = `<option value="">-- Choose Admitted Student (${admissions.length}) --</option>` +
+      admissions.map(s => `
+        <option value="${s.orderId}">${s.studentName} (${s.gradeApplied}) - ${s.rollNo}</option>
       `).join('');
   },
 
