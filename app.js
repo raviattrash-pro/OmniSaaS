@@ -1594,11 +1594,15 @@ const UniversalApp = {
                         <div style="font-size: 11px; color: var(--text-muted);">${SecurityGuard.escapeHTML(f.description || '')}</div>
                       </td>
                       <td style="padding: 8px 10px; color: var(--text-muted);">${SecurityGuard.escapeHTML(f.grade || 'All Classes')}</td>
-                      <td style="padding: 8px 10px; font-weight: 800; color: var(--primary-color);">${p.currency || '₹'}${Number(f.amount).toLocaleString()}</td>
-                      <td style="padding: 8px 10px; text-align: right;">
-                        <button class="pill-btn" style="background: rgba(239, 68, 68, 0.1); color: var(--danger-color); font-size: 10px;" onclick="UniversalApp.deleteOwnerFeeCategory('${f.id}', '${p.id}')">
-                          🗑️ Delete
-                        </button>
+                      <td style="padding: 8px 10px; text-align: right; white-space: nowrap;">
+                        <div style="display: inline-flex; gap: 6px; justify-content: flex-end;">
+                          <button class="pill-btn" style="background: rgba(59, 130, 246, 0.1); color: var(--primary-color); border: 1px solid var(--primary-color); font-size: 10px; padding: 4px 8px;" onclick="UniversalApp.openEditFeeModal('${SecurityGuard.sanitizeAttr(f.id)}', '${p.id}')">
+                            ✏️ Edit
+                          </button>
+                          <button class="pill-btn" style="background: rgba(239, 68, 68, 0.1); color: var(--danger-color); border: 1px solid var(--danger-color); font-size: 10px; padding: 4px 8px;" onclick="UniversalApp.deleteOwnerFeeCategory('${SecurityGuard.sanitizeAttr(f.id)}', '${p.id}')">
+                            🗑️ Delete
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   `).join('')}
@@ -1637,10 +1641,15 @@ const UniversalApp = {
                       </td>
                       <td style="padding: 8px 10px; color: var(--text-muted);">${SecurityGuard.escapeHTML(c.coach || 'Head Mentor')}</td>
                       <td style="padding: 8px 10px; color: var(--text-muted);">${SecurityGuard.escapeHTML(c.schedule || 'Weekly')}</td>
-                      <td style="padding: 8px 10px; text-align: right;">
-                        <button class="pill-btn" style="background: rgba(239, 68, 68, 0.1); color: var(--danger-color); font-size: 10px;" onclick="UniversalApp.deleteOwnerClub('${SecurityGuard.sanitizeAttr(c.title)}', '${p.id}')">
-                          🗑️ Delete
-                        </button>
+                      <td style="padding: 8px 10px; text-align: right; white-space: nowrap;">
+                        <div style="display: inline-flex; gap: 6px; justify-content: flex-end;">
+                          <button class="pill-btn" style="background: rgba(59, 130, 246, 0.1); color: var(--primary-color); border: 1px solid var(--primary-color); font-size: 10px; padding: 4px 8px;" onclick="UniversalApp.openEditClubModal('${SecurityGuard.sanitizeAttr(c.title)}', '${p.id}')">
+                            ✏️ Edit
+                          </button>
+                          <button class="pill-btn" style="background: rgba(239, 68, 68, 0.1); color: var(--danger-color); border: 1px solid var(--danger-color); font-size: 10px; padding: 4px 8px;" onclick="UniversalApp.deleteOwnerClub('${SecurityGuard.sanitizeAttr(c.title)}', '${p.id}')">
+                            🗑️ Delete
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   `).join('')}
@@ -2111,6 +2120,205 @@ const UniversalApp = {
     this.showToast('Club removed.', 'info');
 
     // Refresh student management view
+    const container = document.getElementById('vertical-container');
+    if (container && window.MASTER_CONFIG.activeAppType === 'student_management') {
+      StudentManagementModule.render(container, window.MASTER_CONFIG);
+      StudentManagementModule.switchSubTab('activities');
+    }
+    this.openOwnerDashboard(p.id, 'clubs');
+  },
+
+  openEditFeeModal(feeId, profileId) {
+    const profiles = ClientProfileManager.getProfiles();
+    const p = profiles.find(pr => pr.id === profileId) || profiles[0];
+    const currentSlug = p.slug || 'default';
+    const currency = p.currency || '₹';
+
+    const currentFees = (StudentManagementModule && typeof StudentManagementModule.getCustomFeeCategories === 'function') 
+      ? StudentManagementModule.getCustomFeeCategories(currentSlug) 
+      : [];
+    const fee = currentFees.find(f => f.id === feeId);
+    if (!fee) {
+      this.showToast('Fee structure not found.', 'error');
+      return;
+    }
+
+    this.showModal(`
+      <div style="text-align: left; max-width: 480px; margin: 0 auto;">
+        <h3 style="color: var(--primary-color); font-size: 1.25rem; font-weight: 900; margin-bottom: 6px;">✏️ Edit Fee Structure</h3>
+        <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 16px;">Update fee title, applicable grade, or amount.</p>
+
+        <form onsubmit="UniversalApp.handleUpdateFeeCategory(event, '${SecurityGuard.sanitizeAttr(fee.id)}', '${p.id}')">
+          <div class="form-group">
+            <label>Fee Title *</label>
+            <input type="text" id="edit_fee_title" class="form-control" required value="${SecurityGuard.escapeHTML(fee.title)}" placeholder="e.g. Monthly Tuition Fee" />
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Applicable Class / Grade *</label>
+              <input type="text" id="edit_fee_grade" class="form-control" required value="${SecurityGuard.escapeHTML(fee.grade || 'All Classes')}" placeholder="e.g. Grade 7 or All Classes" />
+            </div>
+            <div class="form-group">
+              <label>Amount (${currency}) *</label>
+              <input type="number" id="edit_fee_amount" class="form-control" required min="1" value="${Number(fee.amount)}" placeholder="e.g. 4500" />
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Category Badge</label>
+              <select id="edit_fee_badge" class="form-control">
+                <option value="Tuition" ${fee.badge === 'Tuition' ? 'selected' : ''}>Tuition</option>
+                <option value="Monthly" ${fee.badge === 'Monthly' ? 'selected' : ''}>Monthly</option>
+                <option value="Transport" ${fee.badge === 'Transport' ? 'selected' : ''}>Transport</option>
+                <option value="Exam Fee" ${fee.badge === 'Exam Fee' ? 'selected' : ''}>Exam Fee</option>
+                <option value="Activities" ${fee.badge === 'Activities' ? 'selected' : ''}>Activities</option>
+                <option value="Admission" ${fee.badge === 'Admission' ? 'selected' : ''}>Admission</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <input type="text" id="edit_fee_desc" class="form-control" value="${SecurityGuard.escapeHTML(fee.description || '')}" placeholder="Short description" />
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px; margin-top: 18px;">
+            <button type="submit" class="btn btn-primary" style="flex: 1; font-weight: 800;">💾 Save Changes</button>
+            <button type="button" class="btn btn-outline" onclick="UniversalApp.openOwnerDashboard('${p.id}', 'fees')">Cancel</button>
+          </div>
+        </form>
+      </div>
+    `);
+  },
+
+  handleUpdateFeeCategory(e, feeId, profileId) {
+    if (e && e.preventDefault) e.preventDefault();
+    const profiles = ClientProfileManager.getProfiles();
+    const p = profiles.find(pr => pr.id === profileId) || profiles[0];
+    const currentSlug = p.slug || 'default';
+
+    const title = document.getElementById('edit_fee_title').value.trim();
+    const grade = document.getElementById('edit_fee_grade').value.trim();
+    const amount = Number(document.getElementById('edit_fee_amount').value) || 0;
+    const badge = document.getElementById('edit_fee_badge').value;
+    const desc = document.getElementById('edit_fee_desc').value.trim();
+
+    if (!title || amount <= 0) {
+      this.showToast('⚠️ Please enter a valid fee title and amount.', 'error');
+      return;
+    }
+
+    let currentFees = (StudentManagementModule && typeof StudentManagementModule.getCustomFeeCategories === 'function') 
+      ? StudentManagementModule.getCustomFeeCategories(currentSlug) 
+      : [];
+    const idx = currentFees.findIndex(f => f.id === feeId);
+    if (idx >= 0) {
+      currentFees[idx] = {
+        ...currentFees[idx],
+        title: title,
+        grade: grade,
+        amount: amount,
+        badge: badge,
+        description: desc
+      };
+      localStorage.setItem(`school_custom_fees_${currentSlug}`, JSON.stringify(currentFees));
+      this.playSound('victory');
+      this.showToast(`✅ Updated fee structure: ${title}!`, 'success');
+    }
+
+    // Refresh view
+    const container = document.getElementById('vertical-container');
+    if (container && window.MASTER_CONFIG.activeAppType === 'student_management') {
+      StudentManagementModule.render(container, window.MASTER_CONFIG);
+      StudentManagementModule.switchSubTab('fees');
+    }
+    this.openOwnerDashboard(p.id, 'fees');
+  },
+
+  openEditClubModal(clubTitle, profileId) {
+    const profiles = ClientProfileManager.getProfiles();
+    const p = profiles.find(pr => pr.id === profileId) || profiles[0];
+    const currentSlug = p.slug || 'default';
+
+    const currentClubs = (StudentManagementModule && typeof StudentManagementModule.getCustomClubs === 'function') 
+      ? StudentManagementModule.getCustomClubs(currentSlug) 
+      : [];
+    const club = currentClubs.find(c => c.title === clubTitle);
+    if (!club) {
+      this.showToast('Club not found.', 'error');
+      return;
+    }
+
+    this.showModal(`
+      <div style="text-align: left; max-width: 480px; margin: 0 auto;">
+        <h3 style="color: var(--primary-color); font-size: 1.25rem; font-weight: 900; margin-bottom: 6px;">✏️ Edit Club / Activity</h3>
+        <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 16px;">Update club name, mentor, or schedule.</p>
+
+        <form onsubmit="UniversalApp.handleUpdateClub(event, '${SecurityGuard.sanitizeAttr(club.title)}', '${p.id}')">
+          <div class="form-group">
+            <label>Club Title *</label>
+            <input type="text" id="edit_club_title" class="form-control" required value="${SecurityGuard.escapeHTML(club.title)}" placeholder="e.g. Cricket Academy" />
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Category *</label>
+              <select id="edit_club_category" class="form-control">
+                <option value="Sports" ${club.category === 'Sports' ? 'selected' : ''}>Sports</option>
+                <option value="STEM" ${club.category === 'STEM' ? 'selected' : ''}>STEM / Robotics</option>
+                <option value="Arts" ${club.category === 'Arts' ? 'selected' : ''}>Arts / Music</option>
+                <option value="Literary" ${club.category === 'Literary' ? 'selected' : ''}>Literary / Debate</option>
+                <option value="Leadership" ${club.category === 'Leadership' ? 'selected' : ''}>Leadership</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Head Coach / Mentor *</label>
+              <input type="text" id="edit_club_coach" class="form-control" required value="${SecurityGuard.escapeHTML(club.coach || '')}" placeholder="e.g. Coach Sharma" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Weekly Schedule</label>
+            <input type="text" id="edit_club_schedule" class="form-control" value="${SecurityGuard.escapeHTML(club.schedule || '')}" placeholder="e.g. Mon & Wed 4:00 PM" />
+          </div>
+          <div style="display: flex; gap: 10px; margin-top: 18px;">
+            <button type="submit" class="btn btn-primary" style="flex: 1; font-weight: 800;">💾 Save Changes</button>
+            <button type="button" class="btn btn-outline" onclick="UniversalApp.openOwnerDashboard('${p.id}', 'clubs')">Cancel</button>
+          </div>
+        </form>
+      </div>
+    `);
+  },
+
+  handleUpdateClub(e, oldClubTitle, profileId) {
+    if (e && e.preventDefault) e.preventDefault();
+    const profiles = ClientProfileManager.getProfiles();
+    const p = profiles.find(pr => pr.id === profileId) || profiles[0];
+    const currentSlug = p.slug || 'default';
+
+    const title = document.getElementById('edit_club_title').value.trim();
+    const category = document.getElementById('edit_club_category').value;
+    const coach = document.getElementById('edit_club_coach').value.trim();
+    const schedule = document.getElementById('edit_club_schedule').value.trim();
+
+    if (!title || !coach) {
+      this.showToast('⚠️ Please enter club title and coach name.', 'error');
+      return;
+    }
+
+    let currentClubs = (StudentManagementModule && typeof StudentManagementModule.getCustomClubs === 'function') 
+      ? StudentManagementModule.getCustomClubs(currentSlug) 
+      : [];
+    const idx = currentClubs.findIndex(c => c.title === oldClubTitle);
+    if (idx >= 0) {
+      currentClubs[idx] = {
+        title: title,
+        category: category,
+        coach: coach,
+        schedule: schedule
+      };
+      localStorage.setItem(`school_custom_clubs_${currentSlug}`, JSON.stringify(currentClubs));
+      this.playSound('victory');
+      this.showToast(`✅ Updated club: ${title}!`, 'success');
+    }
+
+    // Refresh view
     const container = document.getElementById('vertical-container');
     if (container && window.MASTER_CONFIG.activeAppType === 'student_management') {
       StudentManagementModule.render(container, window.MASTER_CONFIG);
