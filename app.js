@@ -1518,7 +1518,7 @@ const UniversalApp = {
     if (!p) return;
 
     const vKey = p.vertical;
-    const currentSlug = p.slug || 'default';
+    const currentSlug = p.slug || (StudentManagementModule && StudentManagementModule.getCurrentSlug ? StudentManagementModule.getCurrentSlug() : 'default');
     const allFees = JSON.parse(localStorage.getItem('student_fees') || '[]');
     const allAdmissions = JSON.parse(localStorage.getItem('student_admissions') || '[]');
     const allClubs = (StudentManagementModule && typeof StudentManagementModule.getCustomClubs === 'function') ? StudentManagementModule.getCustomClubs(currentSlug) : [];
@@ -1527,7 +1527,7 @@ const UniversalApp = {
     const myRevenue = allFees.reduce((sum, f) => sum + (Number(f.amount) || 0), 0);
     const customQr = p.customQr || localStorage.getItem('custom_upi_qr') || '';
     const customLogo = p.customLogo || localStorage.getItem('custom_brand_logo') || '';
-    const liveUrl = `${window.location.origin}${window.location.pathname}?slug=${currentSlug}`;
+    const liveUrl = `${window.location.origin}${window.location.pathname}?biz=${currentSlug}`;
 
     this.showModal(`
       <div class="owner-dashboard-container" style="text-align: left;">
@@ -2018,7 +2018,7 @@ const UniversalApp = {
     if (e && e.preventDefault) e.preventDefault();
     const profiles = ClientProfileManager.getProfiles();
     const p = profiles.find(pr => pr.id === profileId) || profiles[0];
-    const currentSlug = p.slug || 'default';
+    const currentSlug = p.slug || (StudentManagementModule && StudentManagementModule.getCurrentSlug ? StudentManagementModule.getCurrentSlug() : 'default');
 
     const title = document.getElementById('new_fee_title').value.trim();
     const grade = document.getElementById('new_fee_grade').value.trim();
@@ -2043,6 +2043,9 @@ const UniversalApp = {
 
     currentFees.unshift(newFee);
     localStorage.setItem(`school_custom_fees_${currentSlug}`, JSON.stringify(currentFees));
+    if (currentSlug !== 'default') {
+      localStorage.setItem('school_custom_fees_default', JSON.stringify(currentFees));
+    }
 
     this.playSound('victory');
     this.showToast(`✅ Created new fee: ${title}!`, 'success');
@@ -2052,6 +2055,7 @@ const UniversalApp = {
     if (container && window.MASTER_CONFIG.activeAppType === 'student_management') {
       StudentManagementModule.render(container, window.MASTER_CONFIG);
       StudentManagementModule.switchSubTab('fees');
+      StudentManagementModule.refreshFeeDropdown();
     }
     this.openOwnerDashboard(p.id, 'fees');
   },
@@ -2059,11 +2063,14 @@ const UniversalApp = {
   deleteOwnerFeeCategory(feeId, profileId) {
     const profiles = ClientProfileManager.getProfiles();
     const p = profiles.find(pr => pr.id === profileId) || profiles[0];
-    const currentSlug = p.slug || 'default';
+    const currentSlug = p.slug || (StudentManagementModule && StudentManagementModule.getCurrentSlug ? StudentManagementModule.getCurrentSlug() : 'default');
 
     let currentFees = (StudentManagementModule && typeof StudentManagementModule.getCustomFeeCategories === 'function') ? StudentManagementModule.getCustomFeeCategories(currentSlug) : [];
     currentFees = currentFees.filter(f => f.id !== feeId);
     localStorage.setItem(`school_custom_fees_${currentSlug}`, JSON.stringify(currentFees));
+    if (currentSlug !== 'default') {
+      localStorage.setItem('school_custom_fees_default', JSON.stringify(currentFees));
+    }
 
     this.playSound('click');
     this.showToast('Fee structure removed.', 'info');
@@ -2073,6 +2080,7 @@ const UniversalApp = {
     if (container && window.MASTER_CONFIG.activeAppType === 'student_management') {
       StudentManagementModule.render(container, window.MASTER_CONFIG);
       StudentManagementModule.switchSubTab('fees');
+      StudentManagementModule.refreshFeeDropdown();
     }
     this.openOwnerDashboard(p.id, 'fees');
   },
@@ -2147,6 +2155,9 @@ const UniversalApp = {
 
     currentClubs.unshift(newClub);
     localStorage.setItem(`school_custom_clubs_${currentSlug}`, JSON.stringify(currentClubs));
+    if (currentSlug !== 'default') {
+      localStorage.setItem('school_custom_clubs_default', JSON.stringify(currentClubs));
+    }
 
     this.playSound('victory');
     this.showToast(`✅ Created new club: ${title}!`, 'success');
@@ -2163,11 +2174,14 @@ const UniversalApp = {
   deleteOwnerClub(clubTitle, profileId) {
     const profiles = ClientProfileManager.getProfiles();
     const p = profiles.find(pr => pr.id === profileId) || profiles[0];
-    const currentSlug = p.slug || 'default';
+    const currentSlug = p.slug || (StudentManagementModule && StudentManagementModule.getCurrentSlug ? StudentManagementModule.getCurrentSlug() : 'default');
 
     let currentClubs = (StudentManagementModule && typeof StudentManagementModule.getCustomClubs === 'function') ? StudentManagementModule.getCustomClubs(currentSlug) : [];
     currentClubs = currentClubs.filter(c => c.title !== clubTitle);
     localStorage.setItem(`school_custom_clubs_${currentSlug}`, JSON.stringify(currentClubs));
+    if (currentSlug !== 'default') {
+      localStorage.setItem('school_custom_clubs_default', JSON.stringify(currentClubs));
+    }
 
     this.playSound('click');
     this.showToast('Club removed.', 'info');
@@ -2184,7 +2198,7 @@ const UniversalApp = {
   openEditFeeModal(feeId, profileId) {
     const profiles = ClientProfileManager.getProfiles();
     const p = profiles.find(pr => pr.id === profileId) || profiles[0];
-    const currentSlug = p.slug || 'default';
+    const currentSlug = p.slug || (StudentManagementModule && StudentManagementModule.getCurrentSlug ? StudentManagementModule.getCurrentSlug() : 'default');
     const currency = p.currency || '₹';
 
     const currentFees = (StudentManagementModule && typeof StudentManagementModule.getCustomFeeCategories === 'function') 
@@ -2246,7 +2260,7 @@ const UniversalApp = {
     if (e && e.preventDefault) e.preventDefault();
     const profiles = ClientProfileManager.getProfiles();
     const p = profiles.find(pr => pr.id === profileId) || profiles[0];
-    const currentSlug = p.slug || 'default';
+    const currentSlug = p.slug || (StudentManagementModule && StudentManagementModule.getCurrentSlug ? StudentManagementModule.getCurrentSlug() : 'default');
 
     const title = document.getElementById('edit_fee_title').value.trim();
     const grade = document.getElementById('edit_fee_grade').value.trim();
@@ -2273,6 +2287,9 @@ const UniversalApp = {
         description: desc
       };
       localStorage.setItem(`school_custom_fees_${currentSlug}`, JSON.stringify(currentFees));
+      if (currentSlug !== 'default') {
+        localStorage.setItem('school_custom_fees_default', JSON.stringify(currentFees));
+      }
       this.playSound('victory');
       this.showToast(`✅ Updated fee structure: ${title}!`, 'success');
     }
@@ -2282,6 +2299,7 @@ const UniversalApp = {
     if (container && window.MASTER_CONFIG.activeAppType === 'student_management') {
       StudentManagementModule.render(container, window.MASTER_CONFIG);
       StudentManagementModule.switchSubTab('fees');
+      StudentManagementModule.refreshFeeDropdown();
     }
     this.openOwnerDashboard(p.id, 'fees');
   },
@@ -2289,7 +2307,7 @@ const UniversalApp = {
   openEditClubModal(clubTitle, profileId) {
     const profiles = ClientProfileManager.getProfiles();
     const p = profiles.find(pr => pr.id === profileId) || profiles[0];
-    const currentSlug = p.slug || 'default';
+    const currentSlug = p.slug || (StudentManagementModule && StudentManagementModule.getCurrentSlug ? StudentManagementModule.getCurrentSlug() : 'default');
 
     const currentClubs = (StudentManagementModule && typeof StudentManagementModule.getCustomClubs === 'function') 
       ? StudentManagementModule.getCustomClubs(currentSlug) 
@@ -2343,7 +2361,7 @@ const UniversalApp = {
     if (e && e.preventDefault) e.preventDefault();
     const profiles = ClientProfileManager.getProfiles();
     const p = profiles.find(pr => pr.id === profileId) || profiles[0];
-    const currentSlug = p.slug || 'default';
+    const currentSlug = p.slug || (StudentManagementModule && StudentManagementModule.getCurrentSlug ? StudentManagementModule.getCurrentSlug() : 'default');
 
     const title = document.getElementById('edit_club_title').value.trim();
     const category = document.getElementById('edit_club_category').value;
@@ -2367,6 +2385,9 @@ const UniversalApp = {
         schedule: schedule
       };
       localStorage.setItem(`school_custom_clubs_${currentSlug}`, JSON.stringify(currentClubs));
+      if (currentSlug !== 'default') {
+        localStorage.setItem('school_custom_clubs_default', JSON.stringify(currentClubs));
+      }
       this.playSound('victory');
       this.showToast(`✅ Updated club: ${title}!`, 'success');
     }

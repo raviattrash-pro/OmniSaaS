@@ -33,23 +33,62 @@ const StudentManagementModule = {
     catch(e) { console.warn('Corrupted localStorage data in', key, '- resetting.'); localStorage.removeItem(key); return []; }
   },
 
+  getCurrentSlug() {
+    const config = window.MASTER_CONFIG || {};
+    const vData = (config.verticals && config.verticals.student_management) || {};
+    if (vData.slug && vData.slug !== 'default') return vData.slug;
+
+    const params = new URLSearchParams(window.location.search);
+    const urlSlug = params.get('biz') || params.get('b') || params.get('business') || params.get('slug') || params.get('profile');
+    if (urlSlug) return urlSlug.trim();
+
+    const activeProfileId = localStorage.getItem('active_client_profile_id') || sessionStorage.getItem('owner_authenticated_profile');
+    if (activeProfileId && window.ClientProfileManager) {
+      const profiles = ClientProfileManager.getProfiles();
+      const match = profiles.find(p => p.id === activeProfileId);
+      if (match && match.slug) return match.slug;
+    }
+
+    return 'default';
+  },
+
   getCustomFeeCategories(slug) {
-    const config = window.MASTER_CONFIG;
-    const defaultFees = (config.verticals.student_management && config.verticals.student_management.feeCategories) || [];
-    const custom = this._safeParse(`school_custom_fees_${slug || 'default'}`);
-    return (Array.isArray(custom) && custom.length > 0) ? custom : defaultFees;
+    const activeSlug = slug || this.getCurrentSlug();
+    const config = window.MASTER_CONFIG || {};
+    const defaultFees = (config.verticals && config.verticals.student_management && config.verticals.student_management.feeCategories) || [];
+
+    // 1. Check specific slug storage
+    let custom = this._safeParse(`school_custom_fees_${activeSlug}`);
+    if (Array.isArray(custom) && custom.length > 0) return custom;
+
+    // 2. Check default custom storage
+    if (activeSlug !== 'default') {
+      custom = this._safeParse('school_custom_fees_default');
+      if (Array.isArray(custom) && custom.length > 0) return custom;
+    }
+
+    return defaultFees;
   },
 
   getCustomClubs(slug) {
-    const config = window.MASTER_CONFIG;
-    const defaultClubs = (config.verticals.student_management && config.verticals.student_management.activityCatalog) || [];
-    const custom = this._safeParse(`school_custom_clubs_${slug || 'default'}`);
-    return (Array.isArray(custom) && custom.length > 0) ? custom : defaultClubs;
+    const activeSlug = slug || this.getCurrentSlug();
+    const config = window.MASTER_CONFIG || {};
+    const defaultClubs = (config.verticals && config.verticals.student_management && config.verticals.student_management.activityCatalog) || [];
+
+    let custom = this._safeParse(`school_custom_clubs_${activeSlug}`);
+    if (Array.isArray(custom) && custom.length > 0) return custom;
+
+    if (activeSlug !== 'default') {
+      custom = this._safeParse('school_custom_clubs_default');
+      if (Array.isArray(custom) && custom.length > 0) return custom;
+    }
+
+    return defaultClubs;
   },
 
   render(container, config) {
     const data = config.verticals.student_management;
-    const currentSlug = new URLSearchParams(window.location.search).get('slug') || 'default';
+    const currentSlug = this.getCurrentSlug();
     const feeCategories = this.getCustomFeeCategories(currentSlug);
     const activityCatalog = this.getCustomClubs(currentSlug);
     const customLogo = (data && data.customLogo) || config.customLogo || localStorage.getItem('custom_brand_logo');
@@ -517,7 +556,10 @@ const StudentManagementModule = {
     }
 
     if (tabName === 'idcard') this.populateStudentIdDropdown();
-    if (tabName === 'fees') this.populateFeeQuickDropdown();
+    if (tabName === 'fees') {
+      this.populateFeeQuickDropdown();
+      this.refreshFeeDropdown();
+    }
   },
 
   onScholarshipChange(val) {
@@ -758,6 +800,22 @@ const StudentManagementModule = {
     select.innerHTML = `<option value="">-- Choose Admitted Student (${admissions.length}) --</option>` +
       admissions.map(s => `
         <option value="${s.orderId}">${this._decode(s.studentName)} (${this._decode(s.gradeApplied)}) - ${this._decode(s.rollNo)}</option>
+      `).join('');
+  },
+
+  refreshFeeDropdown() {
+    const select = document.getElementById('inline_fee_select');
+    if (!select) return;
+    const currentSlug = this.getCurrentSlug();
+    const feeCategories = this.getCustomFeeCategories(currentSlug);
+    const config = window.MASTER_CONFIG || {};
+    const currency = (config.verticals && config.verticals.student_management && config.verticals.student_management.currency) || '₹';
+
+    select.innerHTML = `<option value="">-- Choose Applicable Fee Category --</option>` +
+      feeCategories.map(fee => `
+        <option value="${fee.id}" data-amount="${fee.amount}" data-title="${SecurityGuard.sanitizeAttr(fee.title)}">
+          ${this._decode(fee.title)} (${this._decode(fee.grade || 'All Classes')}) - ${currency}${Number(fee.amount).toLocaleString()}
+        </option>
       `).join('');
   },
 
@@ -1195,9 +1253,9 @@ const StudentManagementModule = {
            onmouseover="this.style.background='var(--bg-secondary)'" 
            onmouseout="this.style.background='transparent'" 
            onclick="StudentManagementModule.onSelectStudentForFee('${s.orderId}')">
-        <div style="font-weight: 800; font-size: 13px; color: var(--primary-color);">${SecurityGuard.escapeHTML(s.studentName)}</div>
+        <div style="font-weight: 800; font-size: 13px; color: var(--primary-color);">${this._decode(s.studentName)}</div>
         <div style="font-size: 11px; color: var(--text-muted);">
-          Roll: <strong>${SecurityGuard.escapeHTML(s.rollNo)}</strong> | Class: <strong>${SecurityGuard.escapeHTML(s.gradeApplied)}</strong> | Parent: ${SecurityGuard.escapeHTML(s.parentName)}
+          Roll: <strong>${this._decode(s.rollNo)}</strong> | Class: <strong>${this._decode(s.gradeApplied)}</strong> | Parent: ${this._decode(s.parentName)}
         </div>
       </div>
     `).join('');
@@ -1220,17 +1278,17 @@ const StudentManagementModule = {
     const nameEl = document.getElementById('inline_fee_student_name');
     const rollEl = document.getElementById('inline_fee_roll_no');
     const phoneEl = document.getElementById('inline_fee_phone');
-    if (nameEl) nameEl.value = student.studentName;
-    if (rollEl) rollEl.value = student.rollNo;
+    if (nameEl) nameEl.value = this._decode(student.studentName);
+    if (rollEl) rollEl.value = this._decode(student.rollNo);
     if (phoneEl) phoneEl.value = student.phone || '';
 
     // Update Verified Badge Box
     const box = document.getElementById('verified_student_box');
     if (box) {
-      document.getElementById('v_stu_name').innerText = student.studentName;
-      document.getElementById('v_stu_grade').innerText = student.gradeApplied || 'Enrolled';
-      document.getElementById('v_stu_roll').innerText = student.rollNo;
-      document.getElementById('v_stu_parent').innerText = student.parentName || 'Parent / Guardian';
+      document.getElementById('v_stu_name').innerText = this._decode(student.studentName);
+      document.getElementById('v_stu_grade').innerText = this._decode(student.gradeApplied) || 'Enrolled';
+      document.getElementById('v_stu_roll').innerText = this._decode(student.rollNo);
+      document.getElementById('v_stu_parent').innerText = this._decode(student.parentName) || 'Parent / Guardian';
       document.getElementById('v_stu_phone').innerText = student.phone || 'N/A';
       box.style.display = 'block';
     }
@@ -1239,10 +1297,10 @@ const StudentManagementModule = {
     if (sugBox) sugBox.style.display = 'none';
 
     const searchInput = document.getElementById('fee_search_input');
-    if (searchInput) searchInput.value = student.studentName;
+    if (searchInput) searchInput.value = this._decode(student.studentName);
 
     UniversalApp.playSound('click');
-    UniversalApp.showToast(`✓ Verified Record for ${student.studentName}!`, 'success');
+    UniversalApp.showToast(`✓ Verified Record for ${this._decode(student.studentName)}!`, 'success');
   },
 
   clearSelectedStudent() {
