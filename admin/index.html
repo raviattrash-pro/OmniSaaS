@@ -30,7 +30,7 @@
       <form onsubmit="AdminDashboard.handleLogin(event)">
         <div class="admin-form-group">
           <label>Enter Master Security PIN</label>
-          <input type="password" id="admin_pin_input" class="admin-input" placeholder="Enter PIN (Default: 1234)" autofocus required />
+          <input type="password" id="admin_pin_input" class="admin-input" placeholder="Enter PIN " autofocus required />
         </div>
         <div id="login_error_msg" style="color: var(--admin-danger); font-size: 12px; margin-bottom: 12px; display: none;"></div>
         <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; padding: 12px; font-size: 14px;">
@@ -47,7 +47,7 @@
     <!-- TOP NAVIGATION BAR -->
     <header class="admin-header">
       <div class="admin-header-container">
-        <a href="index.html" class="admin-brand">
+        <a href="admin.html" class="admin-brand">
           <span style="font-size: 28px;">⚡</span>
           <div>
             <div style="display: flex; align-items: center; gap: 8px;">
@@ -63,7 +63,7 @@
           <button class="btn-admin btn-admin-accent" style="font-size: 12px;" onclick="AdminDashboard.openGitHubSettings()">
             🐙 GitHub Pages Setup
           </button>
-          <a href="../index.html" target="_blank" class="btn-admin btn-admin-outline" style="font-size: 12px;">
+          <a href="index.html" target="_blank" class="btn-admin btn-admin-outline" style="font-size: 12px;">
             🌐 View Client Live Portal
           </a>
           <button class="btn-admin btn-admin-danger" style="font-size: 12px;" onclick="AdminDashboard.logout()">
@@ -148,6 +148,7 @@
           <!-- STEP 1: SELECT VERTICAL CATEGORY -->
           <div id="wiz_step_1">
             <h3 style="font-size: 16px; margin-bottom: 12px; color: var(--admin-primary);">Step 1: Select Business Vertical</h3>
+            
             <div class="vertical-picker-grid">
               <div class="vertical-option-card selected" id="vert_opt_student_management" onclick="AdminDashboard.selectVertical('student_management')">
                 <div style="font-size: 32px; margin-bottom: 6px;">🎓</div>
@@ -250,6 +251,7 @@
             <div class="admin-form-group">
               <label>Optional: Upload Custom Merchant Logo Image</label>
               <input type="file" id="wiz_logo_file" accept="image/*" class="admin-input" onchange="AdminDashboard.handleLogoUpload(this)" />
+              <div id="wiz_logo_preview" style="display: none; margin-top: 10px;"></div>
             </div>
 
             <div style="display: flex; justify-content: space-between; margin-top: 24px;">
@@ -286,6 +288,7 @@
               <label>Optional: Upload Merchant UPI Standee QR Image</label>
               <input type="file" id="wiz_qr_file" accept="image/*" class="admin-input" onchange="AdminDashboard.handleQrUpload(this)" />
               <div style="font-size: 11px; color: var(--admin-text-muted);">This QR standee will be shown directly during customer checkout.</div>
+              <div id="wiz_qr_preview" style="display: none; margin-top: 10px;"></div>
             </div>
 
             <div style="display: flex; justify-content: space-between; margin-top: 24px;">
@@ -336,6 +339,9 @@
                   <button class="btn-admin btn-admin-primary" onclick="AdminDashboard.copyDedicatedUrl()">📋 Copy</button>
                 </div>
               </div>
+
+              <!-- Uploaded Assets Live Verification Box -->
+              <div id="res_assets_summary" style="margin-top: 20px; display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;"></div>
 
               <!-- Action Buttons for Automated & 1-Click Deployment -->
               <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 24px;">
@@ -435,6 +441,138 @@
       <section id="tab_panel_backup" class="admin-tab-panel" style="display: none;">
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
           
+          <!-- LIVE CONNECTED GOOGLE SHEETS FOR ALL 5 APPS -->
+          <div class="stat-card" style="flex-direction: column; align-items: stretch; text-align: left; grid-column: 1 / -1;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+              <div>
+                <h3 style="font-size: 17px; font-weight: 800; color: var(--admin-primary); margin-bottom: 4px;">📊 Connected Google Spreadsheets (Auto Tab Creation)</h3>
+                <p style="font-size: 12px; color: var(--admin-text-muted);">
+                  Each vertical writes to its official spreadsheet. For every new business onboarded, Google Apps Script automatically creates a <strong>separate dedicated sheet tab</strong> named after the business and logs the entry into <code>_Master_Directory</code>.
+                </p>
+              </div>
+              <span style="background: rgba(16, 185, 129, 0.15); color: var(--admin-success); padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 800;">
+                🟢 5 Spreadsheets Connected
+              </span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; margin-top: 6px;">
+              <a href="https://docs.google.com/spreadsheets/d/1z1K_O8vl9ftwTlJmnLMzLrjC5V7sfhEMbToWjPuCL-w/edit?usp=sharing" target="_blank" style="text-decoration: none; background: var(--admin-bg-surface); border: 1px solid var(--admin-border); padding: 12px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                  <div style="font-weight: 800; font-size: 13px; color: var(--admin-text-main);">🎓 School & Students</div>
+                  <div style="font-size: 11px; color: var(--admin-text-muted);">Admissions, Fees, Activities</div>
+                </div>
+                <span class="btn-admin btn-admin-outline" style="padding: 4px 10px; font-size: 11px;">Open Sheet ↗</span>
+              </a>
+
+              <a href="https://docs.google.com/spreadsheets/d/1Mnb-CnvAhb8bTr5dulfzHZTEoD1rs2BbwgwkGKZxnnY/edit?usp=sharing" target="_blank" style="text-decoration: none; background: var(--admin-bg-surface); border: 1px solid var(--admin-border); padding: 12px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                  <div style="font-weight: 800; font-size: 13px; color: var(--admin-text-main);">🚚 MOVE-X Logistics</div>
+                  <div style="font-size: 11px; color: var(--admin-text-muted);">V0 Operating Ledger, Dispatches, OTP</div>
+                </div>
+                <span class="btn-admin btn-admin-outline" style="padding: 4px 10px; font-size: 11px;">Open Sheet ↗</span>
+              </a>
+
+              <a href="https://docs.google.com/spreadsheets/d/1G1Z3GKyzP9Y_s8av1GSHj1UKwctlwhLuvW9L8FO0zGk/edit?usp=sharing" target="_blank" style="text-decoration: none; background: var(--admin-bg-surface); border: 1px solid var(--admin-border); padding: 12px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                  <div style="font-weight: 800; font-size: 13px; color: var(--admin-text-main);">🛍️ E-Commerce Retail</div>
+                  <div style="font-size: 11px; color: var(--admin-text-muted);">Store Orders, Customer Deliveries</div>
+                </div>
+                <span class="btn-admin btn-admin-outline" style="padding: 4px 10px; font-size: 11px;">Open Sheet ↗</span>
+              </a>
+
+              <a href="https://docs.google.com/spreadsheets/d/1YYurMFHrew8GZtfXsoJetuAEjd58t58LSVb6QogrW1k/edit?usp=sharing" target="_blank" style="text-decoration: none; background: var(--admin-bg-surface); border: 1px solid var(--admin-border); padding: 12px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                  <div style="font-weight: 800; font-size: 13px; color: var(--admin-text-main);">🏨 Hotel & Resorts</div>
+                  <div style="font-size: 11px; color: var(--admin-text-muted);">Room Bookings, Guest Vouchers</div>
+                </div>
+                <span class="btn-admin btn-admin-outline" style="padding: 4px 10px; font-size: 11px;">Open Sheet ↗</span>
+              </a>
+
+              <a href="https://docs.google.com/spreadsheets/d/1YYurMFHrew8GZtfXsoJetuAEjd58t58LSVb6QogrW1k/edit?usp=sharing" target="_blank" style="text-decoration: none; background: var(--admin-bg-surface); border: 1px solid var(--admin-border); padding: 12px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                  <div style="font-weight: 800; font-size: 13px; color: var(--admin-text-main);">🍔 Food & Dining</div>
+                  <div style="font-size: 11px; color: var(--admin-text-muted);">Kitchen Orders, Table Deliveries</div>
+                </div>
+                <span class="btn-admin btn-admin-outline" style="padding: 4px 10px; font-size: 11px;">Open Sheet ↗</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- 🔍 GOOGLE SEARCH INDEXING & SEO HUB -->
+          <div class="stat-card" style="flex-direction: column; align-items: stretch; text-align: left; grid-column: 1 / -1;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 8px;">
+              <div>
+                <h3 style="font-size: 17px; font-weight: 800; margin-bottom: 4px; color: var(--admin-primary);">
+                  🔍 Google Search Indexing & SEO Engine
+                </h3>
+                <p style="font-size: 12px; color: var(--admin-text-muted);">
+                  Instantly notify Google Search Console of your website and all client business portals for rapid indexing.
+                </p>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="btn-admin btn-admin-primary" onclick="AdminDashboard.pingGoogleSitemap()">
+                  📡 1-Click Ping Google Indexer
+                </button>
+                <button class="btn-admin btn-admin-success" onclick="AdminDashboard.downloadSitemapXml()">
+                  🗺️ Download Fresh sitemap.xml
+                </button>
+                <button class="btn-admin btn-admin-outline" onclick="AdminDashboard.downloadIndexingRunnerScript()">
+                  📜 Download Indexing Script (.js)
+                </button>
+              </div>
+            </div>
+
+            <div class="admin-grid-2" style="margin-top: 14px;">
+              <div class="admin-form-group">
+                <label>Google Search Console Site Verification Meta Tag (or Code)</label>
+                <div style="display: flex; gap: 8px;">
+                  <input type="text" id="cfg_google_verification" class="admin-input" placeholder="e.g. google-site-verification=abc123xyz" onchange="AdminDashboard.saveGoogleVerification()" />
+                  <button class="btn-admin btn-admin-primary" style="padding: 8px 16px;" onclick="AdminDashboard.saveGoogleVerification()">
+                    Save
+                  </button>
+                </div>
+                <div style="font-size: 11px; color: var(--admin-text-muted); margin-top: 4px;">
+                  Paste your verification code or tag from Google Search Console. It will be injected dynamically into your site.
+                </div>
+              </div>
+
+              <div style="background: var(--admin-bg-surface); border: 1px solid var(--admin-border); border-radius: 8px; padding: 12px 16px;">
+                <div style="font-size: 12px; font-weight: 800; margin-bottom: 6px; color: var(--admin-text-main);">
+                  ⚡ Google Indexing API Automation
+                </div>
+                <div style="font-size: 11px; color: var(--admin-text-muted); line-height: 1.5;">
+                  Run <code>node scripts/google_indexing.js</code> or double-click <code>run_indexing.bat</code> to submit all client URLs via Google's official Indexing API.
+                  <a href="../GOOGLE_INDEXING_GUIDE.md" target="_blank" style="color: var(--admin-primary); text-decoration: underline; font-weight: 700; margin-left: 4px;">
+                    Read Setup Guide ↗
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- SEO & URL Indexing Inspection Table -->
+            <div style="margin-top: 16px;">
+              <div style="font-size: 13px; font-weight: 800; margin-bottom: 8px; color: var(--admin-text-main);">
+                📋 Registered Business URLs & Search Discovery Links
+              </div>
+              <div style="overflow-x: auto;">
+                <table class="admin-table" style="font-size: 12px;">
+                  <thead>
+                    <tr>
+                      <th>Business Portal</th>
+                      <th>Slug / Path</th>
+                      <th>Canonical URL</th>
+                      <th>Priority</th>
+                      <th>Google Verification Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="indexing_urls_table_body">
+                    <!-- Populated dynamically by AdminDashboard.renderIndexingUrlsTable() -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
           <div class="stat-card" style="flex-direction: column; align-items: stretch; text-align: left;">
             <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 6px;">🐙 GitHub Pages Account Config</h3>
             <p style="font-size: 12px; color: var(--admin-text-muted); margin-bottom: 14px;">Set your GitHub Username or Org to automatically compute business URLs.</p>

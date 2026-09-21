@@ -18,7 +18,7 @@ const MASTER_CONFIG = {
   activeAppType: "student_management",
 
   // 🔗 GOOGLE APPS SCRIPT WEBHOOK URL (Deploy backend/Code.gs and paste URL here)
-  googleScriptUrl: "https://script.google.com/macros/s/AKfycbxExampleWebhookURL/exec",
+  googleScriptUrl: "https://script.google.com/macros/s/AKfycbwwN9X-FoeMqef1wY2k3pyISpmNU7Svg-Qr_TXcUZTGgXCJCyoy34f4_CJvaRXFLRGD/exec",
 
   // 📊 LIVE GOOGLE SPREADSHEETS (Pre-Mapped by Vertical):
   googleSheets: {

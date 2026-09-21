@@ -28,7 +28,7 @@ const AdminDashboard = {
     currency: '₹',
     upiId: '',
     whatsappNumber: '',
-    googleScriptUrl: '',
+    googleScriptUrl: 'https://script.google.com/macros/s/AKfycbwwN9X-FoeMqef1wY2k3pyISpmNU7Svg-Qr_TXcUZTGgXCJCyoy34f4_CJvaRXFLRGD/exec',
     customLogoData: '',
     customQrData: '',
     catalogItems: []

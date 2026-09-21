@@ -391,7 +391,7 @@ const ClientProfileManager = {
     vData.currency = p.currency;
     config.upiId = p.upiId;
     config.whatsappNumber = p.whatsappNumber;
-    config.googleScriptUrl = p.googleScriptUrl || "";
+    config.googleScriptUrl = p.googleScriptUrl || config.googleScriptUrl || "https://script.google.com/macros/s/AKfycbwwN9X-FoeMqef1wY2k3pyISpmNU7Svg-Qr_TXcUZTGgXCJCyoy34f4_CJvaRXFLRGD/exec";
     config.isProductionClientMode = p.isProductionClientMode || false;
     localStorage.setItem('production_client_mode', config.isProductionClientMode ? 'true' : 'false');
 
