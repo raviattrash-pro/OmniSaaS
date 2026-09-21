@@ -41,7 +41,7 @@ const MASTER_CONFIG = {
 
   // 🔐 GOOGLE OAUTH CLIENT ID (Optional for 1-click Google Sign-in)
   enableGoogleAuth: true,
-  googleClientId: "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com",
+  googleClientId: "939865483008-0uas0dhk55a1a0ppefo8svilqfe6a5qj.apps.googleusercontent.com",
 
   // =========================================================================
   // 🏢 VERTICAL CONFIGURATIONS & PRESETS

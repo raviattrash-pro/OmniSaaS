@@ -1258,9 +1258,27 @@ const UniversalApp = {
         this.autoFillUserForms();
         this.playSound('victory');
         this.triggerConfetti();
+        this.closeModal();
         this.showToast(`✅ Welcome, ${this.currentUser.name}! Logged in with Google.`, 'success');
       }
     };
+
+    const initGis = () => {
+      if (window.google && window.google.accounts && window.google.accounts.id) {
+        try {
+          window.google.accounts.id.initialize({
+            client_id: config.googleClientId,
+            callback: window.handleGoogleCredentialResponse,
+            auto_select: false
+          });
+        } catch (e) {
+          console.warn('GIS initialize error:', e);
+        }
+      }
+    };
+
+    initGis();
+    window.addEventListener('load', initGis);
   },
 
   loadUserSession() {
