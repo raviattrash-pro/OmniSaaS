@@ -1,0 +1,6 @@
+# Robots.txt for OmniSaaS Universal Platform
+User-agent: *
+Allow: /
+
+# Canonical XML Sitemap
+Sitemap: https://raviattrash-pro.github.io/OmniSaaS/sitemap.xml

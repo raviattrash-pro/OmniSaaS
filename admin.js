@@ -41,8 +41,10 @@ const AdminDashboard = {
   init() {
     this.checkAuth();
     this.loadGitHubConfigInputs();
+    this.loadGoogleVerification();
     this.loadMetrics();
     this.renderRoster();
+    this.renderIndexingUrlsTable();
     this.initWizardDefaults('student_management');
   },
 
@@ -352,7 +354,11 @@ const AdminDashboard = {
 
     if (tab === 'roster') this.renderRoster();
     if (tab === 'activity') this.renderActivityFeed();
-    if (tab === 'backup') this.loadGitHubConfigInputs();
+    if (tab === 'backup') {
+      this.loadGitHubConfigInputs();
+      this.loadGoogleVerification();
+      this.renderIndexingUrlsTable();
+    }
     if (tab === 'metrics') this.loadMetrics();
   },
 
@@ -1303,7 +1309,116 @@ window.MASTER_CONFIG = {
     localStorage.removeItem('saved_client_profiles');
     this.loadMetrics();
     this.renderRoster();
+    this.renderIndexingUrlsTable();
     this.showToast('🔄 Reset to default 6 vendor profiles.', 'info');
+  },
+
+  // =========================================================================
+  // 🔍 GOOGLE SEARCH INDEXING & SEO METHODS
+  // =========================================================================
+  loadGoogleVerification() {
+    const code = localStorage.getItem('google_site_verification_code') || '';
+    const input = document.getElementById('cfg_google_verification');
+    if (input) input.value = code;
+  },
+
+  saveGoogleVerification() {
+    const input = document.getElementById('cfg_google_verification');
+    if (!input) return;
+    let val = input.value.trim();
+    // If user pasted `<meta name="google-site-verification" content="..." />`, extract the content
+    const match = val.match(/content=["']([^"']+)["']/);
+    if (match) val = match[1];
+    localStorage.setItem('google_site_verification_code', val);
+    input.value = val;
+    this.showToast('✅ Google Site Verification Code saved!', 'success');
+  },
+
+  pingGoogleSitemap() {
+    const sitemapUrl = `https://raviattrash-pro.github.io/OmniSaaS/sitemap.xml`;
+    const pingUrl = `https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`;
+    window.open(pingUrl, '_blank', 'width=540,height=360');
+    this.showToast('📡 Google Search Console Ping dispatched!', 'success');
+  },
+
+  downloadSitemapXml() {
+    const profiles = this.getSavedProfiles();
+    const today = new Date().toISOString().split('T')[0];
+    const baseOrigin = 'https://raviattrash-pro.github.io/OmniSaaS';
+
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+    xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n\n`;
+    xml += `  <url>\n    <loc>${baseOrigin}/</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
+    xml += `  <url>\n    <loc>${baseOrigin}/admin/</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
+
+    profiles.forEach(p => {
+      const slug = p.slug || this.slugify(p.businessName);
+      xml += `  <url>\n    <loc>${baseOrigin}/?slug=${slug}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
+    });
+
+    xml += `</urlset>\n`;
+
+    const blob = new Blob([xml], { type: 'application/xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'sitemap.xml';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    this.showToast('🗺️ Generated & downloaded fresh sitemap.xml!', 'success');
+  },
+
+  downloadIndexingRunnerScript() {
+    window.open('https://github.com/raviattrash-pro/OmniSaaS/blob/main/scripts/google_indexing.js', '_blank');
+    this.showToast('📜 Opening Google Indexing Script repository!', 'info');
+  },
+
+  renderIndexingUrlsTable() {
+    const tbody = document.getElementById('indexing_urls_table_body');
+    if (!tbody) return;
+
+    const profiles = this.getSavedProfiles();
+    const baseOrigin = 'https://raviattrash-pro.github.io/OmniSaaS';
+
+    const list = [
+      { name: 'OmniSaaS Platform Portal (Root)', slug: '/', url: `${baseOrigin}/`, priority: '1.0' },
+      { name: 'OmniSaaS Admin Center', slug: '/admin/', url: `${baseOrigin}/admin/`, priority: '0.6' }
+    ];
+
+    profiles.forEach(p => {
+      const slug = p.slug || this.slugify(p.businessName);
+      list.push({
+        name: p.businessName,
+        slug: `/${slug}`,
+        url: `${baseOrigin}/?slug=${slug}`,
+        priority: '0.9'
+      });
+    });
+
+    tbody.innerHTML = list.map(item => `
+      <tr>
+        <td><strong>${this.escapeHTML(item.name)}</strong></td>
+        <td><code>${this.escapeHTML(item.slug)}</code></td>
+        <td>
+          <a href="${item.url}" target="_blank" style="color: var(--admin-primary); text-decoration: underline; font-size: 11px;">
+            ${item.url}
+          </a>
+        </td>
+        <td><span class="badge-slug">${item.priority}</span></td>
+        <td>
+          <div style="display: flex; gap: 6px;">
+            <a href="https://search.google.com/test/rich-results?url=${encodeURIComponent(item.url)}" target="_blank" class="btn-admin btn-admin-outline" style="padding: 3px 8px; font-size: 11px; text-decoration: none;">
+              🧪 Rich Results
+            </a>
+            <a href="https://www.google.com/search?q=site:${encodeURIComponent(item.url)}" target="_blank" class="btn-admin btn-admin-outline" style="padding: 3px 8px; font-size: 11px; text-decoration: none;">
+              🔍 Site Search
+            </a>
+          </div>
+        </td>
+      </tr>
+    `).join('');
   },
 
   // =========================================================================

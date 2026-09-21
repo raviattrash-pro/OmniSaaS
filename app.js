@@ -1611,6 +1611,65 @@ const UniversalApp = {
     }
 
     this.autoFillUserForms();
+    this.updateSeoAndSchema(verticalKey, vData, customLogo);
+  },
+
+  updateSeoAndSchema(verticalKey, vData, customLogo) {
+    try {
+      const pageUrl = window.location.href.split('#')[0];
+
+      // Update Canonical Link
+      const canonicalEl = document.getElementById('canonical-url');
+      if (canonicalEl) canonicalEl.href = pageUrl;
+
+      // Update Open Graph & Meta Tags
+      const ogTitle = document.getElementById('og-title');
+      const ogDesc = document.getElementById('og-desc');
+      const ogUrl = document.getElementById('og-url');
+      if (ogTitle) ogTitle.content = `${vData.businessName} | ${vData.tagline}`;
+      if (ogDesc) ogDesc.content = vData.heroHeadline ? `${vData.heroHeadline} - ${vData.heroSubtext}` : vData.tagline;
+      if (ogUrl) ogUrl.content = pageUrl;
+
+      // Apply Google Site Verification from settings if available
+      const savedVerification = localStorage.getItem('google_site_verification_code');
+      const metaVerification = document.getElementById('google-site-verification-meta');
+      if (savedVerification && metaVerification) {
+        metaVerification.content = savedVerification;
+      }
+
+      // Dynamic Schema.org JSON-LD Structured Data
+      const schemaScript = document.getElementById('schema-structured-data');
+      if (schemaScript) {
+        let schemaType = "LocalBusiness";
+        if (verticalKey === "student_management") schemaType = "EducationalOrganization";
+        else if (verticalKey === "hotel_booking") schemaType = "LodgingBusiness";
+        else if (verticalKey === "food_order") schemaType = "Restaurant";
+        else if (verticalKey === "ecommerce") schemaType = "OnlineStore";
+        else if (verticalKey === "movex_booking") schemaType = "AutoRental";
+
+        const schemaData = {
+          "@context": "https://schema.org",
+          "@type": schemaType,
+          "name": vData.businessName,
+          "description": vData.tagline || vData.heroHeadline,
+          "url": pageUrl,
+          "priceRange": vData.currency ? `${vData.currency}1 - ${vData.currency}99999` : "$$"
+        };
+
+        if (customLogo) schemaData.image = customLogo;
+        if (window.MASTER_CONFIG.whatsappNumber) schemaData.telephone = window.MASTER_CONFIG.whatsappNumber;
+
+        if (verticalKey === "student_management") {
+          schemaData.educationalLevel = ["Primary School", "Middle School", "Secondary School", "Senior Secondary"];
+        } else if (verticalKey === "food_order") {
+          schemaData.servesCuisine = ["Fast Food", "Indian Cuisine", "Pizza & Burger", "Multi-Cuisine"];
+        }
+
+        schemaScript.textContent = JSON.stringify(schemaData, null, 2);
+      }
+    } catch (e) {
+      console.warn('SEO Schema generation notice:', e);
+    }
   },
 
   switchVertical(verticalKey) {
