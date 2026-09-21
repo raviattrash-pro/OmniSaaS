@@ -37,14 +37,15 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(59, 130, 246, 0.12);
+      background: var(--bg-secondary);
       color: var(--primary-color);
-      padding: 6px 16px;
+      padding: 6px 18px;
       border-radius: 999px;
       font-size: 13px;
       font-weight: 800;
       margin-bottom: 16px;
-      border: 1px solid rgba(59, 130, 246, 0.25);
+      border: 1.5px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
     }
     .platform-hero h1 {
       font-size: 2.8rem;
@@ -267,16 +268,18 @@
       background: #10b981;
       border-color: #10b981;
       color: #fff;
+    }
     .navbar .nav-actions .pill-btn {
       color: var(--text-main) !important;
-      border: 1.5px solid var(--border-color);
-      background: var(--surface-card);
+      border: 1.5px solid var(--border-color) !important;
+      background: var(--surface-card) !important;
       font-weight: 700;
       box-shadow: var(--shadow-sm);
     }
     .navbar .nav-actions .pill-btn:hover {
-      border-color: var(--primary-color);
+      border-color: var(--primary-color) !important;
       color: var(--primary-color) !important;
+      background: var(--bg-secondary) !important;
     }
     .app-card-btn-group {
       display: flex;
@@ -297,6 +300,7 @@
       justify-content: center;
       gap: 6px;
       color: #fff;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.12);
       transition: all 0.2s ease;
     }
     .app-card-btn-primary:hover {
@@ -349,13 +353,13 @@
         <a href="#apps-showcase" class="pill-btn" style="text-decoration: none;">
           🚀 Dedicated Apps
         </a>
-        <a href="#onboarding-wizard" class="pill-btn" style="background: rgba(59, 130, 246, 0.14) !important; color: var(--primary-color) !important; border: 1.5px solid var(--primary-color) !important; font-weight: 800; text-decoration: none;">
+        <a href="#onboarding-wizard" class="pill-btn" style="background: rgba(99, 102, 241, 0.14) !important; color: #4338ca !important; border: 1.5px solid #6366f1 !important; font-weight: 800; text-decoration: none;">
           ⚡ 5-Min App Launch
         </a>
         <button class="pill-btn" onclick="OmniLauncher.openTrackModal()">
           🔍 Track Request
         </button>
-        <a href="admin.html" class="pill-btn" style="background: #1e293b !important; color: #fff !important; text-decoration: none; font-weight: 700;">
+        <a href="admin.html" class="pill-btn" style="background: #1e1b4b !important; color: #ffffff !important; border: 1.5px solid #1e1b4b !important; text-decoration: none; font-weight: 700;">
           🔐 Admin Console
         </a>
         <button class="pill-btn" id="theme-toggle-btn" onclick="UniversalApp.toggleTheme()" style="font-size: 11px;">🌙</button>

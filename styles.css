@@ -4,23 +4,24 @@
    ========================================================================== */
 
 :root {
-  --primary-color: #1e3a8a;
-  --primary-hover: #1e40af;
-  --primary-glow: rgba(30, 58, 138, 0.25);
+  --primary-color: #3b82f6;
+  --primary-hover: #2563eb;
+  --primary-glow: rgba(59, 130, 246, 0.25);
   --accent-color: #f59e0b;
   --accent-hover: #d97706;
   --accent-glow: rgba(245, 158, 11, 0.3);
 
-  /* Light Theme Palette */
-  --bg-color: #f8fafc;
-  --bg-secondary: #f1f5f9;
+  /* Light Theme Palette: Elegant Lavender Background & High Contrast */
+  --bg-color: #f5f3ff;
+  --bg-secondary: #ede9fe;
+  --bg-card: #ffffff;
   --surface-color: #ffffff;
   --surface-card: #ffffff;
-  --surface-glass: rgba(255, 255, 255, 0.88);
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --border-color: #e2e8f0;
-  --border-focus: #3b82f6;
+  --surface-glass: rgba(255, 255, 255, 0.94);
+  --text-main: #1e1b4b;
+  --text-muted: #4b5563;
+  --border-color: #ddd6fe;
+  --border-focus: #6366f1;
   
   --success-color: #10b981;
   --warning-color: #f59e0b;
@@ -31,9 +32,9 @@
   --radius-lg: 20px;
   --radius-xl: 28px;
 
-  --shadow-sm: 0 2px 4px rgba(15, 23, 42, 0.04);
-  --shadow-md: 0 6px 18px rgba(15, 23, 42, 0.08);
-  --shadow-lg: 0 14px 38px rgba(15, 23, 42, 0.12);
+  --shadow-sm: 0 2px 6px rgba(30, 27, 75, 0.05);
+  --shadow-md: 0 8px 22px rgba(99, 102, 241, 0.08);
+  --shadow-lg: 0 16px 40px rgba(99, 102, 241, 0.12);
   --shadow-glow: 0 0 25px var(--primary-glow);
 
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -45,6 +46,7 @@
 [data-theme="dark"] {
   --bg-color: #090d16;
   --bg-secondary: #0f172a;
+  --bg-card: #18233c;
   --surface-color: #131d31;
   --surface-card: #18233c;
   --surface-glass: rgba(19, 29, 49, 0.88);
@@ -134,9 +136,9 @@ body {
   box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
 }
 .pill-btn {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #fff;
+  background: var(--surface-card);
+  border: 1.5px solid var(--border-color);
+  color: var(--text-main);
   padding: 6px 14px;
   border-radius: 999px;
   font-size: 12px;
@@ -145,11 +147,25 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  box-shadow: 0 1px 3px rgba(30, 27, 75, 0.05);
   transition: var(--smooth-transition);
 }
 .pill-btn:hover {
-  background: rgba(255, 255, 255, 0.18);
+  background: var(--bg-secondary);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
   transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(99, 102, 241, 0.12);
+}
+[data-theme="dark"] .pill-btn {
+  background: #18233c;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #f8fafc;
+}
+[data-theme="dark"] .pill-btn:hover {
+  background: #233254;
+  border-color: #60a5fa;
+  color: #fff;
 }
 
 /* ==========================================================================
@@ -284,15 +300,17 @@ body {
   transform: translateY(-2px);
 }
 .btn-outline {
-  background: transparent;
+  background: var(--surface-card);
   border: 1.5px solid var(--border-color);
   color: var(--text-main);
+  box-shadow: var(--shadow-sm);
 }
 .btn-outline:hover {
   border-color: var(--primary-color);
   color: var(--primary-color);
   background: var(--bg-secondary);
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
 }
 .cart-badge-btn {
   position: relative;
