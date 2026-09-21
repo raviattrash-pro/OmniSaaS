@@ -1,110 +1,134 @@
-# ⚡ OmniSaaS — Universal Multi-Business Operating System & Rapid Onboarding Engine
+# ⚡ OmniSaaS — Universal Multi-Tenant Business Operating System
 
-> **Live Platform URL**: [https://raviattrash-pro.github.io/OmniSaaS/](https://raviattrash-pro.github.io/OmniSaaS/)  
-> **Dedicated Admin Portal**: [https://raviattrash-pro.github.io/OmniSaaS/admin/](https://raviattrash-pro.github.io/OmniSaaS/admin/) *(Protected via SHA-256 Encrypted Master Security)*  
-> **Zero-Backend Architecture**: 100% Static HTML5, CSS3 & Vanilla JavaScript hosted on GitHub Pages with Google Sheets Cloud Database Sync.
+> **Platform Showcase & 5-Min Onboarding**: [https://raviattrash-pro.github.io/OmniSaaS/](https://raviattrash-pro.github.io/OmniSaaS/)  
+> **Super Admin Verification Hub**: [https://raviattrash-pro.github.io/OmniSaaS/admin.html](https://raviattrash-pro.github.io/OmniSaaS/admin.html) *(Protected via SHA-256 Encrypted Master Security)*  
+> **Architecture**: 100% Decoupled Static Portals (HTML5/CSS3/ES6+) with Real-Time Google Sheets Cloud Database Sync & Zero-Commission UPI Payments.
 
 ---
 
-## 🌟 The OmniSaaS Advantage
+## 🌟 Decoupled Dedicated Standalone App Portals
 
-OmniSaaS allows you to launch custom-branded, enterprise-grade digital portals for **any business in under 5 minutes**. 
+Each business vertical runs as an **isolated, standalone web portal** with clean URLs, Google Authentication, 256-bit SHA-256 encrypted owner logins, and zero demo bar clutter:
 
-Every business onboarded receives its **own dedicated GitHub Pages URL named directly after the business** (e.g. `https://raviattrash-pro.github.io/dps-school/` or `https://raviattrash-pro.github.io/OmniSaaS/?slug=dps-school`), with their own dedicated sheet tab inside their vertical's Google Sheet!
+| Dedicated Portal | Live App URL | Key Features |
+| :--- | :--- | :--- |
+| 🎓 **School & College OS** | [`/school/`](https://raviattrash-pro.github.io/OmniSaaS/school/) | 4-Step Student Admission Wizard, Dynamic Fee Invoicing with Instant UPI Receipts, Digital Student ID Card Maker |
+| 🚚 **MOVE-X Freight Logistics** | [`/movex/`](https://raviattrash-pro.github.io/OmniSaaS/movex/) | Fleet Booking (Tata Ace to 32ft Container), Live Distance Fare Calculator, 15% Return-Load Saver, OTP Proof-of-Delivery |
+| 🏨 **Hotel & Resort Reservations** | [`/hotel/`](https://raviattrash-pro.github.io/OmniSaaS/hotel/) | Luxury Room & Suite Selection, Table/Slot Bookings, Printable Verified Booking Vouchers, Guest Ledger |
+| 🍔 **Restaurant & Dining Food Ordering** | [`/food/`](https://raviattrash-pro.github.io/OmniSaaS/food/) | Contactless Visual Digital Menu, Table QR Dine-In & Takeaway Cart, Kitchen Order Ticket (KOT) Dispatch |
+| 🛍️ **Quick-Commerce Retail Store** | [`/store/`](https://raviattrash-pro.github.io/OmniSaaS/store/) | Fast Product Catalog, Slide-Out Cart with Promo Codes (`WELCOME10`), Direct Merchant UPI Invoices |
 
 ```
-                        ┌────────────────────────────────────────────────────────┐
-                        │ GitHub Pages Host: https://raviattrash-pro.github.io/  │
-                        └────────────────────────────────────────────────────────┘
-                                     │                                  │
-       ┌─────────────────────────────┴────────────┐                     │
-       ▼                                          ▼                     ▼
-┌──────────────────────────────┐ ┌──────────────────────────────┐ ┌──────────────────────────────┐
-│  Delhi Public School Portal  │ │ Grand Oberoi Palace & Suites │ │ Agency Master Admin Console  │
-│  https://raviattrash-pro.    │ │ https://raviattrash-pro.    │ │ https://raviattrash-pro.    │
-│  github.io/dps-school/       │ │ github.io/grand-oberoi/      │ │ github.io/OmniSaaS/admin/    │
-│                              │ │                              │ │                              │
-│ • Locked school branding     │ │ • Locked hotel branding      │ │ • Encrypted Access Guard     │
-│ • Student Admissions & Fees  │ │ • Room Reservations & Dining │ │ • 5-Minute Rapid Onboarder   │
-│ • Direct merchant UPI        │ │ • Direct merchant UPI        │ │ • 1-Click GitHub Deployer    │
-│ • Dedicated Sheet Tab        │ │ • Dedicated Sheet Tab        │ │ • Cross-Vendor Ledger Feed   │
-└──────────────────────────────┘ └──────────────────────────────┘ └──────────────────────────────┘
+                              ┌────────────────────────────────────────────────────────┐
+                              │ Platform Host: https://raviattrash-pro.github.io/      │
+                              └────────────────────────────────────────────────────────┘
+                                           │                                │
+             ┌─────────────────────────────┼────────────────────────────┐   │
+             ▼                             ▼                            ▼   ▼
+ ┌───────────────────────┐   ┌───────────────────────┐   ┌───────────────────────────────┐
+ │ Dedicated School App  │   │ Dedicated MOVE-X App  │   │ Super Admin Verification Hub  │
+ │ OmniSaaS/school/      │   │ OmniSaaS/movex/       │   │ OmniSaaS/admin.html           │
+ │                       │   │                       │   │                               │
+ │ • Online Admissions   │   │ • Fleet & Cargo Book  │   │ • Review Incoming Apps        │
+ │ • Zero-Fee UPI Receipts│  │ • Fare Distance Calc  │   │ • 1-Click Verify & Activate   │
+ │ • Digital Student ID  │   │ • 4-Digit OTP POD     │   │ • Encrypted Password Guard    │
+ │ • Google Sheet Sync   │   │ • Google Sheet Sync   │   │ • Cross-Vendor Ledger Metrics │
+ └───────────────────────┘   └───────────────────────┘   └───────────────────────────────┘
 ```
 
 ---
 
-## 📊 Cloud Database & Google Sheets Integration
+## ⚡ 5-Minute Self-Service Business Onboarding Pipeline
 
-Each vertical routes transactions and registrations securely via Google Apps Script webhooks, automatically organizing data into **dedicated business tabs**:
+Business owners can register and launch their dedicated application in 5 minutes via the platform landing page ([`index.html`](https://raviattrash-pro.github.io/OmniSaaS/)):
 
-| Business Vertical | Cloud Database Routing | Status |
-|:---|:---|:---|
-| 🎓 **School / College Admissions & Fees** | Secure Google Sheets Webhook Routing | 🟢 Connected |
-| 🚚 **MOVE-X Freight Logistics Ledger** | Secure Google Sheets Webhook Routing | 🟢 Connected |
-| 🛍️ **Ecommerce Retail Store Orders** | Secure Google Sheets Webhook Routing | 🟢 Connected |
-| 🏨 **Hotel & Resort Reservations** | Secure Google Sheets Webhook Routing | 🟢 Connected |
-| 🍲 **Restaurant & Food Orders** | Secure Google Sheets Webhook Routing | 🟢 Connected |
+```
+┌─────────────────┐     ┌─────────────────────┐     ┌────────────────────────┐     ┌──────────────────────┐
+│ 1. Choose       │ ──► │ 2. Owner Contact &  │ ──► │ 3. Custom Services &   │ ──► │ 4. Merchant UPI ID & │
+│ Category        │     │ Business Info       │     │ Dynamic Pricing        │     │ Standee QR Upload    │
+└─────────────────┘     └─────────────────────┘     └────────────────────────┘     └──────────────────────┘
+                                                                                              │
+                                                                                              ▼
+┌────────────────────────────────┐     ┌────────────────────────────────┐     ┌──────────────────────┐
+│ 6. App Activated & LIVE!       │ ◄── │ 5. Super Admin Review &        │ ◄── │ Generates Request ID │
+│ Dedicated URL + Owner ID       │     │ Instant 1-Click Verification   │     │ (e.g. REQ-2026-XXXX) │
+└────────────────────────────────┘     └────────────────────────────────┘     └──────────────────────┘
+```
 
-> 💡 **Multi-Business Tab Automation**: When onboarding multiple schools or businesses (e.g. DPS, St. Xaviers, Cambridge High), each business automatically receives its own cleanly separated tab with all transactions, student profiles, and fee receipts organized independently.
-
----
-
-## ⚡ 5 Supported Business Verticals
-
-1. 🎓 **Student Management & Admissions System**:
-   - Online admissions application with auto Reference ID generation
-   - Fee payment portal with dynamic UPI QR standee and printable receipt slips
-   - Student activity, sports & club enrollments
-   - Real-time application & fee status lookup
-2. 🚚 **MOVE-X Logistics & Vehicle Booking**:
-   - On-demand fleet dispatch (Tata Ace, 3-Wheeler Cargo, 8ft Pickup, Cabs)
-   - Transparent pricing: Base + Distance + Helpers/Stairs + 85% Guaranteed Driver Payout
-   - Return-load pairing discount (15% Saver on recurring lanes)
-   - Fraud prevention with 4-digit Delivery OTP and 5-minute brute-force lockout
-3. 🏨 **Hotel & Resort Reservation Portal**:
-   - Luxury suites, capacity indicators, check-in/out date pickers & instant reservation vouchers
-4. 🍲 **Restaurant Food Ordering System**:
-   - Gourmet menu categories, item customizations, and instant kitchen order tickets
-5. 🛍️ **Quick Commerce & E-Commerce Store**:
-   - Product catalog, category filters, slide-out shopping cart drawer & promo code engine
+1. **Category Selection:** School, Logistics, Hotel, Restaurant, or Retail Store.
+2. **Business & Owner Details:** Institution Name, Owner Name, Contact WhatsApp/Phone, Email, City.
+3. **Owner Password Security:** Password is encrypted client-side with 256-bit SHA-256 before leaving the browser.
+4. **Custom Services & Pricing Builder:** Dynamic repeater allowing the owner to add their custom services, fee grades, or menu items with prices.
+5. **Zero-Fee UPI Setup:** Enter Merchant UPI ID + upload Standee QR image with automatic canvas compression.
+6. **Submission & Tracking:** Generates a unique tracking ticket (`REQ-2026-XXXX`), saves to pending intake queue, and dispatches to Google Apps Script webhook.
+7. **Application Status Tracker:** Built-in status tracker allows applicants to enter their Request ID or Phone to verify whether their app is `In Review` or `Verified & Live`.
 
 ---
 
-## 🔐 Standalone Admin Management Portal
+## 🔐 Super Admin Verification & Approval Hub
 
-- **URL**: `admin/index.html` or `admin.html`
-- **Security**: Protected with SHA-256 cryptographic master password & customizable PIN
-- **Features**:
-  - **Cross-Vendor Revenue Engine**: Real-time aggregated platform volume across all schools, hotels, logistics, restaurants, and retail stores
-  - **5-Minute Rapid Onboarder**: 5-step wizard with auto-slug generation, custom branding, UPI standee upload, and fee catalog configuration
-  - **Vendor Roster with Dedicated URLs**: View every vendor's dedicated URL, test deep links, toggle active/suspended status, and export configs
-  - **Cross-Vendor Unified Transaction Feed**: Live audit trail of all admissions, fee receipts, freight orders, and reservations across all client URLs
-  - **Full Encrypted JSON Backups**: One-click export and import of all client configurations
+- **URL:** [`admin.html`](https://raviattrash-pro.github.io/OmniSaaS/admin.html)
+- **Security:** 256-bit SHA-256 cryptographic master password & customizable PIN.
+- **Intake Review Queue:**
+  - **"📋 Pending Verifications" Tab:** Displays incoming applications with contact details, pricing catalog, UPI ID, and QR code thumbnail.
+  - **"✅ Verify & Activate App":** 1-click action that creates the tenant profile, saves custom services, sets status to `approved`, generates their dedicated URL (`school/?biz=slug`), and provides a 1-tap WhatsApp message to send to the owner.
+  - **"❌ Reject Request":** Allows the administrator to reject or request corrections with notes.
+  - **"👁️ Live Preview":** Instantly tests the dedicated live app.
+
+---
+
+## 🏛️ Software Architecture & Design Patterns
+
+The entire platform is architected adhering strictly to **SOLID Principles** and standard **GoF Design Patterns**:
+
+| Pattern / Principle | Purpose & Implementation |
+| :--- | :--- |
+| **Single Responsibility (SRP)** | Isolated UI modules (`school/`, `movex/`, `hotel/`, `food/`, `store/`), intake controller (`OmniLauncher`), and verification dashboard (`AdminDashboard`). |
+| **Open/Closed (OCP)** | New verticals can be added without modifying existing module core logic. |
+| **Builder Pattern** | `OmniLauncher.submitApplication()` step-by-step builds structured onboarding entities. |
+| **Factory Method** | Dynamic tenant profile and vertical module instantiation based on URL query or folder route. |
+| **Facade Pattern** | `UniversalApp` and `OmniLauncher` provide clean APIs abstracting DOM manipulation, audio synthesis, toasts, and webhooks. |
+| **Proxy / Decorator** | `CryptoSecurity.hashPassword()` and `SecurityGuard.escapeHTML()` intercept and sanitize all user input before storage or rendering. |
+| **State Pattern** | Business onboarding requests transition cleanly: `pending_verification` ➔ `approved` / `rejected`. |
+| **Observer Pattern** | Reactive badge counters and live UI queues update on intake and verification state changes. |
 
 ---
 
 ## 🛡️ Enterprise Security Hardening
 
-- **Token Bucket Rate Limiting**: 15 req/min protection on all forms, webhook dispatches, and promo codes.
-- **XSS Sanitization**: Strict HTML escaping and attribute neutralization prevents script injection.
-- **Circuit Breaker & Offline Queue**: Orders and payments are safely saved locally during network drops and auto-synced upon reconnect.
-- **Spreadsheet Formula Injection Defense**: Neutralizes `=, +, -, @` formula payloads in Google Sheets and CSV exports.
-- **OTP Brute-Force Lockout**: 5-minute lockout after 3 consecutive failed OTP attempts.
+- **SHA-256 Cryptographic Passwords:** Business Owner and Super Admin passwords are encrypted using Web Crypto API SHA-256 with pure JS fallback. No plaintext passwords in storage.
+- **Token Bucket Rate Limiting:** 15 requests/min protection on all forms, webhook dispatches, and promo codes.
+- **Strict XSS Defense:** Strict HTML entity encoding and attribute neutralization prevents script injection.
+- **Circuit Breaker & Offline Queue:** Transactions and registrations are safely saved locally during network drops and auto-synced upon reconnect.
+- **Zero Sensitive Data:** Zero direct spreadsheet URLs, default PINs, or private keys exposed in documentation.
 
 ---
 
-## 🚀 How to Deploy on GitHub Pages
+## 🚀 Quick Start & Development
 
-1. **Push to GitHub**:
+1. **Clone Repository:**
    ```bash
-   git init
-   git add .
-   git commit -m "Initial commit: OmniSaaS Multi-Business Platform"
-   git branch -M main
-   git remote add origin https://github.com/raviattrash-pro/OmniSaaS.git
-   git push -u origin main
+   git clone https://github.com/raviattrash-pro/OmniSaaS.git
+   cd OmniSaaS
    ```
-2. **Enable GitHub Pages**:
-   - On GitHub, go to `Settings` ➔ `Pages`.
-   - Under **Build and deployment** ➔ **Branch**, choose `main` ➔ `/ (root)` ➔ `Save`.
-   - Your live platform is immediately available at `https://raviattrash-pro.github.io/OmniSaaS/`!
+
+2. **Run Locally:**
+   Open `index.html` directly in any modern browser or run a local static server:
+   ```bash
+   npx serve .
+   ```
+
+3. **Deploy to GitHub Pages:**
+   Push changes to the `main` branch:
+   ```bash
+   git add .
+   git commit -m "feat: Updates"
+   git push origin main
+   ```
+   GitHub Pages automatically hosts the updated portals within 60 seconds!
+
+---
+
+## 📄 License & Attribution
+
+© 2026 OmniSaaS Enterprise &bull; Universal Multi-Tenant Business Platform. All Rights Reserved.
