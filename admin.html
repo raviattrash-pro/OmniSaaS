@@ -329,13 +329,24 @@
                 <strong id="res_vendor_name">Vendor Name</strong> (<span id="res_vendor_vertical">CATEGORY</span>) now has its own business-named GitHub Pages destination!
               </p>
 
-              <!-- Dedicated GitHub Pages URL Box -->
+              <!-- Instant Live Portal URL Box -->
               <div style="max-width: 700px; margin: 20px auto 0; text-align: left;">
-                <label style="font-size: 12px; font-weight: 800; color: var(--admin-text-muted); text-transform: uppercase;">
-                  🌐 Dedicated GitHub Pages URL (Named for this Business):
+                <label style="font-size: 12px; font-weight: 800; color: var(--admin-success); text-transform: uppercase;">
+                  🚀 Instant Live Portal URL (Ready to Share & Active Now):
                 </label>
                 <div style="display: flex; gap: 8px; margin-top: 6px;">
-                  <input type="text" id="res_dedicated_url" class="admin-input" style="font-weight: 800; color: var(--admin-primary);" readonly />
+                  <input type="text" id="res_live_portal_url" class="admin-input" style="font-weight: 800; color: var(--admin-success); border-color: rgba(34, 197, 94, 0.4);" readonly />
+                  <button class="btn-admin btn-admin-success" onclick="AdminDashboard.copyLivePortalUrl()">📋 Copy</button>
+                </div>
+              </div>
+
+              <!-- Standalone Custom Repository URL Box -->
+              <div style="max-width: 700px; margin: 14px auto 0; text-align: left;">
+                <label style="font-size: 11px; font-weight: 700; color: var(--admin-text-muted); text-transform: uppercase;">
+                  📦 Standalone Repository URL (Optional - Requires 1-Click Deploy Below):
+                </label>
+                <div style="display: flex; gap: 8px; margin-top: 6px;">
+                  <input type="text" id="res_dedicated_url" class="admin-input" style="font-weight: 700; color: var(--admin-primary); opacity: 0.85;" readonly />
                   <button class="btn-admin btn-admin-primary" onclick="AdminDashboard.copyDedicatedUrl()">📋 Copy</button>
                 </div>
               </div>

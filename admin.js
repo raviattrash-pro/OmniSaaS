@@ -699,10 +699,12 @@ const AdminDashboard = {
     // Render Handover Display
     const nameEl = document.getElementById('res_vendor_name');
     const vertEl = document.getElementById('res_vendor_vertical');
+    const liveUrlEl = document.getElementById('res_live_portal_url');
     const urlEl = document.getElementById('res_dedicated_url');
 
     if (nameEl) nameEl.innerText = data.businessName;
     if (vertEl) vertEl.innerText = data.vertical.replace('_', ' ').toUpperCase();
+    if (liveUrlEl) liveUrlEl.value = deepLaunchUrl;
     if (urlEl) urlEl.value = dedicatedUrl;
 
     // Render Live Verification Badges for Uploaded Assets
@@ -728,7 +730,7 @@ const AdminDashboard = {
       assetsSummaryEl.innerHTML = html;
     }
 
-    const waMsg = `🎉 *Congratulations! Your App is Live!* 🎉\n\n*Business:* ${data.businessName}\n*Category:* ${data.vertical.replace('_', ' ').toUpperCase()}\n*Official Portal:* ${dedicatedUrl}\n*Direct Link:* ${deepLaunchUrl}\n\nYour app is equipped with Instant zero-fee UPI checkout, real-time Google Sheets sync, and PWA offline capability. Welcome aboard!`;
+    const waMsg = `🎉 *Congratulations! Your App is Live!* 🎉\n\n*Business:* ${data.businessName}\n*Category:* ${data.vertical.replace('_', ' ').toUpperCase()}\n*Official Live Portal:* ${deepLaunchUrl}\n\nYour app is equipped with Instant zero-fee UPI checkout, real-time Google Sheets sync, and PWA offline capability. Welcome aboard!`;
     const waLink = `https://wa.me/${(data.whatsappNumber || '').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(waMsg)}`;
     
     const waBtn = document.getElementById('res_whatsapp_btn');
@@ -740,12 +742,21 @@ const AdminDashboard = {
     this.showToast('🚀 New Vendor Successfully Onboarded in 5 Minutes!', 'success');
   },
 
+  copyLivePortalUrl() {
+    const input = document.getElementById('res_live_portal_url');
+    if (input) {
+      input.select();
+      navigator.clipboard.writeText(input.value);
+      this.showToast('📋 Copied Instant Live Portal URL!', 'success');
+    }
+  },
+
   copyDedicatedUrl() {
     const input = document.getElementById('res_dedicated_url');
     if (input) {
       input.select();
       navigator.clipboard.writeText(input.value);
-      this.showToast('📋 Copied Dedicated Business URL!', 'success');
+      this.showToast('📋 Copied Standalone Repository URL!', 'success');
     }
   },
 
