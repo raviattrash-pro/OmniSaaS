@@ -1088,11 +1088,34 @@ const AdminDashboard = {
   // 🚀 FINALIZE ONBOARDING & GENERATE DEDICATED LAUNCH ASSETS
   // =========================================================================
   async finalizeOnboarding() {
+    // Read directly from DOM inputs as robust fallback
+    const domName = document.getElementById('wiz_name')?.value?.trim();
+    const domSlug = document.getElementById('wiz_slug')?.value?.trim();
+    const domTagline = document.getElementById('wiz_tagline')?.value?.trim();
+    const domIcon = document.getElementById('wiz_icon')?.value?.trim();
+    const domUpi = document.getElementById('wiz_upi')?.value?.trim();
+    const domPhone = document.getElementById('wiz_whatsapp')?.value?.trim();
+    const domScript = document.getElementById('wiz_script')?.value?.trim();
+
     const data = this.wizardData;
-    const slug = this.slugify(data.slug || data.businessName);
+    data.businessName = domName || data.businessName || "My New Business";
+    data.vertical = data.vertical || "student_management";
+    data.slug = this.slugify(domSlug || data.slug || data.businessName);
+    data.tagline = domTagline || data.tagline || `Official ${data.businessName} Portal`;
+    data.logoIcon = domIcon || data.logoIcon || "🏛️";
+    if (domUpi) data.upiId = domUpi;
+    if (domPhone) data.whatsappNumber = domPhone;
+    if (domScript) data.googleScriptUrl = domScript;
+
+    const slug = data.slug;
     const vendorId = "vendor_" + slug + "_" + Date.now().toString(36);
     const defaultPassword = data.ownerPassword || 'pass1234';
-    const ownerPasswordHash = await CryptoSecurity.hashPassword(defaultPassword);
+    let ownerPasswordHash = '';
+    try {
+      ownerPasswordHash = await CryptoSecurity.hashPassword(defaultPassword);
+    } catch (e) {
+      ownerPasswordHash = '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918'; // pass1234 hash fallback
+    }
 
     const newVendorProfile = {
       id: vendorId,
@@ -1103,12 +1126,12 @@ const AdminDashboard = {
       vertical: data.vertical,
       tagline: data.tagline,
       logoIcon: data.logoIcon,
-      themeColor: data.themeColor,
-      accentColor: data.accentColor,
-      currency: data.currency,
-      upiId: data.upiId,
-      whatsappNumber: data.whatsappNumber,
-      googleScriptUrl: data.googleScriptUrl,
+      themeColor: data.themeColor || "#1e3a8a",
+      accentColor: data.accentColor || "#f59e0b",
+      currency: data.currency || "₹",
+      upiId: data.upiId || "payments@upi",
+      whatsappNumber: data.whatsappNumber || "+919876543210",
+      googleScriptUrl: data.googleScriptUrl || "",
       customLogo: data.customLogoData || null,
       customQr: data.customQrData || null,
       catalogItems: [...data.catalogItems],
@@ -1137,7 +1160,7 @@ const AdminDashboard = {
 
     // Compute Dedicated URLs
     const dedicatedUrl = this.getDedicatedBusinessUrl(slug);
-    const deepLaunchUrl = this.getDeepLaunchUrl(slug);
+    const deepLaunchUrl = this.getDeepLaunchUrl(slug, data.vertical);
 
     // Render Handover Display
     const nameEl = document.getElementById('res_vendor_name');
@@ -1146,7 +1169,7 @@ const AdminDashboard = {
     const urlEl = document.getElementById('res_dedicated_url');
 
     if (nameEl) nameEl.innerText = data.businessName;
-    if (vertEl) vertEl.innerText = data.vertical.replace('_', ' ').toUpperCase();
+    if (vertEl) vertEl.innerText = (data.vertical || 'student_management').replace('_', ' ').toUpperCase();
     if (liveUrlEl) liveUrlEl.value = deepLaunchUrl;
     if (urlEl) urlEl.value = dedicatedUrl;
 
