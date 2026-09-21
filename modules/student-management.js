@@ -26,14 +26,36 @@ const StudentManagementModule = {
     meritScholarshipPct: 0
   },
 
+  selectedStudentForFee: null,
+
   _safeParse(key) {
     try { return JSON.parse(localStorage.getItem(key) || '[]'); }
     catch(e) { console.warn('Corrupted localStorage data in', key, '- resetting.'); localStorage.removeItem(key); return []; }
   },
 
+  getCustomFeeCategories(slug) {
+    const config = window.MASTER_CONFIG;
+    const defaultFees = (config.verticals.student_management && config.verticals.student_management.feeCategories) || [];
+    const custom = this._safeParse(`school_custom_fees_${slug || 'default'}`);
+    return (Array.isArray(custom) && custom.length > 0) ? custom : defaultFees;
+  },
+
+  getCustomClubs(slug) {
+    const config = window.MASTER_CONFIG;
+    const defaultClubs = (config.verticals.student_management && config.verticals.student_management.activityCatalog) || [];
+    const custom = this._safeParse(`school_custom_clubs_${slug || 'default'}`);
+    return (Array.isArray(custom) && custom.length > 0) ? custom : defaultClubs;
+  },
+
   render(container, config) {
     const data = config.verticals.student_management;
+    const currentSlug = new URLSearchParams(window.location.search).get('slug') || 'default';
+    const feeCategories = this.getCustomFeeCategories(currentSlug);
+    const activityCatalog = this.getCustomClubs(currentSlug);
     const customLogo = (data && data.customLogo) || config.customLogo || localStorage.getItem('custom_brand_logo');
+    const customQr = (data && data.customQr) || config.customQr || localStorage.getItem('custom_upi_qr');
+    const upiId = (data && data.upiId) || config.upiId || 'payments@upi';
+    const admissions = this._safeParse('student_admissions');
     this.currentStep = 1;
 
     container.innerHTML = `
@@ -248,7 +270,7 @@ const StudentManagementModule = {
             <div class="digital-id-card" id="printableStudentIdCard">
               <div class="id-card-top">
                 <div>
-                  <div style="font-size: 13px; font-weight: 800; letter-spacing: 1px; color: var(--accent-color);">${data.businessName.toUpperCase()}</div>
+                  <div style="font-size: 13px; font-weight: 800; letter-spacing: 1px; color: var(--accent-color);">${(data.businessName || 'INSTITUTION').toUpperCase()}</div>
                   <div style="font-size: 10px; opacity: 0.8;">ACCREDITED K-12 INSTITUTION</div>
                 </div>
                 ${customLogo ? `<img src="${customLogo}" style="max-height: 32px; max-width: 50px; object-fit: contain;" alt="School Logo" />` : '<div style="font-size: 1.6rem;">🏛️</div>'}
@@ -276,46 +298,176 @@ const StudentManagementModule = {
         </div>
       </div>
 
-      <!-- 3. FEES & UPI INVOICING TAB -->
+      <!-- 3. SMART STUDENT FEE INVOICING & UPI PAYMENT TAB -->
       <div id="subtab-fees" class="subtab-panel" style="display: none; margin-top: 25px;">
-        <div class="grid-container">
-          ${data.feeCategories.map(fee => `
-            <div class="card">
-              <div class="card-body">
-                <span class="card-badge" style="width: fit-content; margin-bottom: 8px;">${fee.badge}</span>
-                <h4 class="card-title">${fee.title}</h4>
-                <div class="card-subtitle">${fee.grade}</div>
-                <p class="card-desc">${fee.description}</p>
-                <div class="card-footer">
-                  <div class="price-tag">${data.currency}${fee.amount.toLocaleString()}</div>
-                  <button class="btn btn-primary" onclick="StudentManagementModule.openFeePaymentModal('${fee.id}', '${fee.title}', ${fee.amount})">
-                    Pay Fee
-                  </button>
-                </div>
+        <div class="form-card" style="max-width: 820px; margin: 0 auto 30px auto;">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <span class="card-badge" style="background: var(--primary-color); color: #fff; margin-bottom: 6px;">⚡ INSTANT DIGITAL FEE COUNTER</span>
+            <h3 style="font-size: 1.45rem; color: var(--primary-color); margin-top: 4px;">Student Fee Verification & Payment</h3>
+            <p style="color: var(--text-muted); font-size: 13px;">Type student name or ID to auto-populate records, select your fee structure, and pay directly via zero-fee UPI.</p>
+          </div>
+
+          <!-- STUDENT LOOKUP / SELECTION CONTROLS -->
+          <div style="background: var(--bg-secondary); border: 1.5px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px;">
+            <div style="font-size: 12px; font-weight: 800; color: var(--primary-color); margin-bottom: 8px;">
+              🔍 STEP 1: VERIFY STUDENT IDENTITY
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div class="form-group" style="margin: 0; position: relative;">
+                <label style="font-size: 11px; font-weight: 700;">Search Registered Student (Name / Roll No)</label>
+                <input type="text" id="fee_search_input" class="form-control" placeholder="e.g. Aarav Sharma or STU-2026..." oninput="StudentManagementModule.onFeeStudentSearch(this.value)" />
+                <div id="fee_search_suggestions" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--surface-card); border: 1px solid var(--border-color); border-radius: 6px; box-shadow: var(--shadow-lg); z-index: 50; max-height: 180px; overflow-y: auto;"></div>
+              </div>
+              <div class="form-group" style="margin: 0;">
+                <label style="font-size: 11px; font-weight: 700;">Or Select from Admitted Roster (${admissions.length})</label>
+                <select id="fee_quick_student_select" class="form-control" onchange="StudentManagementModule.onSelectStudentForFee(this.value)">
+                  <option value="">-- Choose Admitted Student --</option>
+                  ${admissions.map(s => `<option value="${s.orderId}">${s.studentName} (${s.gradeApplied}) - ${s.rollNo}</option>`).join('')}
+                </select>
               </div>
             </div>
-          `).join('')}
+
+            <!-- DYNAMIC VERIFIED STUDENT CARD -->
+            <div id="verified_student_box" style="margin-top: 14px; display: none; background: rgba(16, 185, 129, 0.08); border: 1.5px solid var(--success-color); border-radius: 8px; padding: 12px 16px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <div>
+                  <div style="font-size: 11px; font-weight: 800; color: var(--success-color); letter-spacing: 0.5px;">✓ VERIFIED STUDENT PROFILE</div>
+                  <div style="font-size: 16px; font-weight: 900; color: var(--text-main);" id="v_stu_name">-</div>
+                  <div style="font-size: 12px; color: var(--text-muted);">
+                    Class/Grade: <strong id="v_stu_grade">-</strong> | Roll/ID: <strong id="v_stu_roll" style="color: var(--primary-color);">-</strong>
+                  </div>
+                  <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+                    Parent: <strong id="v_stu_parent">-</strong> | Phone: <strong id="v_stu_phone">-</strong>
+                  </div>
+                </div>
+                <button type="button" class="pill-btn" style="background: rgba(239, 68, 68, 0.1); color: var(--danger-color); font-size: 11px;" onclick="StudentManagementModule.clearSelectedStudent()">
+                  ✕ Clear / Change
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 2: SELECT FEE STRUCTURE & PAYMENT -->
+          <form id="inlineFeePaymentForm" onsubmit="StudentManagementModule.handleInlineFeeSubmit(event)">
+            <div style="font-size: 12px; font-weight: 800; color: var(--primary-color); margin-bottom: 8px;">
+              💳 STEP 2: SELECT FEE PARTICULAR & SUBMIT PROOF
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group form-grid-full">
+                <label>Select Fee Structure Category *</label>
+                <select id="inline_fee_select" class="form-control" required onchange="StudentManagementModule.onInlineFeeSelectChange(this.value)">
+                  <option value="">-- Choose Applicable Fee Category --</option>
+                  ${feeCategories.map(fee => `
+                    <option value="${fee.id}" data-amount="${fee.amount}" data-title="${SecurityGuard.sanitizeAttr(fee.title)}">
+                      ${fee.title} (${fee.grade}) - ${data.currency}${Number(fee.amount).toLocaleString()}
+                    </option>
+                  `).join('')}
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Student Full Name *</label>
+                <input type="text" id="inline_fee_student_name" class="form-control" required placeholder="Student Full Name" />
+              </div>
+
+              <div class="form-group">
+                <label>Student Roll No / Application ID *</label>
+                <input type="text" id="inline_fee_roll_no" class="form-control" required placeholder="e.g. STU-2026-9821" />
+              </div>
+
+              <div class="form-group">
+                <label>Parent Contact Phone *</label>
+                <input type="tel" id="inline_fee_phone" class="form-control" required placeholder="+91 98765 43210" />
+              </div>
+
+              <div class="form-group">
+                <label>Total Fee Invoiced Amount</label>
+                <div id="inline_fee_amount_display" style="font-size: 1.6rem; font-weight: 900; color: var(--primary-color); padding: 6px 0;">
+                  ${data.currency}0
+                </div>
+                <input type="hidden" id="inline_fee_amount_val" value="0" />
+                <input type="hidden" id="inline_fee_title_val" value="" />
+              </div>
+            </div>
+
+            <!-- PAYMENT QR SECTION -->
+            <div style="background: var(--bg-secondary); border: 1.5px solid var(--border-color); border-radius: var(--radius-md); padding: 18px; margin: 16px 0; text-align: center;">
+              <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); margin-bottom: 8px;">
+                ${customQr ? '🏢 OFFICIAL SCHOOL MERCHANT STANDEE QR' : '⚡ SCAN WITH GPAY / PHONEPE / PAYTM'}
+              </div>
+              <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 10px;">
+                <img id="inline_fee_qr_img" src="${customQr || `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent('upi://pay?pa=' + upiId + '&pn=' + encodeURIComponent(data.businessName || 'School Fee') + '&cu=INR')}`}" alt="UPI QR" style="max-height: 180px; max-width: 180px; object-fit: contain; background: #fff; padding: 6px; border-radius: 8px; border: 1.5px solid var(--border-color);" />
+              </div>
+              <div style="display: flex; justify-content: center; align-items: center; gap: 8px;">
+                <span style="font-size: 12px; color: var(--text-muted);">VPA: <strong>${upiId}</strong></span>
+                <button type="button" class="pill-btn" style="background: var(--surface-card); color: var(--text-main);" onclick="navigator.clipboard.writeText('${upiId}'); UniversalApp.showToast('UPI ID Copied!', 'success');">📋 Copy</button>
+              </div>
+            </div>
+
+            <!-- UTR & SCREENSHOT UPLOAD -->
+            <div class="form-grid">
+              <div class="form-group">
+                <label>UPI Transaction Reference / 12-Digit UTR ID *</label>
+                <input type="text" id="inline_fee_txn_id" class="form-control" required placeholder="Enter 12-digit UTR from payment receipt" />
+              </div>
+              <div class="form-group">
+                <label>Upload Payment Confirmation Screenshot *</label>
+                <input type="file" id="inline_fee_screenshot_file" class="form-control" accept="image/*" required onchange="StudentManagementModule.handleFeeScreenshotUpload(this)" />
+                <div id="fee_screenshot_preview" style="display: none; margin-top: 8px;"></div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 14px; padding: 14px; font-size: 15px; font-weight: 900;">
+              ✅ Verify Fee Payment & Generate Official Receipt
+            </button>
+          </form>
+        </div>
+
+        <!-- FEE CATEGORIES CATALOG DISPLAY -->
+        <div style="margin-top: 20px;">
+          <h4 style="font-size: 1.15rem; font-weight: 800; color: var(--primary-color); margin-bottom: 12px;">
+            📚 Active Institutional Fee Structures (${feeCategories.length})
+          </h4>
+          <div class="grid-container">
+            ${feeCategories.map(fee => `
+              <div class="card">
+                <div class="card-body">
+                  <span class="card-badge" style="width: fit-content; margin-bottom: 8px;">${fee.badge || 'Fee'}</span>
+                  <h4 class="card-title">${fee.title}</h4>
+                  <div class="card-subtitle">${fee.grade || 'All Classes'}</div>
+                  <p class="card-desc">${fee.description || 'Institutional Academic Fee'}</p>
+                  <div class="card-footer">
+                    <div class="price-tag">${data.currency}${Number(fee.amount).toLocaleString()}</div>
+                    <button class="btn btn-primary" onclick="StudentManagementModule.selectFeeCategoryCard('${fee.id}', '${SecurityGuard.sanitizeAttr(fee.title)}', ${fee.amount})">
+                      ⚡ Pay This Fee
+                    </button>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
         </div>
       </div>
 
       <!-- 4. ACTIVITIES TAB -->
       <div id="subtab-activities" class="subtab-panel" style="display: none; margin-top: 25px;">
         <div class="grid-container">
-          ${data.activityCatalog.map(act => {
+          ${activityCatalog.map(act => {
             const enrollments = StudentManagementModule._safeParse('student_activities').filter(e => e.activityName === act.title);
             return `
               <div class="card">
                 <div class="card-body">
-                  <span class="card-badge" style="background: #6366f1; width: fit-content; margin-bottom: 8px;">${act.category}</span>
+                  <span class="card-badge" style="background: #6366f1; width: fit-content; margin-bottom: 8px;">${act.category || 'Club'}</span>
                   <h4 class="card-title">${act.title}</h4>
                   <div class="card-desc">
-                    <strong>Head Coach/Mentor:</strong> ${act.coach}<br>
-                    <strong>Weekly Schedule:</strong> ${act.schedule}<br>
+                    <strong>Head Coach/Mentor:</strong> ${act.coach || 'Head Mentor'}<br>
+                    <strong>Weekly Schedule:</strong> ${act.schedule || 'Weekly Sessions'}<br>
                     <strong>Enrolled Students:</strong> ${enrollments.length} registered
                   </div>
                   <div class="card-footer">
                     <span style="font-size: 13px; color: var(--success-color); font-weight: 800;">● Open for Registration</span>
-                    <button class="btn btn-outline" onclick="StudentManagementModule.openActivityModal('${act.title}')">
+                    <button class="btn btn-outline" onclick="StudentManagementModule.openActivityModal('${SecurityGuard.sanitizeAttr(act.title)}')">
                       Register Student
                     </button>
                   </div>
@@ -976,7 +1128,278 @@ const StudentManagementModule = {
       </div>
     `;
     box.style.display = 'block';
+  },
+
+  onFeeStudentSearch(query) {
+    const sugBox = document.getElementById('fee_search_suggestions');
+    if (!sugBox) return;
+    const clean = query.trim().toLowerCase();
+    if (!clean || clean.length < 2) {
+      sugBox.style.display = 'none';
+      return;
+    }
+
+    const admissions = this._safeParse('student_admissions');
+    const matches = admissions.filter(s => 
+      s.studentName.toLowerCase().includes(clean) ||
+      s.rollNo.toLowerCase().includes(clean) ||
+      s.orderId.toLowerCase().includes(clean) ||
+      (s.phone && s.phone.includes(clean))
+    );
+
+    if (matches.length === 0) {
+      sugBox.innerHTML = `<div style="padding: 10px; font-size: 12px; color: var(--text-muted); text-align: center;">No registered student found for "${clean}". Type details manually below.</div>`;
+      sugBox.style.display = 'block';
+      return;
+    }
+
+    sugBox.innerHTML = matches.slice(0, 6).map(s => `
+      <div style="padding: 8px 12px; border-bottom: 1px solid var(--border-color); cursor: pointer; transition: background 0.15s;" 
+           onmouseover="this.style.background='var(--bg-secondary)'" 
+           onmouseout="this.style.background='transparent'" 
+           onclick="StudentManagementModule.onSelectStudentForFee('${s.orderId}')">
+        <div style="font-weight: 800; font-size: 13px; color: var(--primary-color);">${SecurityGuard.escapeHTML(s.studentName)}</div>
+        <div style="font-size: 11px; color: var(--text-muted);">
+          Roll: <strong>${SecurityGuard.escapeHTML(s.rollNo)}</strong> | Class: <strong>${SecurityGuard.escapeHTML(s.gradeApplied)}</strong> | Parent: ${SecurityGuard.escapeHTML(s.parentName)}
+        </div>
+      </div>
+    `).join('');
+    sugBox.style.display = 'block';
+  },
+
+  onSelectStudentForFee(refId) {
+    if (!refId) return;
+    const admissions = this._safeParse('student_admissions');
+    const match = admissions.find(a => a.orderId === refId || a.rollNo === refId);
+    if (!match) return;
+
+    this.selectVerifiedStudent(match);
+  },
+
+  selectVerifiedStudent(student) {
+    this.selectedStudentForFee = student;
+
+    // Fill Form inputs
+    const nameEl = document.getElementById('inline_fee_student_name');
+    const rollEl = document.getElementById('inline_fee_roll_no');
+    const phoneEl = document.getElementById('inline_fee_phone');
+    if (nameEl) nameEl.value = student.studentName;
+    if (rollEl) rollEl.value = student.rollNo;
+    if (phoneEl) phoneEl.value = student.phone || '';
+
+    // Update Verified Badge Box
+    const box = document.getElementById('verified_student_box');
+    if (box) {
+      document.getElementById('v_stu_name').innerText = student.studentName;
+      document.getElementById('v_stu_grade').innerText = student.gradeApplied || 'Enrolled';
+      document.getElementById('v_stu_roll').innerText = student.rollNo;
+      document.getElementById('v_stu_parent').innerText = student.parentName || 'Parent / Guardian';
+      document.getElementById('v_stu_phone').innerText = student.phone || 'N/A';
+      box.style.display = 'block';
+    }
+
+    const sugBox = document.getElementById('fee_search_suggestions');
+    if (sugBox) sugBox.style.display = 'none';
+
+    const searchInput = document.getElementById('fee_search_input');
+    if (searchInput) searchInput.value = student.studentName;
+
+    UniversalApp.playSound('click');
+    UniversalApp.showToast(`✓ Verified Record for ${student.studentName}!`, 'success');
+  },
+
+  clearSelectedStudent() {
+    this.selectedStudentForFee = null;
+    const box = document.getElementById('verified_student_box');
+    if (box) box.style.display = 'none';
+
+    const nameEl = document.getElementById('inline_fee_student_name');
+    const rollEl = document.getElementById('inline_fee_roll_no');
+    const phoneEl = document.getElementById('inline_fee_phone');
+    const searchInput = document.getElementById('fee_search_input');
+    const selectEl = document.getElementById('fee_quick_student_select');
+
+    if (nameEl) nameEl.value = '';
+    if (rollEl) rollEl.value = '';
+    if (phoneEl) phoneEl.value = '';
+    if (searchInput) searchInput.value = '';
+    if (selectEl) selectEl.value = '';
+  },
+
+  onInlineFeeSelectChange(feeId) {
+    const select = document.getElementById('inline_fee_select');
+    if (!select) return;
+    const opt = select.options[select.selectedIndex];
+    if (!opt || !feeId) {
+      document.getElementById('inline_fee_amount_display').innerText = `${window.MASTER_CONFIG.verticals.student_management.currency || '₹'}0`;
+      document.getElementById('inline_fee_amount_val').value = '0';
+      document.getElementById('inline_fee_title_val').value = '';
+      return;
+    }
+
+    const amount = Number(opt.dataset.amount) || 0;
+    const title = opt.dataset.title || opt.text;
+    const currency = window.MASTER_CONFIG.verticals.student_management.currency || '₹';
+    const config = window.MASTER_CONFIG;
+    const vData = config.verticals.student_management || {};
+    const upiId = vData.upiId || config.upiId || 'payments@upi';
+    const customQr = vData.customQr || config.customQr || localStorage.getItem('custom_upi_qr');
+
+    document.getElementById('inline_fee_amount_display').innerText = `${currency}${amount.toLocaleString()}`;
+    document.getElementById('inline_fee_amount_val').value = amount;
+    document.getElementById('inline_fee_title_val').value = title;
+
+    // Update QR Image dynamically with exact amount if not static standee
+    const qrImg = document.getElementById('inline_fee_qr_img');
+    if (qrImg) {
+      if (customQr) {
+        qrImg.src = customQr;
+      } else {
+        const upiUri = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(vData.businessName || 'School Fee')}&am=${amount}&cu=INR&tn=Fee_${feeId}`;
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiUri)}`;
+      }
+    }
+  },
+
+  selectFeeCategoryCard(feeId, title, amount) {
+    const select = document.getElementById('inline_fee_select');
+    if (select) {
+      select.value = feeId;
+      this.onInlineFeeSelectChange(feeId);
+    }
+    const form = document.getElementById('inlineFeePaymentForm');
+    if (form) {
+      form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    UniversalApp.playSound('click');
+    UniversalApp.showToast(`Selected: ${title} (${window.MASTER_CONFIG.verticals.student_management.currency || '₹'}${amount.toLocaleString()})`, 'info');
+  },
+
+  async handleInlineFeeSubmit(e) {
+    if (e && e.preventDefault) e.preventDefault();
+
+    // Mandatory Google Sign-In Gate
+    if (!UniversalApp.currentUser) {
+      UniversalApp.showGoogleLoginPrompt("Please sign in with Google to pay institutional fees.", () => {
+        this.handleInlineFeeSubmit();
+      });
+      return;
+    }
+
+    const config = window.MASTER_CONFIG;
+    const vData = config.verticals.student_management || {};
+    const feeSelect = document.getElementById('inline_fee_select');
+    const feeId = feeSelect ? feeSelect.value : '';
+    const feeTitle = document.getElementById('inline_fee_title_val').value || (feeSelect && feeSelect.options[feeSelect.selectedIndex] ? feeSelect.options[feeSelect.selectedIndex].text : 'Academic Fee');
+    const amount = Number(document.getElementById('inline_fee_amount_val').value) || 0;
+    const studentName = SecurityGuard.escapeHTML(document.getElementById('inline_fee_student_name').value.trim());
+    const rollNo = SecurityGuard.escapeHTML(document.getElementById('inline_fee_roll_no').value.trim());
+    const phone = SecurityGuard.escapeHTML(document.getElementById('inline_fee_phone').value.trim());
+    const txnId = SecurityGuard.escapeHTML(document.getElementById('inline_fee_txn_id').value.trim());
+
+    if (!feeId || amount <= 0) {
+      UniversalApp.showToast('⚠️ Please select an active Fee Category to pay.', 'error');
+      return;
+    }
+    if (!txnId) {
+      UniversalApp.showToast('⚠️ Please enter the UPI Transaction Reference / UTR ID.', 'error');
+      return;
+    }
+    if (!this.uploadedFeeScreenshotData) {
+      UniversalApp.showToast('⚠️ Please upload the payment confirmation screenshot.', 'error');
+      return;
+    }
+
+    const receiptNo = "REC-" + new Date().getFullYear() + "-" + Math.floor(10000 + Math.random() * 90000);
+    const sanitizedFeeTitle = SecurityGuard.escapeHTML(feeTitle);
+
+    const feeRecord = {
+      receiptNo: receiptNo,
+      timestamp: new Date().toISOString(),
+      studentName: studentName,
+      rollNo: rollNo,
+      phone: phone,
+      particulars: sanitizedFeeTitle,
+      amount: amount,
+      currency: vData.currency || config.verticals.student_management.currency || '₹',
+      txnId: txnId,
+      transactionRef: txnId,
+      screenshotData: this.uploadedFeeScreenshotData,
+      status: "Paid (Verified)"
+    };
+
+    const fees = this._safeParse('student_fees');
+    fees.unshift(feeRecord);
+    localStorage.setItem('student_fees', JSON.stringify(fees));
+
+    const payload = {
+      orderId: receiptNo,
+      timestamp: feeRecord.timestamp,
+      appType: "student_management",
+      customer: {
+        name: studentName,
+        email: UniversalApp.currentUser ? UniversalApp.currentUser.email : "",
+        phone: phone,
+        authProvider: UniversalApp.currentUser ? "google" : "guest"
+      },
+      cart: {
+        items: [{ id: feeId, title: sanitizedFeeTitle, price: amount, quantity: 1, subtotal: amount }],
+        finalTotal: amount,
+        currency: feeRecord.currency
+      },
+      customFields: {
+        studentRollNo: rollNo,
+        transactionRef: txnId,
+        paymentMode: "UPI Instant",
+        paymentScreenshot: "[Screenshot Attached]"
+      },
+      payment: { method: "upi", status: "paid" }
+    };
+
+    UniversalApp.showToast("Recording Fee Payment in Ledger...", "info");
+    try {
+      await UniversalApp.dispatchWebhook(payload);
+    } catch (err) {
+      console.warn('Webhook error:', err);
+    }
+    UniversalApp.triggerConfetti();
+    UniversalApp.playSound('victory');
+
+    const customLogo = vData.customLogo || config.customLogo || localStorage.getItem('custom_brand_logo');
+
+    UniversalApp.showModal(`
+      <div class="receipt-box" id="printableReceipt">
+        <div class="receipt-header">
+          ${customLogo ? `<img src="${customLogo}" style="max-height: 48px; max-width: 140px; object-fit: contain; margin-bottom: 6px;" alt="Logo" />` : '<span style="font-size: 2.4rem;">🏛️</span>'}
+          <h3 style="color: var(--primary-color); margin-top: 4px;">${SecurityGuard.escapeHTML(vData.businessName || 'School Fee Portal')}</h3>
+          <p style="font-size: 13px; color: var(--text-muted);">Official Student Fee Payment Receipt</p>
+          <div style="font-size: 13px; font-weight: 800; color: var(--text-main); margin-top: 6px;">Receipt #: ${receiptNo}</div>
+        </div>
+        <div class="receipt-row"><span>Student Name:</span><strong>${studentName}</strong></div>
+        <div class="receipt-row"><span>Roll / Student ID:</span><strong>${rollNo}</strong></div>
+        <div class="receipt-row"><span>Fee Particulars:</span><strong>${sanitizedFeeTitle}</strong></div>
+        <div class="receipt-row"><span>UPI Transaction / UTR:</span><strong style="color: var(--primary-color);">${txnId}</strong></div>
+        <div class="receipt-row"><span>Payment Date:</span><strong>${new Date().toLocaleDateString()}</strong></div>
+        <div class="receipt-row" style="border-top: 1.5px solid var(--border-color); padding-top: 8px; margin-top: 8px;">
+          <span style="font-weight: 800; font-size: 15px;">Amount Paid:</span>
+          <strong style="color: var(--primary-color); font-size: 17px;">${feeRecord.currency}${amount.toLocaleString()}</strong>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button class="btn btn-primary" style="flex: 1;" onclick="UniversalApp.printActiveReceipt()">🖨️ Download / Print Receipt</button>
+          <button class="btn btn-outline" style="flex: 1;" onclick="UniversalApp.closeModal()">Done</button>
+        </div>
+      </div>
+    `);
+
+    // Reset Form
+    document.getElementById('inlineFeePaymentForm').reset();
+    document.getElementById('inline_fee_amount_display').innerText = `${feeRecord.currency}0`;
+    document.getElementById('inline_fee_amount_val').value = '0';
+    document.getElementById('fee_screenshot_preview').style.display = 'none';
+    this.uploadedFeeScreenshotData = null;
+    this.clearSelectedStudent();
   }
 };
 
 window.StudentManagementModule = StudentManagementModule;
+

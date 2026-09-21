@@ -1527,80 +1527,34 @@ const UniversalApp = {
     }
   },
 
-  openOwnerDashboard(profileId) {
+  openOwnerDashboard(profileId, activeSubTab = 'fees') {
     const profiles = ClientProfileManager.getProfiles();
     const p = profiles.find(pr => pr.id === profileId) || profiles[0];
     if (!p) return;
 
     const vKey = p.vertical;
+    const currentSlug = p.slug || 'default';
     const allFees = JSON.parse(localStorage.getItem('student_fees') || '[]');
-    const allOrders = JSON.parse(localStorage.getItem('store_orders') || '[]');
-    const allHotels = JSON.parse(localStorage.getItem('hotel_reservations') || '[]');
-    const allMovex = JSON.parse(localStorage.getItem('movex_ledger') || '[]');
+    const allAdmissions = JSON.parse(localStorage.getItem('student_admissions') || '[]');
+    const allClubs = (StudentManagementModule && typeof StudentManagementModule.getCustomClubs === 'function') ? StudentManagementModule.getCustomClubs(currentSlug) : [];
+    const allFeeStructures = (StudentManagementModule && typeof StudentManagementModule.getCustomFeeCategories === 'function') ? StudentManagementModule.getCustomFeeCategories(currentSlug) : [];
 
-    let myRecords = [];
-    let myRevenue = 0;
-
-    if (vKey === 'student_management') {
-      myRecords = allFees.map(f => ({
-        id: f.receiptNo,
-        title: `${f.studentName} (${f.particulars})`,
-        amount: f.amount,
-        txn: f.txnId || 'N/A',
-        proof: f.screenshotData || null,
-        date: f.timestamp,
-        status: f.status
-      }));
-      myRevenue = allFees.reduce((sum, f) => sum + (Number(f.amount) || 0), 0);
-    } else if (vKey === 'hotel_booking') {
-      myRecords = allHotels.map(h => ({
-        id: h.orderId,
-        title: `${h.guestName} (${h.roomTitle})`,
-        amount: h.totalFare,
-        txn: h.txnId || 'N/A',
-        proof: h.screenshotData || null,
-        date: h.timestamp,
-        status: h.status
-      }));
-      myRevenue = allHotels.reduce((sum, h) => sum + (Number(h.totalFare) || 0), 0);
-    } else if (vKey === 'movex_booking') {
-      myRecords = allMovex.map(m => ({
-        id: m.orderId,
-        title: `${m.customerName} (${m.vehicleModel})`,
-        amount: m.finalFare,
-        txn: m.txnId || 'N/A',
-        proof: m.screenshotData || null,
-        date: m.timestamp,
-        status: m.tripStatus
-      }));
-      myRevenue = allMovex.reduce((sum, m) => sum + (Number(m.finalFare) || 0), 0);
-    } else {
-      myRecords = allOrders.map(o => ({
-        id: o.orderId,
-        title: `${o.customerName} - ${o.itemsSummary}`,
-        amount: o.total,
-        txn: o.txnId || 'N/A',
-        proof: o.screenshotData || null,
-        date: o.timestamp,
-        status: o.status
-      }));
-      myRevenue = allOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
-    }
-
+    const myRevenue = allFees.reduce((sum, f) => sum + (Number(f.amount) || 0), 0);
     const customQr = p.customQr || localStorage.getItem('custom_upi_qr') || '';
     const customLogo = p.customLogo || localStorage.getItem('custom_brand_logo') || '';
-    const liveUrl = `${window.location.origin}${window.location.pathname}?slug=${p.slug || 'my-business'}`;
+    const liveUrl = `${window.location.origin}${window.location.pathname}?slug=${currentSlug}`;
 
     this.showModal(`
-      <div style="text-align: left; max-width: 680px; margin: 0 auto;">
+      <div style="text-align: left; max-width: 840px; margin: 0 auto;">
+        <!-- Header -->
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 16px;">
           <div>
             <span style="font-size: 11px; font-weight: 800; color: var(--primary-color); text-transform: uppercase;">
-              🏢 BUSINESS OWNER CONTROL CENTER
+              🏢 SCHOOL BUSINESS OWNER CONTROL CENTER
             </span>
-            <h3 style="margin: 2px 0; font-size: 1.3rem; font-weight: 900; color: var(--text-main);">${SecurityGuard.escapeHTML(p.businessName)}</h3>
+            <h3 style="margin: 2px 0; font-size: 1.35rem; font-weight: 900; color: var(--text-main);">${SecurityGuard.escapeHTML(p.businessName)}</h3>
             <div style="font-size: 11px; color: var(--text-muted);">
-              Portal URL: <a href="${liveUrl}" target="_blank" style="color: var(--primary-color); text-decoration: underline;">${liveUrl}</a>
+              Live Portal: <a href="${liveUrl}" target="_blank" style="color: var(--primary-color); text-decoration: underline;">${liveUrl}</a>
             </div>
           </div>
           <button class="pill-btn" style="background: rgba(239, 68, 68, 0.1); color: var(--danger-color); border: 1px solid var(--danger-color); font-size: 11px;" onclick="UniversalApp.ownerSignOut()">
@@ -1609,218 +1563,523 @@ const UniversalApp = {
         </div>
 
         <!-- Metrics Row -->
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px;">
-          <div style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
-            <div style="font-size: 11px; color: var(--text-muted); font-weight: 700;">TOTAL VOLUME</div>
-            <div style="font-size: 1.4rem; font-weight: 900; color: var(--primary-color);">${p.currency || '₹'}${myRevenue.toLocaleString()}</div>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px;">
+          <div style="background: var(--bg-secondary); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+            <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">TOTAL REVENUE</div>
+            <div style="font-size: 1.25rem; font-weight: 900; color: var(--primary-color);">${p.currency || '₹'}${myRevenue.toLocaleString()}</div>
           </div>
-          <div style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
-            <div style="font-size: 11px; color: var(--text-muted); font-weight: 700;">TRANSACTIONS</div>
-            <div style="font-size: 1.4rem; font-weight: 900; color: var(--success-color);">${myRecords.length}</div>
+          <div style="background: var(--bg-secondary); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+            <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">FEE PAYMENTS</div>
+            <div style="font-size: 1.25rem; font-weight: 900; color: var(--success-color);">${allFees.length}</div>
           </div>
-          <div style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
-            <div style="font-size: 11px; color: var(--text-muted); font-weight: 700;">STATUS</div>
-            <div style="font-size: 1.1rem; font-weight: 900; color: var(--success-color); margin-top: 4px;">🟢 Live Active</div>
+          <div style="background: var(--bg-secondary); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+            <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">ADMISSIONS</div>
+            <div style="font-size: 1.25rem; font-weight: 900; color: #6366f1;">${allAdmissions.length}</div>
+          </div>
+          <div style="background: var(--bg-secondary); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+            <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">FEE STRUCTURES</div>
+            <div style="font-size: 1.25rem; font-weight: 900; color: #f59e0b;">${allFeeStructures.length}</div>
           </div>
         </div>
 
-        <!-- MERCHANT QR & BRANDING MANAGER -->
-        <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
-          <h4 style="font-size: 13px; font-weight: 800; color: var(--text-main); margin-bottom: 10px;">💳 Merchant UPI Standee QR & Brand Logo</h4>
-          
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
-            <!-- QR Standee Box -->
-            <div style="border: 1px dashed var(--border-color); border-radius: 6px; padding: 10px; text-align: center; background: var(--surface-card);">
-              <label style="font-size: 11px; font-weight: 800; display: block; margin-bottom: 6px;">Merchant UPI QR Standee</label>
-              ${customQr ? 
-                `<img src="${customQr}" style="max-height: 80px; max-width: 80px; object-fit: contain; background: #fff; padding: 4px; border-radius: 4px; border: 1px solid var(--border-color);" alt="QR" />` :
-                `<div style="font-size: 11px; color: var(--text-muted); padding: 16px 0;">⚡ Using Dynamic QR</div>`
-              }
-              <div style="margin-top: 8px;">
-                <input type="file" id="owner_qr_file" accept="image/*" style="display: none;" onchange="UniversalApp.updateOwnerQr(this, '${p.id}')" />
-                <button class="pill-btn" style="font-size: 11px; width: 100%;" onclick="document.getElementById('owner_qr_file').click()">
-                  📤 ${customQr ? 'Change Standee QR' : 'Upload Standee QR'}
-                </button>
-              </div>
-            </div>
-
-            <!-- Brand Logo Box -->
-            <div style="border: 1px dashed var(--border-color); border-radius: 6px; padding: 10px; text-align: center; background: var(--surface-card);">
-              <label style="font-size: 11px; font-weight: 800; display: block; margin-bottom: 6px;">Official Brand Logo</label>
-              ${customLogo ? 
-                `<img src="${customLogo}" style="max-height: 50px; max-width: 120px; object-fit: contain; margin: 15px auto;" alt="Logo" />` :
-                `<div style="font-size: 28px; padding: 10px 0;">${p.logoIcon || '🏛️'}</div>`
-              }
-              <div style="margin-top: 8px;">
-                <input type="file" id="owner_logo_file" accept="image/*" style="display: none;" onchange="UniversalApp.updateOwnerLogo(this, '${p.id}')" />
-                <button class="pill-btn" style="font-size: 11px; width: 100%;" onclick="document.getElementById('owner_logo_file').click()">
-                  📤 ${customLogo ? 'Change Brand Logo' : 'Upload Brand Logo'}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Quick UPI & Phone Update -->
-          <form onsubmit="UniversalApp.saveOwnerSettings(event, '${p.id}')" style="margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: flex-end;">
-            <div>
-              <label style="font-size: 11px; font-weight: 700;">UPI VPA Address</label>
-              <input type="text" id="owner_upi_id" class="form-control" style="font-size: 12px;" value="${SecurityGuard.escapeHTML(p.upiId || '')}" placeholder="merchant@upi" required />
-            </div>
-            <div>
-              <label style="font-size: 11px; font-weight: 700;">WhatsApp Support Number</label>
-              <input type="tel" id="owner_whatsapp" class="form-control" style="font-size: 12px;" value="${SecurityGuard.escapeHTML(p.whatsappNumber || '')}" placeholder="+91 98765 43210" />
-            </div>
-            <button type="submit" class="btn btn-primary" style="padding: 9px 16px; font-size: 12px; font-weight: 800;">
-              💾 Save
-            </button>
-          </form>
+        <!-- Navigation Tabs inside Dashboard -->
+        <div style="display: flex; gap: 8px; border-bottom: 1px solid var(--border-color); margin-bottom: 14px; flex-wrap: wrap;">
+          <button class="tab-btn ${activeSubTab === 'fees' ? 'active' : ''}" style="padding: 6px 12px; font-size: 12px;" onclick="UniversalApp.openOwnerDashboard('${p.id}', 'fees')">
+            💳 Fee Structure Manager (${allFeeStructures.length})
+          </button>
+          <button class="tab-btn ${activeSubTab === 'clubs' ? 'active' : ''}" style="padding: 6px 12px; font-size: 12px;" onclick="UniversalApp.openOwnerDashboard('${p.id}', 'clubs')">
+            🏆 Clubs & Activities (${allClubs.length})
+          </button>
+          <button class="tab-btn ${activeSubTab === 'students' ? 'active' : ''}" style="padding: 6px 12px; font-size: 12px;" onclick="UniversalApp.openOwnerDashboard('${p.id}', 'students')">
+            👥 Student Roster (${allAdmissions.length})
+          </button>
+          <button class="tab-btn ${activeSubTab === 'ledger' ? 'active' : ''}" style="padding: 6px 12px; font-size: 12px;" onclick="UniversalApp.openOwnerDashboard('${p.id}', 'ledger')">
+            📜 Payment Ledger (${allFees.length})
+          </button>
+          <button class="tab-btn ${activeSubTab === 'branding' ? 'active' : ''}" style="padding: 6px 12px; font-size: 12px;" onclick="UniversalApp.openOwnerDashboard('${p.id}', 'branding')">
+            ⚙️ Standee QR & Branding
+          </button>
         </div>
 
-        <!-- RECENT SUBMISSIONS / ORDERS TABLE -->
-        <div style="margin-top: 14px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <strong style="font-size: 13px;">📋 Recent Submissions & Payments (${myRecords.length})</strong>
-            <button class="pill-btn" style="font-size: 11px;" onclick="UniversalApp.exportOwnerData('${p.id}')">
-              📥 Export CSV
-            </button>
-          </div>
+        <!-- TAB 1: FEE STRUCTURE MANAGER (CRUD) -->
+        ${activeSubTab === 'fees' ? `
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <strong style="font-size: 13px;">Institutional Fee Structures</strong>
+              <button class="btn btn-primary" style="padding: 6px 12px; font-size: 11px; font-weight: 800;" onclick="UniversalApp.openAddFeeModal('${p.id}')">
+                ➕ Add New Fee Structure
+              </button>
+            </div>
 
-          <div style="max-height: 220px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px;">
-            ${myRecords.length === 0 ? 
-              `<div style="text-align: center; color: var(--text-muted); padding: 24px; font-size: 12px;">No transactions recorded for this business yet.</div>` :
-              `<table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+            <div style="max-height: 280px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px;">
+              <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
                 <thead>
                   <tr style="background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); text-align: left;">
-                    <th style="padding: 8px 10px;">ID / Record</th>
+                    <th style="padding: 8px 10px;">Fee Title / Badge</th>
+                    <th style="padding: 8px 10px;">Applicable Class</th>
                     <th style="padding: 8px 10px;">Amount</th>
-                    <th style="padding: 8px 10px;">UTR / Proof</th>
-                    <th style="padding: 8px 10px;">Status</th>
+                    <th style="padding: 8px 10px; text-align: right;">Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  ${myRecords.slice(0, 20).map(r => `
+                  ${allFeeStructures.map(f => `
                     <tr style="border-bottom: 1px solid var(--border-color);">
                       <td style="padding: 8px 10px;">
-                        <div style="font-weight: 700;">${SecurityGuard.escapeHTML(r.id)}</div>
-                        <div style="font-size: 11px; color: var(--text-muted);">${SecurityGuard.escapeHTML(r.title)}</div>
+                        <span style="font-size: 10px; background: rgba(59, 130, 246, 0.12); color: var(--primary-color); padding: 1px 6px; border-radius: 4px; font-weight: 800; margin-right: 4px;">${SecurityGuard.escapeHTML(f.badge || 'Fee')}</span>
+                        <strong>${SecurityGuard.escapeHTML(f.title)}</strong>
+                        <div style="font-size: 11px; color: var(--text-muted);">${SecurityGuard.escapeHTML(f.description || '')}</div>
                       </td>
-                      <td style="padding: 8px 10px; font-weight: 800; color: var(--primary-color);">
-                        ${p.currency || '₹'}${Number(r.amount).toLocaleString()}
-                      </td>
-                      <td style="padding: 8px 10px;">
-                        <code style="font-size: 10px;">${SecurityGuard.escapeHTML(r.txn)}</code>
-                        ${r.proof ? `<div style="font-size: 10px; color: var(--success-color); font-weight: 700;">✓ Screenshot uploaded</div>` : ''}
-                      </td>
-                      <td style="padding: 8px 10px;">
-                        <span style="font-size: 10px; background: rgba(16, 185, 129, 0.15); color: var(--success-color); padding: 2px 6px; border-radius: 999px; font-weight: 800;">● ${SecurityGuard.escapeHTML(r.status)}</span>
+                      <td style="padding: 8px 10px; color: var(--text-muted);">${SecurityGuard.escapeHTML(f.grade || 'All Classes')}</td>
+                      <td style="padding: 8px 10px; font-weight: 800; color: var(--primary-color);">${p.currency || '₹'}${Number(f.amount).toLocaleString()}</td>
+                      <td style="padding: 8px 10px; text-align: right;">
+                        <button class="pill-btn" style="background: rgba(239, 68, 68, 0.1); color: var(--danger-color); font-size: 10px;" onclick="UniversalApp.deleteOwnerFeeCategory('${f.id}', '${p.id}')">
+                          🗑️ Delete
+                        </button>
                       </td>
                     </tr>
                   `).join('')}
                 </tbody>
-              </table>`
-            }
+              </table>
+            </div>
           </div>
-        </div>
+        ` : ''}
+
+        <!-- TAB 2: CLUBS & ACTIVITIES MANAGER (CRUD) -->
+        ${activeSubTab === 'clubs' ? `
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <strong style="font-size: 13px;">Co-Curricular Clubs & Activities</strong>
+              <button class="btn btn-primary" style="padding: 6px 12px; font-size: 11px; font-weight: 800;" onclick="UniversalApp.openAddClubModal('${p.id}')">
+                ➕ Add New Club / Activity
+              </button>
+            </div>
+
+            <div style="max-height: 280px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px;">
+              <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                <thead>
+                  <tr style="background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); text-align: left;">
+                    <th style="padding: 8px 10px;">Club / Category</th>
+                    <th style="padding: 8px 10px;">Coach / Mentor</th>
+                    <th style="padding: 8px 10px;">Schedule</th>
+                    <th style="padding: 8px 10px; text-align: right;">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${allClubs.map(c => `
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                      <td style="padding: 8px 10px;">
+                        <span style="font-size: 10px; background: rgba(99, 102, 241, 0.15); color: #6366f1; padding: 1px 6px; border-radius: 4px; font-weight: 800; margin-right: 4px;">${SecurityGuard.escapeHTML(c.category || 'Club')}</span>
+                        <strong>${SecurityGuard.escapeHTML(c.title)}</strong>
+                      </td>
+                      <td style="padding: 8px 10px; color: var(--text-muted);">${SecurityGuard.escapeHTML(c.coach || 'Head Mentor')}</td>
+                      <td style="padding: 8px 10px; color: var(--text-muted);">${SecurityGuard.escapeHTML(c.schedule || 'Weekly')}</td>
+                      <td style="padding: 8px 10px; text-align: right;">
+                        <button class="pill-btn" style="background: rgba(239, 68, 68, 0.1); color: var(--danger-color); font-size: 10px;" onclick="UniversalApp.deleteOwnerClub('${SecurityGuard.sanitizeAttr(c.title)}', '${p.id}')">
+                          🗑️ Delete
+                        </button>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- TAB 3: STUDENT ROSTER & ID CARD CENTER -->
+        ${activeSubTab === 'students' ? `
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <strong style="font-size: 13px;">Admitted Student Roster (${allAdmissions.length})</strong>
+            </div>
+
+            <div style="max-height: 280px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px;">
+              ${allAdmissions.length === 0 ? 
+                `<div style="text-align: center; color: var(--text-muted); padding: 24px; font-size: 12px;">No student admissions registered yet.</div>` :
+                `<table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                  <thead>
+                    <tr style="background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); text-align: left;">
+                      <th style="padding: 8px 10px;">Roll / Ref ID</th>
+                      <th style="padding: 8px 10px;">Student Name</th>
+                      <th style="padding: 8px 10px;">Class / Grade</th>
+                      <th style="padding: 8px 10px;">Parent Contact</th>
+                      <th style="padding: 8px 10px; text-align: right;">ID Card</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${allAdmissions.map(s => `
+                      <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 8px 10px;">
+                          <strong style="color: var(--primary-color);">${SecurityGuard.escapeHTML(s.rollNo)}</strong>
+                          <div style="font-size: 10px; color: var(--text-muted);">${SecurityGuard.escapeHTML(s.orderId)}</div>
+                        </td>
+                        <td style="padding: 8px 10px; font-weight: 700;">${SecurityGuard.escapeHTML(s.studentName)}</td>
+                        <td style="padding: 8px 10px; color: var(--text-muted);">${SecurityGuard.escapeHTML(s.gradeApplied)}</td>
+                        <td style="padding: 8px 10px;">
+                          <div>${SecurityGuard.escapeHTML(s.parentName)}</div>
+                          <div style="font-size: 11px; color: var(--text-muted);">${SecurityGuard.escapeHTML(s.phone)}</div>
+                        </td>
+                        <td style="padding: 8px 10px; text-align: right;">
+                          <button class="pill-btn" style="background: rgba(59, 130, 246, 0.12); color: var(--primary-color); font-size: 10px; font-weight: 800;" onclick="UniversalApp.printStudentIdDirect('${s.orderId}')">
+                            🪪 Print ID Card
+                          </button>
+                        </td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>`
+              }
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- TAB 4: PAYMENT LEDGER & PROOF -->
+        ${activeSubTab === 'ledger' ? `
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <strong style="font-size: 13px;">Institutional Fee Ledger & Verified Receipts</strong>
+              <button class="pill-btn" style="font-size: 11px;" onclick="UniversalApp.exportOwnerData('${p.id}')">
+                📥 Export CSV
+              </button>
+            </div>
+
+            <div style="max-height: 280px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px;">
+              ${allFees.length === 0 ? 
+                `<div style="text-align: center; color: var(--text-muted); padding: 24px; font-size: 12px;">No fee payment transactions recorded yet.</div>` :
+                `<table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                  <thead>
+                    <tr style="background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); text-align: left;">
+                      <th style="padding: 8px 10px;">Receipt # / Student</th>
+                      <th style="padding: 8px 10px;">Fee Particulars</th>
+                      <th style="padding: 8px 10px;">Amount</th>
+                      <th style="padding: 8px 10px;">UTR Reference</th>
+                      <th style="padding: 8px 10px; text-align: center;">Proof</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${allFees.map(f => `
+                      <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 8px 10px;">
+                          <strong style="color: var(--primary-color);">${SecurityGuard.escapeHTML(f.receiptNo)}</strong>
+                          <div style="font-size: 11px; font-weight: 700;">${SecurityGuard.escapeHTML(f.studentName)} (${SecurityGuard.escapeHTML(f.rollNo || '')})</div>
+                        </td>
+                        <td style="padding: 8px 10px; color: var(--text-muted);">${SecurityGuard.escapeHTML(f.particulars)}</td>
+                        <td style="padding: 8px 10px; font-weight: 800; color: var(--primary-color);">
+                          ${f.currency || p.currency || '₹'}${Number(f.amount).toLocaleString()}
+                        </td>
+                        <td style="padding: 8px 10px;">
+                          <code style="font-size: 10px;">${SecurityGuard.escapeHTML(f.txnId || f.transactionRef || 'N/A')}</code>
+                        </td>
+                        <td style="padding: 8px 10px; text-align: center;">
+                          ${f.screenshotData ? 
+                            `<img src="${f.screenshotData}" style="max-height: 32px; max-width: 32px; object-fit: cover; border-radius: 4px; cursor: pointer; border: 1px solid var(--border-color);" onclick="UniversalApp.previewScreenshot('${f.screenshotData}')" title="Click to enlarge proof" />` :
+                            `<span style="color: var(--text-muted); font-size: 10px;">None</span>`
+                          }
+                        </td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>`
+              }
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- TAB 5: MERCHANT STANDEE QR & BRANDING SETTINGS -->
+        ${activeSubTab === 'branding' ? `
+          <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px;">
+            <h4 style="font-size: 13px; font-weight: 800; color: var(--text-main); margin-bottom: 10px;">💳 Merchant UPI Standee QR & Brand Logo</h4>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+              <!-- QR Standee Box -->
+              <div style="border: 1px dashed var(--border-color); border-radius: 6px; padding: 10px; text-align: center; background: var(--surface-card);">
+                <label style="font-size: 11px; font-weight: 800; display: block; margin-bottom: 6px;">Merchant UPI QR Standee</label>
+                ${customQr ? 
+                  `<img src="${customQr}" style="max-height: 80px; max-width: 80px; object-fit: contain; background: #fff; padding: 4px; border-radius: 4px; border: 1px solid var(--border-color);" alt="QR" />` :
+                  `<div style="font-size: 11px; color: var(--text-muted); padding: 16px 0;">⚡ Using Dynamic QR</div>`
+                }
+                <div style="margin-top: 8px;">
+                  <input type="file" id="owner_qr_file" accept="image/*" style="display: none;" onchange="UniversalApp.updateOwnerQr(this, '${p.id}')" />
+                  <button class="pill-btn" style="font-size: 11px; width: 100%;" onclick="document.getElementById('owner_qr_file').click()">
+                    📤 ${customQr ? 'Change Standee QR' : 'Upload Standee QR'}
+                  </button>
+                </div>
+              </div>
+
+              <!-- Brand Logo Box -->
+              <div style="border: 1px dashed var(--border-color); border-radius: 6px; padding: 10px; text-align: center; background: var(--surface-card);">
+                <label style="font-size: 11px; font-weight: 800; display: block; margin-bottom: 6px;">Official Brand Logo</label>
+                ${customLogo ? 
+                  `<img src="${customLogo}" style="max-height: 50px; max-width: 120px; object-fit: contain; margin: 15px auto;" alt="Logo" />` :
+                  `<div style="font-size: 28px; padding: 10px 0;">${p.logoIcon || '🏛️'}</div>`
+                }
+                <div style="margin-top: 8px;">
+                  <input type="file" id="owner_logo_file" accept="image/*" style="display: none;" onchange="UniversalApp.updateOwnerLogo(this, '${p.id}')" />
+                  <button class="pill-btn" style="font-size: 11px; width: 100%;" onclick="document.getElementById('owner_logo_file').click()">
+                    📤 ${customLogo ? 'Change Brand Logo' : 'Upload Brand Logo'}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick UPI & Phone Update -->
+            <form onsubmit="UniversalApp.saveOwnerSettings(event, '${p.id}')" style="margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: flex-end;">
+              <div>
+                <label style="font-size: 11px; font-weight: 700;">UPI VPA Address</label>
+                <input type="text" id="owner_upi_id" class="form-control" style="font-size: 12px;" value="${SecurityGuard.escapeHTML(p.upiId || '')}" placeholder="merchant@upi" required />
+              </div>
+              <div>
+                <label style="font-size: 11px; font-weight: 700;">WhatsApp Support Number</label>
+                <input type="tel" id="owner_whatsapp" class="form-control" style="font-size: 12px;" value="${SecurityGuard.escapeHTML(p.whatsappNumber || '')}" placeholder="+91 98765 43210" />
+              </div>
+              <button type="submit" class="btn btn-primary" style="padding: 9px 16px; font-size: 12px; font-weight: 800;">
+                💾 Save
+              </button>
+            </form>
+          </div>
+        ` : ''}
+
       </div>
     `);
   },
 
-  async updateOwnerQr(input, profileId) {
-    if (input.files && input.files[0]) {
-      try {
-        const compressed = await ImageCompressor.compress(input.files[0], 500, 0.88);
-        const profiles = ClientProfileManager.getProfiles();
-        const p = profiles.find(pr => pr.id === profileId);
-        if (p) {
-          p.customQr = compressed;
-          ClientProfileManager.saveProfile(p);
-          localStorage.setItem('custom_upi_qr', compressed);
-          window.MASTER_CONFIG.customQr = compressed;
-          if (window.MASTER_CONFIG.verticals[p.vertical]) {
-            window.MASTER_CONFIG.verticals[p.vertical].customQr = compressed;
-          }
-          this.playSound('victory');
-          this.showToast('✅ Merchant Standee QR Updated & Live!', 'success');
-          this.openOwnerDashboard(profileId);
-        }
-      } catch (err) {
-        console.error('Owner QR update error:', err);
-        this.showToast('Failed to update QR standee.', 'error');
-      }
-    }
-  },
-
-  async updateOwnerLogo(input, profileId) {
-    if (input.files && input.files[0]) {
-      try {
-        const compressed = await ImageCompressor.compress(input.files[0], 400, 0.85);
-        const profiles = ClientProfileManager.getProfiles();
-        const p = profiles.find(pr => pr.id === profileId);
-        if (p) {
-          p.customLogo = compressed;
-          ClientProfileManager.saveProfile(p);
-          localStorage.setItem('custom_brand_logo', compressed);
-          window.MASTER_CONFIG.customLogo = compressed;
-          if (window.MASTER_CONFIG.verticals[p.vertical]) {
-            window.MASTER_CONFIG.verticals[p.vertical].customLogo = compressed;
-          }
-          this.applyThemeAndVertical();
-          this.playSound('victory');
-          this.showToast('✅ Brand Logo Updated & Live!', 'success');
-          this.openOwnerDashboard(profileId);
-        }
-      } catch (err) {
-        console.error('Owner logo update error:', err);
-        this.showToast('Failed to update brand logo.', 'error');
-      }
-    }
-  },
-
-  saveOwnerSettings(e, profileId) {
-    if (e) e.preventDefault();
-    const upi = document.getElementById('owner_upi_id').value.trim();
-    const wa = document.getElementById('owner_whatsapp').value.trim();
-
+  openAddFeeModal(profileId) {
     const profiles = ClientProfileManager.getProfiles();
-    const p = profiles.find(pr => pr.id === profileId);
-    if (p) {
-      p.upiId = upi;
-      p.whatsappNumber = wa;
-      ClientProfileManager.saveProfile(p);
-      window.MASTER_CONFIG.upiId = upi;
-      window.MASTER_CONFIG.whatsappNumber = wa;
-      this.playSound('click');
-      this.showToast('✅ Payment settings saved successfully!', 'success');
-    }
+    const p = profiles.find(pr => pr.id === profileId) || profiles[0];
+    const currency = p.currency || '₹';
+
+    this.showModal(`
+      <div style="text-align: left; max-width: 480px; margin: 0 auto;">
+        <h3 style="color: var(--primary-color); font-size: 1.25rem; font-weight: 900; margin-bottom: 6px;">➕ Add New Fee Structure</h3>
+        <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 16px;">Create a customized fee category (e.g. Monthly Tuition, Bus Transport, Term Lab Fee).</p>
+
+        <form onsubmit="UniversalApp.handleAddFeeCategory(event, '${p.id}')">
+          <div class="form-group">
+            <label>Fee Title *</label>
+            <input type="text" id="new_fee_title" class="form-control" required placeholder="e.g. Monthly Tuition Fee - October" />
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Applicable Class / Grade *</label>
+              <input type="text" id="new_fee_grade" class="form-control" required placeholder="e.g. Grade 7 or All Classes" />
+            </div>
+            <div class="form-group">
+              <label>Amount (${currency}) *</label>
+              <input type="number" id="new_fee_amount" class="form-control" required min="1" placeholder="e.g. 4500" />
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Category Badge</label>
+              <select id="new_fee_badge" class="form-control">
+                <option value="Tuition">Tuition</option>
+                <option value="Monthly">Monthly</option>
+                <option value="Transport">Transport</option>
+                <option value="Exam Fee">Exam Fee</option>
+                <option value="Activities">Activities</option>
+                <option value="Admission">Admission</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <input type="text" id="new_fee_desc" class="form-control" placeholder="e.g. Covers monthly coaching & smart lab" />
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px; margin-top: 18px;">
+            <button type="submit" class="btn btn-primary" style="flex: 1; font-weight: 800;">Save & Publish Fee</button>
+            <button type="button" class="btn btn-outline" onclick="UniversalApp.openOwnerDashboard('${p.id}', 'fees')">Cancel</button>
+          </div>
+        </form>
+      </div>
+    `);
   },
 
-  exportOwnerData(profileId) {
+  handleAddFeeCategory(e, profileId) {
+    if (e && e.preventDefault) e.preventDefault();
     const profiles = ClientProfileManager.getProfiles();
-    const p = profiles.find(pr => pr.id === profileId);
-    if (!p) return;
+    const p = profiles.find(pr => pr.id === profileId) || profiles[0];
+    const currentSlug = p.slug || 'default';
 
-    const allFees = JSON.parse(localStorage.getItem('student_fees') || '[]');
-    let csv = "Receipt_No,Student_Name,Particulars,Amount,Currency,Roll_No,Phone,UTR_Txn_ID,Timestamp,Status\n";
-    allFees.forEach(f => {
-      csv += `"${f.receiptNo}","${f.studentName}","${f.particulars}","${f.amount}","${f.currency}","${f.rollNo}","${f.phone}","${f.txnId || ''}","${f.timestamp}","${f.status}"\n`;
-    });
+    const title = document.getElementById('new_fee_title').value.trim();
+    const grade = document.getElementById('new_fee_grade').value.trim();
+    const amount = Number(document.getElementById('new_fee_amount').value) || 0;
+    const badge = document.getElementById('new_fee_badge').value;
+    const desc = document.getElementById('new_fee_desc').value.trim();
 
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${p.slug || 'business'}-transactions-${new Date().toISOString().slice(0, 10)}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-    this.showToast('📥 Exported transactions CSV!', 'success');
+    if (!title || amount <= 0) {
+      this.showToast('⚠️ Please enter a valid fee title and amount.', 'error');
+      return;
+    }
+
+    const currentFees = (StudentManagementModule && typeof StudentManagementModule.getCustomFeeCategories === 'function') ? StudentManagementModule.getCustomFeeCategories(currentSlug) : [];
+    const newFee = {
+      id: "fee_" + Date.now().toString(36),
+      title: title,
+      grade: grade || "All Classes",
+      amount: amount,
+      badge: badge || "Fee",
+      description: desc || "Academic Fee"
+    };
+
+    currentFees.unshift(newFee);
+    localStorage.setItem(`school_custom_fees_${currentSlug}`, JSON.stringify(currentFees));
+
+    this.playSound('victory');
+    this.showToast(`✅ Created new fee: ${title}!`, 'success');
+    
+    // Refresh student management view if open
+    const container = document.getElementById('vertical-container');
+    if (container && window.MASTER_CONFIG.activeAppType === 'student_management') {
+      StudentManagementModule.render(container, window.MASTER_CONFIG);
+      StudentManagementModule.switchSubTab('fees');
+    }
+    this.openOwnerDashboard(p.id, 'fees');
   },
 
-  ownerSignOut() {
-    sessionStorage.removeItem('owner_authenticated_profile');
+  deleteOwnerFeeCategory(feeId, profileId) {
+    const profiles = ClientProfileManager.getProfiles();
+    const p = profiles.find(pr => pr.id === profileId) || profiles[0];
+    const currentSlug = p.slug || 'default';
+
+    let currentFees = (StudentManagementModule && typeof StudentManagementModule.getCustomFeeCategories === 'function') ? StudentManagementModule.getCustomFeeCategories(currentSlug) : [];
+    currentFees = currentFees.filter(f => f.id !== feeId);
+    localStorage.setItem(`school_custom_fees_${currentSlug}`, JSON.stringify(currentFees));
+
+    this.playSound('click');
+    this.showToast('Fee structure removed.', 'info');
+
+    // Refresh student management view
+    const container = document.getElementById('vertical-container');
+    if (container && window.MASTER_CONFIG.activeAppType === 'student_management') {
+      StudentManagementModule.render(container, window.MASTER_CONFIG);
+      StudentManagementModule.switchSubTab('fees');
+    }
+    this.openOwnerDashboard(p.id, 'fees');
+  },
+
+  openAddClubModal(profileId) {
+    const profiles = ClientProfileManager.getProfiles();
+    const p = profiles.find(pr => pr.id === profileId) || profiles[0];
+
+    this.showModal(`
+      <div style="text-align: left; max-width: 480px; margin: 0 auto;">
+        <h3 style="color: var(--primary-color); font-size: 1.25rem; font-weight: 900; margin-bottom: 6px;">➕ Add Co-Curricular Club</h3>
+        <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 16px;">Create a new club or activity open for student registration.</p>
+
+        <form onsubmit="UniversalApp.handleAddClub(event, '${p.id}')">
+          <div class="form-group">
+            <label>Club Title *</label>
+            <input type="text" id="new_club_title" class="form-control" required placeholder="e.g. Cricket & Sports Academy" />
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Category *</label>
+              <select id="new_club_category" class="form-control">
+                <option value="Sports">Sports</option>
+                <option value="STEM">STEM / Robotics</option>
+                <option value="Arts">Arts / Music</option>
+                <option value="Literary">Literary / Debate</option>
+                <option value="Leadership">Leadership</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Head Coach / Mentor *</label>
+              <input type="text" id="new_club_coach" class="form-control" required placeholder="e.g. Coach Sharma" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Weekly Schedule</label>
+            <input type="text" id="new_club_schedule" class="form-control" placeholder="e.g. Mon & Wed 4:00 PM" />
+          </div>
+          <div style="display: flex; gap: 10px; margin-top: 18px;">
+            <button type="submit" class="btn btn-primary" style="flex: 1; font-weight: 800;">Save & Open Registration</button>
+            <button type="button" class="btn btn-outline" onclick="UniversalApp.openOwnerDashboard('${p.id}', 'clubs')">Cancel</button>
+          </div>
+        </form>
+      </div>
+    `);
+  },
+
+  handleAddClub(e, profileId) {
+    if (e && e.preventDefault) e.preventDefault();
+    const profiles = ClientProfileManager.getProfiles();
+    const p = profiles.find(pr => pr.id === profileId) || profiles[0];
+    const currentSlug = p.slug || 'default';
+
+    const title = document.getElementById('new_club_title').value.trim();
+    const category = document.getElementById('new_club_category').value;
+    const coach = document.getElementById('new_club_coach').value.trim();
+    const schedule = document.getElementById('new_club_schedule').value.trim();
+
+    if (!title || !coach) {
+      this.showToast('⚠️ Please enter club title and coach name.', 'error');
+      return;
+    }
+
+    const currentClubs = (StudentManagementModule && typeof StudentManagementModule.getCustomClubs === 'function') ? StudentManagementModule.getCustomClubs(currentSlug) : [];
+    const newClub = {
+      id: "act_" + Date.now().toString(36),
+      title: title,
+      category: category || "Sports",
+      coach: coach,
+      schedule: schedule || "Weekly Sessions"
+    };
+
+    currentClubs.unshift(newClub);
+    localStorage.setItem(`school_custom_clubs_${currentSlug}`, JSON.stringify(currentClubs));
+
+    this.playSound('victory');
+    this.showToast(`✅ Created new club: ${title}!`, 'success');
+
+    // Refresh student management view
+    const container = document.getElementById('vertical-container');
+    if (container && window.MASTER_CONFIG.activeAppType === 'student_management') {
+      StudentManagementModule.render(container, window.MASTER_CONFIG);
+      StudentManagementModule.switchSubTab('activities');
+    }
+    this.openOwnerDashboard(p.id, 'clubs');
+  },
+
+  deleteOwnerClub(clubTitle, profileId) {
+    const profiles = ClientProfileManager.getProfiles();
+    const p = profiles.find(pr => pr.id === profileId) || profiles[0];
+    const currentSlug = p.slug || 'default';
+
+    let currentClubs = (StudentManagementModule && typeof StudentManagementModule.getCustomClubs === 'function') ? StudentManagementModule.getCustomClubs(currentSlug) : [];
+    currentClubs = currentClubs.filter(c => c.title !== clubTitle);
+    localStorage.setItem(`school_custom_clubs_${currentSlug}`, JSON.stringify(currentClubs));
+
+    this.playSound('click');
+    this.showToast('Club removed.', 'info');
+
+    // Refresh student management view
+    const container = document.getElementById('vertical-container');
+    if (container && window.MASTER_CONFIG.activeAppType === 'student_management') {
+      StudentManagementModule.render(container, window.MASTER_CONFIG);
+      StudentManagementModule.switchSubTab('activities');
+    }
+    this.openOwnerDashboard(p.id, 'clubs');
+  },
+
+  printStudentIdDirect(orderId) {
     this.closeModal();
-    this.showToast('Owner signed out.', 'info');
+    StudentManagementModule.switchSubTab('idcard');
+    StudentManagementModule.onSelectStudentForId(orderId);
+    setTimeout(() => {
+      this.printIdCard();
+    }, 400);
+  },
+
+  previewScreenshot(dataUrl) {
+    this.showModal(`
+      <div style="text-align: center;">
+        <h4 style="color: var(--primary-color); margin-bottom: 12px;">Payment Proof Confirmation Screenshot</h4>
+        <div style="max-height: 480px; overflow: auto; background: #000; border-radius: 8px; padding: 6px;">
+          <img src="${dataUrl}" style="max-width: 100%; height: auto; border-radius: 4px;" alt="Payment Proof" />
+        </div>
+        <button class="btn btn-outline" style="margin-top: 14px;" onclick="UniversalApp.closeModal()">Close Preview</button>
+      </div>
+    `);
   },
 
   autoFillUserForms() {
