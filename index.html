@@ -267,6 +267,62 @@
       background: #10b981;
       border-color: #10b981;
       color: #fff;
+    .navbar .nav-actions .pill-btn {
+      color: var(--text-main) !important;
+      border: 1.5px solid var(--border-color);
+      background: var(--surface-card);
+      font-weight: 700;
+      box-shadow: var(--shadow-sm);
+    }
+    .navbar .nav-actions .pill-btn:hover {
+      border-color: var(--primary-color);
+      color: var(--primary-color) !important;
+    }
+    .app-card-btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .app-card-btn-primary {
+      width: 100%;
+      padding: 11px 16px;
+      font-size: 13px;
+      font-weight: 800;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      color: #fff;
+      transition: all 0.2s ease;
+    }
+    .app-card-btn-primary:hover {
+      opacity: 0.92;
+      transform: translateY(-1px);
+    }
+    .app-card-btn-secondary {
+      width: 100%;
+      padding: 9px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 8px;
+      border: 1.5px solid var(--border-color);
+      background: var(--bg-secondary);
+      color: var(--text-main);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .app-card-btn-secondary:hover {
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      background: var(--surface-card);
     }
   </style>
 </head>
@@ -293,13 +349,13 @@
         <a href="#apps-showcase" class="pill-btn" style="text-decoration: none;">
           🚀 Dedicated Apps
         </a>
-        <a href="#onboarding-wizard" class="pill-btn" style="background: rgba(59, 130, 246, 0.12); color: var(--primary-color); border: 1.5px solid var(--primary-color); font-weight: 800; text-decoration: none;">
+        <a href="#onboarding-wizard" class="pill-btn" style="background: rgba(59, 130, 246, 0.14) !important; color: var(--primary-color) !important; border: 1.5px solid var(--primary-color) !important; font-weight: 800; text-decoration: none;">
           ⚡ 5-Min App Launch
         </a>
         <button class="pill-btn" onclick="OmniLauncher.openTrackModal()">
           🔍 Track Request
         </button>
-        <a href="admin.html" class="pill-btn" style="background: #1e293b; color: #fff; text-decoration: none; font-weight: 700;">
+        <a href="admin.html" class="pill-btn" style="background: #1e293b !important; color: #fff !important; text-decoration: none; font-weight: 700;">
           🔐 Admin Console
         </a>
         <button class="pill-btn" id="theme-toggle-btn" onclick="UniversalApp.toggleTheme()" style="font-size: 11px;">🌙</button>
@@ -331,7 +387,7 @@
     <div class="section-header">
       <span class="hero-badge">ISOLATED APPS</span>
       <h2>Choose a Dedicated App Portal</h2>
-      <p>Each business gets a standalone, high-performance web portal with dedicated routes, encrypted owner login, and zero clutter.</p>
+      <p>Explore live demos to see what your business gets, or onboard your own business in 5 minutes.</p>
     </div>
 
     <div class="apps-card-grid">
@@ -355,9 +411,14 @@
             <li><span>✅</span> Real-Time Google Sheets Sync</li>
           </ul>
         </div>
-        <a href="school/index.html" class="app-card-btn btn btn-primary">
-          🚀 Launch School App →
-        </a>
+        <div class="app-card-btn-group">
+          <button type="button" class="app-card-btn-primary" style="background: #1e3a8a;" onclick="OmniLauncher.startOnboardingFor('student_management')">
+            ⚡ Onboard School / College (5 Min) →
+          </button>
+          <a href="school/index.html" class="app-card-btn-secondary">
+            👁️ View Live Demo App
+          </a>
+        </div>
       </div>
 
       <!-- 2. MOVE-X Logistics -->
@@ -380,9 +441,14 @@
             <li><span>✅</span> OTP Proof-of-Delivery Verification</li>
           </ul>
         </div>
-        <a href="movex/index.html" class="app-card-btn btn btn-primary" style="background: #0284c7; border-color: #0284c7;">
-          🚀 Launch MOVE-X App →
-        </a>
+        <div class="app-card-btn-group">
+          <button type="button" class="app-card-btn-primary" style="background: #0284c7;" onclick="OmniLauncher.startOnboardingFor('movex_booking')">
+            ⚡ Onboard Logistics / Fleet (5 Min) →
+          </button>
+          <a href="movex/index.html" class="app-card-btn-secondary">
+            👁️ View Live Demo App
+          </a>
+        </div>
       </div>
 
       <!-- 3. Hotel & Resort -->
@@ -405,9 +471,14 @@
             <li><span>✅</span> Guest Check-In Status Ledger</li>
           </ul>
         </div>
-        <a href="hotel/index.html" class="app-card-btn btn btn-primary" style="background: #4f46e5; border-color: #4f46e5;">
-          🚀 Launch Hotel App →
-        </a>
+        <div class="app-card-btn-group">
+          <button type="button" class="app-card-btn-primary" style="background: #4f46e5;" onclick="OmniLauncher.startOnboardingFor('hotel_booking')">
+            ⚡ Onboard Hotel / Resort (5 Min) →
+          </button>
+          <a href="hotel/index.html" class="app-card-btn-secondary">
+            👁️ View Live Demo App
+          </a>
+        </div>
       </div>
 
       <!-- 4. Restaurant & Food Ordering -->
@@ -430,9 +501,14 @@
             <li><span>✅</span> Kitchen Order Ticket (KOT) Dispatch</li>
           </ul>
         </div>
-        <a href="food/index.html" class="app-card-btn btn btn-primary" style="background: #dc2626; border-color: #dc2626;">
-          🚀 Launch Food App →
-        </a>
+        <div class="app-card-btn-group">
+          <button type="button" class="app-card-btn-primary" style="background: #dc2626;" onclick="OmniLauncher.startOnboardingFor('food_order')">
+            ⚡ Onboard Restaurant / Cafe (5 Min) →
+          </button>
+          <a href="food/index.html" class="app-card-btn-secondary">
+            👁️ View Live Demo App
+          </a>
+        </div>
       </div>
 
       <!-- 5. Quick-Commerce Retail -->
@@ -455,9 +531,14 @@
             <li><span>✅</span> Instant Order Invoice & Tracking</li>
           </ul>
         </div>
-        <a href="store/index.html" class="app-card-btn btn btn-primary" style="background: #10b981; border-color: #10b981;">
-          🚀 Launch Store App →
-        </a>
+        <div class="app-card-btn-group">
+          <button type="button" class="app-card-btn-primary" style="background: #10b981;" onclick="OmniLauncher.startOnboardingFor('ecommerce')">
+            ⚡ Onboard Retail Store (5 Min) →
+          </button>
+          <a href="store/index.html" class="app-card-btn-secondary">
+            👁️ View Live Demo App
+          </a>
+        </div>
       </div>
     </div>
   </section>
@@ -486,27 +567,27 @@
         <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Select the operational model that best matches your business.</p>
 
         <div class="wizard-cat-grid">
-          <div class="wizard-cat-item selected" onclick="OmniLauncher.selectVertical('student_management', this)">
+          <div class="wizard-cat-item selected" data-vertical="student_management" onclick="OmniLauncher.selectVertical('student_management', this)">
             <div style="font-size: 28px; margin-bottom: 4px;">🎓</div>
             <div style="font-weight: 800; font-size: 12px;">School / College</div>
             <div style="font-size: 10px; color: var(--text-muted);">Admissions & Fees</div>
           </div>
-          <div class="wizard-cat-item" onclick="OmniLauncher.selectVertical('movex_booking', this)">
+          <div class="wizard-cat-item" data-vertical="movex_booking" onclick="OmniLauncher.selectVertical('movex_booking', this)">
             <div style="font-size: 28px; margin-bottom: 4px;">🚚</div>
             <div style="font-weight: 800; font-size: 12px;">Logistics / Fleet</div>
             <div style="font-size: 10px; color: var(--text-muted);">Trucks & Cargo</div>
           </div>
-          <div class="wizard-cat-item" onclick="OmniLauncher.selectVertical('hotel_booking', this)">
+          <div class="wizard-cat-item" data-vertical="hotel_booking" onclick="OmniLauncher.selectVertical('hotel_booking', this)">
             <div style="font-size: 28px; margin-bottom: 4px;">🏨</div>
             <div style="font-weight: 800; font-size: 12px;">Hotel / Resort</div>
             <div style="font-size: 10px; color: var(--text-muted);">Rooms & Stays</div>
           </div>
-          <div class="wizard-cat-item" onclick="OmniLauncher.selectVertical('food_order', this)">
+          <div class="wizard-cat-item" data-vertical="food_order" onclick="OmniLauncher.selectVertical('food_order', this)">
             <div style="font-size: 28px; margin-bottom: 4px;">🍔</div>
             <div style="font-weight: 800; font-size: 12px;">Restaurant / Cafe</div>
             <div style="font-size: 10px; color: var(--text-muted);">Menu & Orders</div>
           </div>
-          <div class="wizard-cat-item" onclick="OmniLauncher.selectVertical('ecommerce', this)">
+          <div class="wizard-cat-item" data-vertical="ecommerce" onclick="OmniLauncher.selectVertical('ecommerce', this)">
             <div style="font-size: 28px; margin-bottom: 4px;">🛍️</div>
             <div style="font-weight: 800; font-size: 12px;">Retail Store</div>
             <div style="font-size: 10px; color: var(--text-muted);">Products & Cart</div>
@@ -720,7 +801,80 @@
       selectVertical(vKey, elem) {
         this.selectedVertical = vKey;
         document.querySelectorAll('.wizard-cat-item').forEach(el => el.classList.remove('selected'));
-        if (elem) elem.classList.add('selected');
+        if (elem) {
+          elem.classList.add('selected');
+        } else {
+          const target = document.querySelector(`.wizard-cat-item[data-vertical="${vKey}"]`);
+          if (target) target.classList.add('selected');
+        }
+        this.presetServicePlaceholders(vKey);
+      },
+
+      startOnboardingFor(vKey) {
+        this.selectedVertical = vKey;
+        document.querySelectorAll('.wizard-cat-item').forEach(el => {
+          el.classList.remove('selected');
+          if (el.getAttribute('data-vertical') === vKey) {
+            el.classList.add('selected');
+          }
+        });
+
+        this.presetServicePlaceholders(vKey);
+
+        // Smooth scroll to onboarding wizard
+        const wiz = document.getElementById('onboarding-wizard');
+        if (wiz) wiz.scrollIntoView({ behavior: 'smooth' });
+
+        // Go directly to Step 2 (Business details)
+        this.nextStep(2);
+        setTimeout(() => {
+          const nameInput = document.getElementById('ob_biz_name');
+          if (nameInput) nameInput.focus();
+        }, 400);
+
+        const vertName = vKey === 'student_management' ? 'School / College' :
+                         vKey === 'movex_booking' ? 'Logistics / Fleet' :
+                         vKey === 'hotel_booking' ? 'Hotel & Resort' :
+                         vKey === 'food_order' ? 'Restaurant / Cafe' : 'Retail Store';
+        UniversalApp.showToast(`✨ Ready to onboard your ${vertName}! Enter your details below.`, 'success');
+      },
+
+      presetServicePlaceholders(vKey) {
+        const container = document.getElementById('ob_services_container');
+        if (!container) return;
+
+        const presets = {
+          student_management: [
+            { title: "Class 10 Tuition & Smart Lab Fee", price: 4500, desc: "Monthly composite academic fee" },
+            { title: "Annual Registration & Sports Dues", price: 2500, desc: "Annual institutional dues" }
+          ],
+          movex_booking: [
+            { title: "Tata Ace Local 16km City Freight", price: 650, desc: "Base rate + standard driver payout" },
+            { title: "8ft High-Deck 35km Inter-City Route", price: 1450, desc: "Heavy commercial dispatch" }
+          ],
+          hotel_booking: [
+            { title: "Deluxe AC King Suite Room (1 Night)", price: 3200, desc: "Includes complimentary breakfast & WiFi" },
+            { title: "Private Dining Rooftop Table Slot", price: 1200, desc: "4-seater reserved dinner table" }
+          ],
+          food_order: [
+            { title: "Royal Hyderabadi Handi Dum Biryani", price: 380, desc: "Served with mirchi ka salan & raita" },
+            { title: "Tandoori Chicken Tikka Platter (8 Pcs)", price: 290, desc: "Charcoal grilled gourmet starter" }
+          ],
+          ecommerce: [
+            { title: "Wireless ANC Bluetooth Earbuds", price: 1999, desc: "Fast charging with 36hr battery" },
+            { title: "Smart AMOLED Fitness Watch", price: 2499, desc: "Heart rate & SpO2 tracker" }
+          ]
+        };
+
+        const list = presets[vKey] || presets.student_management;
+        container.innerHTML = list.map(item => `
+          <div class="service-row-item">
+            <input type="text" class="form-control ob-service-title" value="${SecurityGuard.escapeHTML(item.title)}" placeholder="Service / Item Name" style="flex: 2;" required />
+            <input type="number" class="form-control ob-service-price" value="${item.price}" placeholder="Price (₹)" style="flex: 1;" required />
+            <input type="text" class="form-control ob-service-desc" value="${SecurityGuard.escapeHTML(item.desc)}" placeholder="Short description" style="flex: 2;" />
+            <button type="button" class="btn btn-outline" style="padding: 8px 12px; color: var(--danger-color);" onclick="OmniLauncher.removeServiceRow(this)">✕</button>
+          </div>
+        `).join('');
       },
 
       nextStep(stepNum) {
