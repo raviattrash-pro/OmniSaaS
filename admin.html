@@ -59,6 +59,10 @@
         </a>
 
         <div style="display: flex; align-items: center; gap: 10px;">
+          <!-- Change Password Button -->
+          <button class="btn-admin btn-admin-outline" style="font-size: 12px;" onclick="AdminDashboard.openChangePasswordModal()">
+            🔑 Change Master Password
+          </button>
           <!-- GitHub Integration Settings Button -->
           <button class="btn-admin btn-admin-accent" style="font-size: 12px;" onclick="AdminDashboard.openGitHubSettings()">
             🐙 GitHub Pages Setup
@@ -601,6 +605,14 @@
           </div>
 
           <div class="stat-card" style="flex-direction: column; align-items: stretch; text-align: left;">
+            <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 6px; color: var(--admin-primary);">🔐 Master Security & PIN</h3>
+            <p style="font-size: 12px; color: var(--admin-text-muted); margin-bottom: 16px;">Update the Platform Super Admin master password with SHA-256 cryptographic encryption.</p>
+            <button class="btn-admin btn-admin-primary" onclick="AdminDashboard.openChangePasswordModal()">
+              🔑 Change Master Admin Password
+            </button>
+          </div>
+
+          <div class="stat-card" style="flex-direction: column; align-items: stretch; text-align: left;">
             <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 6px;">📥 Export All Vendors Backup</h3>
             <p style="font-size: 12px; color: var(--admin-text-muted); margin-bottom: 16px;">Download all vendor profiles, color codes, UPI credentials, and settings as a JSON backup.</p>
             <button class="btn-admin btn-admin-primary" onclick="AdminDashboard.exportAllVendorsBackup()">
@@ -636,7 +648,8 @@
     </footer>
   </div>
 
-  <!-- Admin Controller Script -->
-  <script src="admin.js"></script>
+  <!-- Scripts Loader -->
+  <script src="config.js?v=2.3"></script>
+  <script src="admin.js?v=2.3"></script>
 </body>
 </html>

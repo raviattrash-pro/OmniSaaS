@@ -101,5 +101,6 @@ If you prefer to host all businesses inside one master repository:
 - **Strict HTML & Attribute Escaping**: `SecurityGuard.escapeHTML()` and `sanitizeAttr()` neutralize any XSS injections.
 - **Circuit Breaker & Offline Queue**: Uninterrupted offline order logging with automatic re-sync upon connection recovery.
 - **OTP Brute-Force Lockout**: Logistics verification automatically locks out for 5 minutes after 3 failed OTP attempts.
+- **Client-Side Cryptographic Password Encryption**: `CryptoSecurity.hashPassword()` utilizes 256-bit SHA-256 cryptographic hashing for both Business Owners and Platform Super Admins, completely preventing plaintext password storage.
 - **Spreadsheet Formula Injection Defense**: In `Code.gs` and CSV exports, all cells beginning with `=`, `+`, `-`, or `@` are stripped of injection vectors.
 - **Frame-Busting & Clickjacking Defense**: Embedded frame-busting scripts prevent malicious framing.

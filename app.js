@@ -1499,7 +1499,7 @@ const UniversalApp = {
     `);
   },
 
-  handleOwnerLogin(e) {
+  async handleOwnerLogin(e) {
     e.preventDefault();
     const user = document.getElementById('owner_login_user').value.trim();
     const pass = document.getElementById('owner_login_pass').value.trim();
@@ -1514,9 +1514,25 @@ const UniversalApp = {
       return pUser === cleanUser || pSlug === cleanUser || pId === cleanUser;
     });
 
-    const expectedPass = profile ? (profile.ownerPassword || 'pass1234') : 'pass1234';
+    if (!profile) {
+      this.showToast('❌ Business owner account not found.', 'error');
+      return;
+    }
 
-    if (profile && (pass === expectedPass || pass === 'pass1234' || pass === 'admin1234')) {
+    const isValid = await CryptoSecurity.verifyPassword(
+      pass,
+      profile.ownerPasswordHash || profile.ownerPassword,
+      'pass1234'
+    );
+
+    if (isValid) {
+      // Auto-encrypt: if stored password was plaintext or unhashed, encrypt with SHA-256 now
+      if (!profile.ownerPasswordHash) {
+        profile.ownerPasswordHash = await CryptoSecurity.hashPassword(pass);
+        delete profile.ownerPassword;
+        ClientProfileManager.saveProfile(profile);
+      }
+
       sessionStorage.setItem('owner_authenticated_profile', profile.id);
       this.playSound('victory');
       this.triggerConfetti();
@@ -1598,6 +1614,9 @@ const UniversalApp = {
           </button>
           <button class="tab-btn ${activeSubTab === 'branding' ? 'active' : ''}" style="padding: 6px 12px; font-size: 12px;" onclick="UniversalApp.openOwnerDashboard('${p.id}', 'branding')">
             ⚙️ Standee QR & Branding
+          </button>
+          <button class="tab-btn ${activeSubTab === 'security' ? 'active' : ''}" style="padding: 6px 12px; font-size: 12px;" onclick="UniversalApp.openOwnerDashboard('${p.id}', 'security')">
+            🔐 Security & Password
           </button>
         </div>
 
@@ -1839,8 +1858,102 @@ const UniversalApp = {
           </div>
         ` : ''}
 
+        <!-- TAB 6: SECURITY & ENCRYPTED PASSWORD MANAGER -->
+        ${activeSubTab === 'security' ? `
+          <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; max-width: 520px; margin: 0 auto;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+              <span style="font-size: 26px;">🔐</span>
+              <div>
+                <h4 style="font-size: 15px; font-weight: 800; color: var(--text-main); margin: 0;">Change Owner Password</h4>
+                <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0;">Secured with 256-bit client-side cryptographic SHA-256 encryption.</p>
+              </div>
+            </div>
+
+            <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 12px;">
+              <strong>Owner User ID:</strong> <code style="color: var(--primary-color); font-weight: 800; font-size: 13px;">${SecurityGuard.escapeHTML(p.ownerUserId || `owner_${p.slug || p.id}`)}</code>
+            </div>
+
+            <form onsubmit="UniversalApp.handleOwnerPasswordChange(event, '${p.id}')">
+              <div class="form-group" style="margin-bottom: 12px;">
+                <label style="font-size: 12px; font-weight: 700;">Current Password *</label>
+                <input type="password" id="owner_curr_pass" class="form-control" required placeholder="Enter current password (default: pass1234)" />
+              </div>
+
+              <div class="form-group" style="margin-bottom: 12px;">
+                <label style="font-size: 12px; font-weight: 700;">New Password (Min. 6 Characters) *</label>
+                <input type="password" id="owner_new_pass" class="form-control" required minlength="6" placeholder="Enter new strong password" />
+              </div>
+
+              <div class="form-group" style="margin-bottom: 16px;">
+                <label style="font-size: 12px; font-weight: 700;">Confirm New Password *</label>
+                <input type="password" id="owner_conf_pass" class="form-control" required minlength="6" placeholder="Re-type new password" />
+              </div>
+
+              <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn btn-primary" style="flex: 1; font-weight: 800; padding: 10px;">
+                  🛡️ Encrypt & Save Password
+                </button>
+              </div>
+            </form>
+
+            <div style="margin-top: 14px; font-size: 11px; color: var(--text-muted); text-align: center;">
+              🔒 Passwords are cryptographically hashed and never stored in plaintext.
+            </div>
+          </div>
+        ` : ''}
+
       </div>
     `);
+  },
+
+  async handleOwnerPasswordChange(e, profileId) {
+    if (e && e.preventDefault) e.preventDefault();
+    const profiles = ClientProfileManager.getProfiles();
+    const p = profiles.find(pr => pr.id === profileId) || profiles[0];
+    if (!p) return;
+
+    const currPass = document.getElementById('owner_curr_pass').value.trim();
+    const newPass = document.getElementById('owner_new_pass').value.trim();
+    const confPass = document.getElementById('owner_conf_pass').value.trim();
+
+    if (!currPass || !newPass || !confPass) {
+      this.showToast('⚠️ Please fill out all password fields.', 'error');
+      return;
+    }
+
+    if (newPass.length < 6) {
+      this.showToast('⚠️ New password must be at least 6 characters.', 'error');
+      return;
+    }
+
+    if (newPass !== confPass) {
+      this.showToast('❌ New password and confirmation do not match.', 'error');
+      return;
+    }
+
+    // Verify current password against stored hash or fallback
+    const isCurrentValid = await CryptoSecurity.verifyPassword(
+      currPass,
+      p.ownerPasswordHash || p.ownerPassword,
+      'pass1234'
+    );
+
+    if (!isCurrentValid) {
+      this.showToast('❌ Incorrect current password.', 'error');
+      return;
+    }
+
+    // Encrypt new password using SHA-256
+    const newHash = await CryptoSecurity.hashPassword(newPass);
+    p.ownerPasswordHash = newHash;
+    delete p.ownerPassword; // Purge plaintext
+
+    ClientProfileManager.saveProfile(p);
+
+    this.playSound('victory');
+    this.triggerConfetti();
+    this.showToast('🔒 Owner password successfully encrypted & updated!', 'success');
+    this.openOwnerDashboard(p.id, 'security');
   },
 
   openAddFeeModal(profileId) {

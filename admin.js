@@ -56,13 +56,23 @@ const AdminDashboard = {
     }
   },
 
-  handleLogin(e) {
+  async handleLogin(e) {
     e.preventDefault();
     const pinInput = document.getElementById('admin_pin_input');
     const pin = pinInput.value.trim();
-    const savedPin = localStorage.getItem('admin_master_pin') || '1234';
+    const savedHash = localStorage.getItem('admin_master_pin_hash');
+    const legacyPin = localStorage.getItem('admin_master_pin') || '1234';
 
-    if (pin === savedPin) {
+    const isValid = await CryptoSecurity.verifyPassword(pin, savedHash || legacyPin, '1234');
+
+    if (isValid) {
+      // Transparently upgrade to encrypted SHA-256 hash if not yet hashed
+      if (!savedHash) {
+        const hash = await CryptoSecurity.hashPassword(pin);
+        localStorage.setItem('admin_master_pin_hash', hash);
+        localStorage.removeItem('admin_master_pin');
+      }
+
       sessionStorage.setItem('admin_authenticated', 'true');
       document.getElementById('admin-login-overlay').style.display = 'none';
       this.loadMetrics();
@@ -70,10 +80,95 @@ const AdminDashboard = {
     } else {
       const errEl = document.getElementById('login_error_msg');
       if (errEl) {
-        errEl.innerText = '❌ Incorrect PIN. (Default is 1234)';
+        errEl.innerText = '❌ Incorrect Master Password / PIN. (Default is 1234)';
         errEl.style.display = 'block';
       }
     }
+  },
+
+  openChangePasswordModal() {
+    const existing = document.getElementById('admin-password-modal');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.className = 'admin-modal-overlay';
+    overlay.id = 'admin-password-modal';
+    overlay.innerHTML = `
+      <div class="admin-modal-card">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+          <span style="font-size: 30px;">🔑</span>
+          <div>
+            <h3 style="font-size: 16px; font-weight: 900; margin: 0; color: var(--admin-text-main);">Change Master Admin Password</h3>
+            <p style="font-size: 12px; color: var(--admin-text-muted); margin: 2px 0 0 0;">Secured with SHA-256 cryptographic encryption.</p>
+          </div>
+        </div>
+        
+        <form onsubmit="AdminDashboard.handleAdminPasswordChange(event)">
+          <div class="admin-form-group" style="margin-bottom: 12px;">
+            <label>Current Master Password / PIN *</label>
+            <input type="password" id="admin_curr_pin" class="admin-input" required placeholder="Enter current PIN / Password (default: 1234)" />
+          </div>
+          
+          <div class="admin-form-group" style="margin-bottom: 12px;">
+            <label>New Master Password (Min. 4 Characters) *</label>
+            <input type="password" id="admin_new_pin" class="admin-input" required minlength="4" placeholder="Enter new Master PIN or Password" />
+          </div>
+          
+          <div class="admin-form-group" style="margin-bottom: 18px;">
+            <label>Confirm New Password *</label>
+            <input type="password" id="admin_conf_pin" class="admin-input" required minlength="4" placeholder="Re-type new Master PIN or Password" />
+          </div>
+          
+          <div style="display: flex; gap: 10px;">
+            <button type="submit" class="btn-admin btn-admin-primary" style="flex: 1; padding: 10px; font-weight: 800;">
+              🔒 Encrypt & Save Admin Password
+            </button>
+            <button type="button" class="btn-admin btn-admin-outline" onclick="document.getElementById('admin-password-modal').remove()">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+  },
+
+  async handleAdminPasswordChange(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const curr = document.getElementById('admin_curr_pin').value.trim();
+    const newPin = document.getElementById('admin_new_pin').value.trim();
+    const confPin = document.getElementById('admin_conf_pin').value.trim();
+
+    if (!curr || !newPin || !confPin) {
+      this.showToast('⚠️ Please fill out all password fields.', 'error');
+      return;
+    }
+    if (newPin.length < 4) {
+      this.showToast('⚠️ New password must be at least 4 characters.', 'error');
+      return;
+    }
+    if (newPin !== confPin) {
+      this.showToast('❌ New password and confirmation do not match.', 'error');
+      return;
+    }
+
+    const savedHash = localStorage.getItem('admin_master_pin_hash');
+    const legacyPin = localStorage.getItem('admin_master_pin') || '1234';
+    const isValid = await CryptoSecurity.verifyPassword(curr, savedHash || legacyPin, '1234');
+
+    if (!isValid) {
+      this.showToast('❌ Current master password is incorrect.', 'error');
+      return;
+    }
+
+    const newHash = await CryptoSecurity.hashPassword(newPin);
+    localStorage.setItem('admin_master_pin_hash', newHash);
+    localStorage.removeItem('admin_master_pin');
+
+    const modal = document.getElementById('admin-password-modal');
+    if (modal) modal.remove();
+
+    this.showToast('🔒 Master Admin Password encrypted & updated successfully!', 'success');
   },
 
   logout() {
@@ -685,14 +780,18 @@ const AdminDashboard = {
   // =========================================================================
   // 🚀 FINALIZE ONBOARDING & GENERATE DEDICATED LAUNCH ASSETS
   // =========================================================================
-  finalizeOnboarding() {
+  async finalizeOnboarding() {
     const data = this.wizardData;
     const slug = this.slugify(data.slug || data.businessName);
     const vendorId = "vendor_" + slug + "_" + Date.now().toString(36);
+    const defaultPassword = data.ownerPassword || 'pass1234';
+    const ownerPasswordHash = await CryptoSecurity.hashPassword(defaultPassword);
 
     const newVendorProfile = {
       id: vendorId,
       slug: slug,
+      ownerUserId: data.ownerUserId || `owner_${slug}`,
+      ownerPasswordHash: ownerPasswordHash,
       businessName: data.businessName,
       vertical: data.vertical,
       tagline: data.tagline,
