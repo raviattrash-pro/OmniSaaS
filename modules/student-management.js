@@ -641,9 +641,12 @@ const StudentManagementModule = {
     }
 
     const config = window.MASTER_CONFIG;
-    const currency = config.verticals.student_management.currency;
-    const customQr = config.customQr || localStorage.getItem('custom_upi_qr');
-    const upiUri = `upi://pay?pa=${config.upiId}&pn=${encodeURIComponent(config.verticals.student_management.businessName)}&am=${amount}&cu=INR&tn=Fee_${feeId}`;
+    const vData = config.verticals.student_management || {};
+    const currency = vData.currency || '₹';
+    const customQr = vData.customQr || config.customQr || localStorage.getItem('custom_upi_qr');
+    const upiId = vData.upiId || config.upiId || 'payments@upi';
+    const businessName = vData.businessName || 'School Fee Invoicing';
+    const upiUri = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(businessName)}&am=${amount}&cu=INR&tn=Fee_${feeId}`;
     const dynamicQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=190x190&data=${encodeURIComponent(upiUri)}`;
     const qrDisplayUrl = customQr || dynamicQrUrl;
     const defaultName = UniversalApp.currentUser ? UniversalApp.currentUser.name : "";
@@ -661,8 +664,8 @@ const StudentManagementModule = {
           </p>
           <img src="${qrDisplayUrl}" alt="UPI Payment QR" style="max-height: 200px; max-width: 200px; object-fit: contain; border-radius: 8px; border: 1.5px solid var(--border-color); background: #fff; padding: 6px;" />
           <div style="display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 8px;">
-            <span style="font-size: 12px; color: var(--text-muted);">VPA: <strong>${config.upiId}</strong></span>
-            <button class="pill-btn" style="background: var(--surface-card); color: var(--text-main);" onclick="navigator.clipboard.writeText('${config.upiId}'); UniversalApp.showToast('UPI ID Copied!', 'success');">📋 Copy</button>
+            <span style="font-size: 12px; color: var(--text-muted);">VPA: <strong>${upiId}</strong></span>
+            <button class="pill-btn" style="background: var(--surface-card); color: var(--text-main);" onclick="navigator.clipboard.writeText('${upiId}'); UniversalApp.showToast('UPI ID Copied!', 'success');">📋 Copy</button>
           </div>
         </div>
 

@@ -1141,11 +1141,17 @@ footer {
   }
 
   /* 1. When an active modal is open (Receipt Slip, Voucher, Order Receipt, Docket) */
+  #app-modal.active,
+  #app-modal.active *,
+  .modal-overlay.active,
+  .modal-overlay.active *,
   .modal.active,
   .modal.active * {
-    visibility: visible;
+    visibility: visible !important;
   }
 
+  #app-modal.active,
+  .modal-overlay.active,
   .modal.active {
     position: absolute !important;
     left: 0 !important;
@@ -1153,12 +1159,14 @@ footer {
     width: 100% !important;
     height: auto !important;
     display: block !important;
-    background: transparent !important;
+    background: #ffffff !important;
     padding: 0 !important;
     margin: 0 !important;
     overflow: visible !important;
   }
 
+  #app-modal.active .modal-box,
+  .modal-overlay.active .modal-box,
   .modal.active .modal-box,
   .modal.active .modal-content {
     position: static !important;

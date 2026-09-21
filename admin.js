@@ -553,37 +553,69 @@ const AdminDashboard = {
     this.renderWizardCatalogRows();
   },
 
-  handleLogoUpload(input) {
+  compressImage(file, maxDimension = 500, quality = 0.82) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+          if (width > height) {
+            if (width > maxDimension) {
+              height = Math.round((height * maxDimension) / width);
+              width = maxDimension;
+            }
+          } else {
+            if (height > maxDimension) {
+              width = Math.round((width * maxDimension) / height);
+              height = maxDimension;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = reject;
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  },
+
+  async handleLogoUpload(input) {
     if (input.files && input.files[0]) {
       const file = input.files[0];
       if (!file.type.startsWith('image/')) {
         this.showToast('Please upload a valid image file.', 'error');
         return;
       }
-      if (file.size > 4 * 1024 * 1024) {
-        this.showToast('Logo file must be under 4MB.', 'error');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.wizardData.customLogoData = e.target.result;
+      try {
+        const compressedBase64 = await this.compressImage(file, 400, 0.85);
+        this.wizardData.customLogoData = compressedBase64;
         const prev = document.getElementById('wiz_logo_preview');
         if (prev) {
           prev.style.display = 'block';
           prev.innerHTML = `
             <div style="display: flex; align-items: center; gap: 12px; background: var(--admin-bg-surface); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--admin-border); width: fit-content; margin-top: 8px;">
-              <img src="${e.target.result}" style="max-height: 48px; max-width: 140px; object-fit: contain; border-radius: 4px;" alt="Logo Preview" />
+              <img src="${compressedBase64}" style="max-height: 48px; max-width: 140px; object-fit: contain; border-radius: 4px;" alt="Logo Preview" />
               <div>
-                <div style="font-size: 12px; font-weight: 800; color: var(--admin-success);">✅ Custom Logo Uploaded</div>
-                <div style="font-size: 10px; color: var(--admin-text-muted);">${file.name} (${Math.round(file.size / 1024)} KB)</div>
+                <div style="font-size: 12px; font-weight: 800; color: var(--admin-success);">✅ Custom Logo Uploaded (Optimized)</div>
+                <div style="font-size: 10px; color: var(--admin-text-muted);">${file.name}</div>
               </div>
               <button type="button" class="btn-admin btn-admin-danger" style="padding: 2px 8px; font-size: 11px; margin-left: 8px;" onclick="AdminDashboard.removeLogoUpload()">✕</button>
             </div>
           `;
         }
-        this.showToast('✅ Brand logo uploaded successfully!', 'success');
-      };
-      reader.readAsDataURL(file);
+        this.showToast('✅ Brand logo uploaded and optimized successfully!', 'success');
+      } catch (err) {
+        console.error('Logo compression error:', err);
+        this.showToast('Error processing logo image', 'error');
+      }
     }
   },
 
@@ -599,37 +631,35 @@ const AdminDashboard = {
     this.showToast('Logo removed', 'info');
   },
 
-  handleQrUpload(input) {
+  async handleQrUpload(input) {
     if (input.files && input.files[0]) {
       const file = input.files[0];
       if (!file.type.startsWith('image/')) {
         this.showToast('Please upload a valid image file.', 'error');
         return;
       }
-      if (file.size > 4 * 1024 * 1024) {
-        this.showToast('QR file must be under 4MB.', 'error');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.wizardData.customQrData = e.target.result;
+      try {
+        const compressedBase64 = await this.compressImage(file, 500, 0.88);
+        this.wizardData.customQrData = compressedBase64;
         const prev = document.getElementById('wiz_qr_preview');
         if (prev) {
           prev.style.display = 'block';
           prev.innerHTML = `
             <div style="display: flex; align-items: center; gap: 12px; background: var(--admin-bg-surface); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--admin-border); width: fit-content; margin-top: 8px;">
-              <img src="${e.target.result}" style="max-height: 80px; max-width: 80px; object-fit: contain; border-radius: 6px; background: #fff; padding: 4px;" alt="QR Standee Preview" />
+              <img src="${compressedBase64}" style="max-height: 80px; max-width: 80px; object-fit: contain; border-radius: 6px; background: #fff; padding: 4px;" alt="QR Standee Preview" />
               <div>
-                <div style="font-size: 12px; font-weight: 800; color: var(--admin-success);">✅ Merchant QR Standee Uploaded</div>
-                <div style="font-size: 10px; color: var(--admin-text-muted);">${file.name} (${Math.round(file.size / 1024)} KB)</div>
+                <div style="font-size: 12px; font-weight: 800; color: var(--admin-success);">✅ Merchant QR Standee Uploaded (Optimized)</div>
+                <div style="font-size: 10px; color: var(--admin-text-muted);">${file.name}</div>
               </div>
               <button type="button" class="btn-admin btn-admin-danger" style="padding: 2px 8px; font-size: 11px; margin-left: 8px;" onclick="AdminDashboard.removeQrUpload()">✕</button>
             </div>
           `;
         }
-        this.showToast('✅ UPI Standee QR uploaded successfully!', 'success');
-      };
-      reader.readAsDataURL(file);
+        this.showToast('✅ UPI Standee QR uploaded and optimized successfully!', 'success');
+      } catch (err) {
+        console.error('QR compression error:', err);
+        this.showToast('Error processing QR image', 'error');
+      }
     }
   },
 
