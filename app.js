@@ -36,6 +36,23 @@ const SecurityGuard = {
       .replace(/\//g, '&#x2F;');
   },
 
+  unescapeHTML(str) {
+    if (str === null || str === undefined) return '';
+    if (typeof str !== 'string') str = String(str);
+    return str
+      .replace(/&#x2F;/g, '/')
+      .replace(/&#039;/g, "'")
+      .replace(/&#96;/g, '`')
+      .replace(/&quot;/g, '"')
+      .replace(/&gt;/g, '>')
+      .replace(/&lt;/g, '<')
+      .replace(/&amp;/g, '&');
+  },
+
+  decodeEntities(str) {
+    return this.unescapeHTML(str);
+  },
+
   sanitizeAttr(str) {
     if (str === null || str === undefined) return '';
     if (typeof str !== 'string') str = String(str);
@@ -1488,6 +1505,13 @@ const UniversalApp = {
     }
   },
 
+  ownerSignOut() {
+    this.playSound('click');
+    sessionStorage.removeItem('owner_authenticated_profile');
+    this.closeModal();
+    this.showToast('🚪 Signed out of Owner Dashboard.', 'info');
+  },
+
   openOwnerDashboard(profileId, activeSubTab = 'fees') {
     const profiles = ClientProfileManager.getProfiles();
     const p = profiles.find(pr => pr.id === profileId) || profiles[0];
@@ -1506,100 +1530,115 @@ const UniversalApp = {
     const liveUrl = `${window.location.origin}${window.location.pathname}?slug=${currentSlug}`;
 
     this.showModal(`
-      <div style="text-align: left; max-width: 840px; margin: 0 auto;">
+      <div class="owner-dashboard-container" style="text-align: left;">
         <!-- Header -->
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 16px;">
-          <div>
-            <span style="font-size: 11px; font-weight: 800; color: var(--primary-color); text-transform: uppercase;">
-              🏢 SCHOOL BUSINESS OWNER CONTROL CENTER
-            </span>
-            <h3 style="margin: 2px 0; font-size: 1.35rem; font-weight: 900; color: var(--text-main);">${SecurityGuard.escapeHTML(p.businessName)}</h3>
-            <div style="font-size: 11px; color: var(--text-muted);">
-              Live Portal: <a href="${liveUrl}" target="_blank" style="color: var(--primary-color); text-decoration: underline;">${liveUrl}</a>
+        <div class="owner-dash-header">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            ${customLogo ? `<img src="${customLogo}" style="max-height: 44px; max-width: 70px; object-fit: contain; border-radius: 6px; background: #fff; padding: 3px; border: 1px solid var(--border-color);" alt="Logo" />` : `<div style="font-size: 2.2rem; background: var(--bg-secondary); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-color);">${p.logoIcon || '🎓'}</div>`}
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="owner-dash-badge">🏢 BUSINESS OWNER CONTROL CENTER</span>
+                <span style="font-size: 10px; background: rgba(34, 197, 94, 0.15); color: #16a34a; font-weight: 800; padding: 2px 8px; border-radius: 12px;">● ACTIVE</span>
+              </div>
+              <h2 style="margin: 3px 0 2px 0; font-size: 1.45rem; font-weight: 900; color: var(--text-main);">${SecurityGuard.escapeHTML(p.businessName)}</h2>
+              <div style="font-size: 11.5px; color: var(--text-muted);">
+                Dedicated Portal: <a href="${liveUrl}" target="_blank" style="color: var(--primary-color); font-weight: 700; text-decoration: underline;">${liveUrl}</a>
+              </div>
             </div>
           </div>
-          <button class="pill-btn" style="background: rgba(239, 68, 68, 0.1); color: var(--danger-color); border: 1px solid var(--danger-color); font-size: 11px;" onclick="UniversalApp.ownerSignOut()">
-            🚪 Log Out
-          </button>
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <a href="admin.html" target="_blank" class="pill-btn" style="background: rgba(99, 102, 241, 0.12); color: #6366f1; border: 1px solid #6366f1; font-size: 11px; font-weight: 800;">
+              ⚡ Admin Hub
+            </a>
+            <button class="pill-btn" style="background: rgba(239, 68, 68, 0.12); color: var(--danger-color); border: 1px solid var(--danger-color); font-size: 11px; font-weight: 800;" onclick="UniversalApp.ownerSignOut()">
+              🚪 Sign Out
+            </button>
+          </div>
         </div>
 
         <!-- Metrics Row -->
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px;">
-          <div style="background: var(--bg-secondary); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
-            <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">TOTAL REVENUE</div>
-            <div style="font-size: 1.25rem; font-weight: 900; color: var(--primary-color);">${p.currency || '₹'}${myRevenue.toLocaleString()}</div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px;">
+          <div class="owner-stat-card">
+            <div class="stat-title">💰 TOTAL REVENUE</div>
+            <div class="stat-num" style="color: var(--primary-color);">${p.currency || '₹'}${myRevenue.toLocaleString()}</div>
           </div>
-          <div style="background: var(--bg-secondary); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
-            <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">FEE PAYMENTS</div>
-            <div style="font-size: 1.25rem; font-weight: 900; color: var(--success-color);">${allFees.length}</div>
+          <div class="owner-stat-card">
+            <div class="stat-title">💳 FEE PAYMENTS</div>
+            <div class="stat-num" style="color: var(--success-color);">${allFees.length}</div>
           </div>
-          <div style="background: var(--bg-secondary); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
-            <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">ADMISSIONS</div>
-            <div style="font-size: 1.25rem; font-weight: 900; color: #6366f1;">${allAdmissions.length}</div>
+          <div class="owner-stat-card">
+            <div class="stat-title">🎓 ADMITTED ROSTER</div>
+            <div class="stat-num" style="color: #6366f1;">${allAdmissions.length}</div>
           </div>
-          <div style="background: var(--bg-secondary); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
-            <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">FEE STRUCTURES</div>
-            <div style="font-size: 1.25rem; font-weight: 900; color: #f59e0b;">${allFeeStructures.length}</div>
+          <div class="owner-stat-card">
+            <div class="stat-title">📚 FEE STRUCTURES</div>
+            <div class="stat-num" style="color: #f59e0b;">${allFeeStructures.length}</div>
           </div>
         </div>
 
         <!-- Navigation Tabs inside Dashboard -->
-        <div style="display: flex; gap: 8px; border-bottom: 1px solid var(--border-color); margin-bottom: 14px; flex-wrap: wrap;">
-          <button class="tab-btn ${activeSubTab === 'fees' ? 'active' : ''}" style="padding: 6px 12px; font-size: 12px;" onclick="UniversalApp.openOwnerDashboard('${p.id}', 'fees')">
-            💳 Fee Structure Manager (${allFeeStructures.length})
+        <div style="display: flex; gap: 8px; border-bottom: 1.5px solid var(--border-color); margin-bottom: 18px; flex-wrap: wrap;">
+          <button class="tab-btn ${activeSubTab === 'fees' ? 'active' : ''}" style="padding: 8px 14px; font-size: 12px; font-weight: 700;" onclick="UniversalApp.openOwnerDashboard('${p.id}', 'fees')">
+            💳 Fee Structures (${allFeeStructures.length})
           </button>
-          <button class="tab-btn ${activeSubTab === 'clubs' ? 'active' : ''}" style="padding: 6px 12px; font-size: 12px;" onclick="UniversalApp.openOwnerDashboard('${p.id}', 'clubs')">
+          <button class="tab-btn ${activeSubTab === 'clubs' ? 'active' : ''}" style="padding: 8px 14px; font-size: 12px; font-weight: 700;" onclick="UniversalApp.openOwnerDashboard('${p.id}', 'clubs')">
             🏆 Clubs & Activities (${allClubs.length})
           </button>
-          <button class="tab-btn ${activeSubTab === 'students' ? 'active' : ''}" style="padding: 6px 12px; font-size: 12px;" onclick="UniversalApp.openOwnerDashboard('${p.id}', 'students')">
+          <button class="tab-btn ${activeSubTab === 'students' ? 'active' : ''}" style="padding: 8px 14px; font-size: 12px; font-weight: 700;" onclick="UniversalApp.openOwnerDashboard('${p.id}', 'students')">
             👥 Student Roster (${allAdmissions.length})
           </button>
-          <button class="tab-btn ${activeSubTab === 'ledger' ? 'active' : ''}" style="padding: 6px 12px; font-size: 12px;" onclick="UniversalApp.openOwnerDashboard('${p.id}', 'ledger')">
+          <button class="tab-btn ${activeSubTab === 'ledger' ? 'active' : ''}" style="padding: 8px 14px; font-size: 12px; font-weight: 700;" onclick="UniversalApp.openOwnerDashboard('${p.id}', 'ledger')">
             📜 Payment Ledger (${allFees.length})
           </button>
-          <button class="tab-btn ${activeSubTab === 'branding' ? 'active' : ''}" style="padding: 6px 12px; font-size: 12px;" onclick="UniversalApp.openOwnerDashboard('${p.id}', 'branding')">
+          <button class="tab-btn ${activeSubTab === 'branding' ? 'active' : ''}" style="padding: 8px 14px; font-size: 12px; font-weight: 700;" onclick="UniversalApp.openOwnerDashboard('${p.id}', 'branding')">
             ⚙️ Standee QR & Branding
           </button>
-          <button class="tab-btn ${activeSubTab === 'security' ? 'active' : ''}" style="padding: 6px 12px; font-size: 12px;" onclick="UniversalApp.openOwnerDashboard('${p.id}', 'security')">
-            🔐 Security & Password
+          <button class="tab-btn ${activeSubTab === 'security' ? 'active' : ''}" style="padding: 8px 14px; font-size: 12px; font-weight: 700;" onclick="UniversalApp.openOwnerDashboard('${p.id}', 'security')">
+            🔐 Owner Security
           </button>
         </div>
 
         <!-- TAB 1: FEE STRUCTURE MANAGER (CRUD) -->
         ${activeSubTab === 'fees' ? `
           <div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-              <strong style="font-size: 13px;">Institutional Fee Structures</strong>
-              <button class="btn btn-primary" style="padding: 6px 12px; font-size: 11px; font-weight: 800;" onclick="UniversalApp.openAddFeeModal('${p.id}')">
-                ➕ Add New Fee Structure
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <div>
+                <strong style="font-size: 13.5px; color: var(--text-main);">Institutional Fee Structure Categories</strong>
+                <div style="font-size: 11px; color: var(--text-muted);">Manage admission, tuition, laboratory, and activity fee slabs.</div>
+              </div>
+              <button class="btn btn-primary" style="padding: 7px 14px; font-size: 12px; font-weight: 800;" onclick="UniversalApp.openAddFeeModal('${p.id}')">
+                ➕ Add Fee Structure
               </button>
             </div>
 
-            <div style="max-height: 280px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px;">
-              <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+            <div class="owner-table-container">
+              <table class="owner-table">
                 <thead>
-                  <tr style="background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); text-align: left;">
-                    <th style="padding: 8px 10px;">Fee Title / Badge</th>
-                    <th style="padding: 8px 10px;">Applicable Class</th>
-                    <th style="padding: 8px 10px;">Amount</th>
-                    <th style="padding: 8px 10px; text-align: right;">Action</th>
+                  <tr>
+                    <th>Fee Title / Description</th>
+                    <th>Applicable Grade</th>
+                    <th>Amount</th>
+                    <th style="text-align: right;">Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   ${allFeeStructures.map(f => `
-                    <tr style="border-bottom: 1px solid var(--border-color);">
-                      <td style="padding: 8px 10px;">
-                        <span style="font-size: 10px; background: rgba(59, 130, 246, 0.12); color: var(--primary-color); padding: 1px 6px; border-radius: 4px; font-weight: 800; margin-right: 4px;">${SecurityGuard.escapeHTML(f.badge || 'Fee')}</span>
-                        <strong>${SecurityGuard.escapeHTML(f.title)}</strong>
-                        <div style="font-size: 11px; color: var(--text-muted);">${SecurityGuard.escapeHTML(f.description || '')}</div>
+                    <tr>
+                      <td>
+                        <span style="font-size: 10px; background: rgba(59, 130, 246, 0.12); color: var(--primary-color); padding: 2px 7px; border-radius: 4px; font-weight: 800; margin-right: 6px;">${SecurityGuard.escapeHTML(f.badge || 'Fee')}</span>
+                        <strong style="color: var(--text-main);">${SecurityGuard.escapeHTML(f.title)}</strong>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">${SecurityGuard.escapeHTML(f.description || '')}</div>
                       </td>
-                      <td style="padding: 8px 10px; color: var(--text-muted);">${SecurityGuard.escapeHTML(f.grade || 'All Classes')}</td>
-                      <td style="padding: 8px 10px; text-align: right; white-space: nowrap;">
+                      <td style="color: var(--text-muted); font-weight: 600;">${SecurityGuard.escapeHTML(f.grade || 'All Classes')}</td>
+                      <td>
+                        <strong style="color: var(--primary-color); font-size: 13px;">${p.currency || '₹'}${Number(f.amount).toLocaleString()}</strong>
+                      </td>
+                      <td style="text-align: right; white-space: nowrap;">
                         <div style="display: inline-flex; gap: 6px; justify-content: flex-end;">
-                          <button class="pill-btn" style="background: rgba(59, 130, 246, 0.1); color: var(--primary-color); border: 1px solid var(--primary-color); font-size: 10px; padding: 4px 8px;" onclick="UniversalApp.openEditFeeModal('${SecurityGuard.sanitizeAttr(f.id)}', '${p.id}')">
+                          <button class="pill-btn" style="background: rgba(59, 130, 246, 0.1); color: var(--primary-color); border: 1px solid var(--primary-color); font-size: 11px; padding: 4px 10px;" onclick="UniversalApp.openEditFeeModal('${SecurityGuard.sanitizeAttr(f.id)}', '${p.id}')">
                             ✏️ Edit
                           </button>
-                          <button class="pill-btn" style="background: rgba(239, 68, 68, 0.1); color: var(--danger-color); border: 1px solid var(--danger-color); font-size: 10px; padding: 4px 8px;" onclick="UniversalApp.deleteOwnerFeeCategory('${SecurityGuard.sanitizeAttr(f.id)}', '${p.id}')">
+                          <button class="pill-btn" style="background: rgba(239, 68, 68, 0.1); color: var(--danger-color); border: 1px solid var(--danger-color); font-size: 11px; padding: 4px 10px;" onclick="UniversalApp.deleteOwnerFeeCategory('${SecurityGuard.sanitizeAttr(f.id)}', '${p.id}')">
                             🗑️ Delete
                           </button>
                         </div>
@@ -1615,38 +1654,41 @@ const UniversalApp = {
         <!-- TAB 2: CLUBS & ACTIVITIES MANAGER (CRUD) -->
         ${activeSubTab === 'clubs' ? `
           <div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-              <strong style="font-size: 13px;">Co-Curricular Clubs & Activities</strong>
-              <button class="btn btn-primary" style="padding: 6px 12px; font-size: 11px; font-weight: 800;" onclick="UniversalApp.openAddClubModal('${p.id}')">
-                ➕ Add New Club / Activity
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <div>
+                <strong style="font-size: 13.5px; color: var(--text-main);">Co-Curricular Clubs & Activities</strong>
+                <div style="font-size: 11px; color: var(--text-muted);">Manage robotics, sports academies, music clubs, and societies.</div>
+              </div>
+              <button class="btn btn-primary" style="padding: 7px 14px; font-size: 12px; font-weight: 800;" onclick="UniversalApp.openAddClubModal('${p.id}')">
+                ➕ Add New Club
               </button>
             </div>
 
-            <div style="max-height: 280px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px;">
-              <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+            <div class="owner-table-container">
+              <table class="owner-table">
                 <thead>
-                  <tr style="background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); text-align: left;">
-                    <th style="padding: 8px 10px;">Club / Category</th>
-                    <th style="padding: 8px 10px;">Coach / Mentor</th>
-                    <th style="padding: 8px 10px;">Schedule</th>
-                    <th style="padding: 8px 10px; text-align: right;">Action</th>
+                  <tr>
+                    <th>Club Name / Category</th>
+                    <th>Coach / Mentor</th>
+                    <th>Schedule</th>
+                    <th style="text-align: right;">Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   ${allClubs.map(c => `
-                    <tr style="border-bottom: 1px solid var(--border-color);">
-                      <td style="padding: 8px 10px;">
-                        <span style="font-size: 10px; background: rgba(99, 102, 241, 0.15); color: #6366f1; padding: 1px 6px; border-radius: 4px; font-weight: 800; margin-right: 4px;">${SecurityGuard.escapeHTML(c.category || 'Club')}</span>
-                        <strong>${SecurityGuard.escapeHTML(c.title)}</strong>
+                    <tr>
+                      <td>
+                        <span style="font-size: 10px; background: rgba(99, 102, 241, 0.15); color: #6366f1; padding: 2px 7px; border-radius: 4px; font-weight: 800; margin-right: 6px;">${SecurityGuard.escapeHTML(c.category || 'Club')}</span>
+                        <strong style="color: var(--text-main);">${SecurityGuard.escapeHTML(c.title)}</strong>
                       </td>
-                      <td style="padding: 8px 10px; color: var(--text-muted);">${SecurityGuard.escapeHTML(c.coach || 'Head Mentor')}</td>
-                      <td style="padding: 8px 10px; color: var(--text-muted);">${SecurityGuard.escapeHTML(c.schedule || 'Weekly')}</td>
-                      <td style="padding: 8px 10px; text-align: right; white-space: nowrap;">
+                      <td style="color: var(--text-muted); font-weight: 600;">${SecurityGuard.escapeHTML(c.coach || 'Head Mentor')}</td>
+                      <td style="color: var(--text-muted);">${SecurityGuard.escapeHTML(c.schedule || 'Weekly')}</td>
+                      <td style="text-align: right; white-space: nowrap;">
                         <div style="display: inline-flex; gap: 6px; justify-content: flex-end;">
-                          <button class="pill-btn" style="background: rgba(59, 130, 246, 0.1); color: var(--primary-color); border: 1px solid var(--primary-color); font-size: 10px; padding: 4px 8px;" onclick="UniversalApp.openEditClubModal('${SecurityGuard.sanitizeAttr(c.title)}', '${p.id}')">
+                          <button class="pill-btn" style="background: rgba(59, 130, 246, 0.1); color: var(--primary-color); border: 1px solid var(--primary-color); font-size: 11px; padding: 4px 10px;" onclick="UniversalApp.openEditClubModal('${SecurityGuard.sanitizeAttr(c.title)}', '${p.id}')">
                             ✏️ Edit
                           </button>
-                          <button class="pill-btn" style="background: rgba(239, 68, 68, 0.1); color: var(--danger-color); border: 1px solid var(--danger-color); font-size: 10px; padding: 4px 8px;" onclick="UniversalApp.deleteOwnerClub('${SecurityGuard.sanitizeAttr(c.title)}', '${p.id}')">
+                          <button class="pill-btn" style="background: rgba(239, 68, 68, 0.1); color: var(--danger-color); border: 1px solid var(--danger-color); font-size: 11px; padding: 4px 10px;" onclick="UniversalApp.deleteOwnerClub('${SecurityGuard.sanitizeAttr(c.title)}', '${p.id}')">
                             🗑️ Delete
                           </button>
                         </div>
@@ -1662,40 +1704,48 @@ const UniversalApp = {
         <!-- TAB 3: STUDENT ROSTER & ID CARD CENTER -->
         ${activeSubTab === 'students' ? `
           <div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-              <strong style="font-size: 13px;">Admitted Student Roster (${allAdmissions.length})</strong>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <div>
+                <strong style="font-size: 13.5px; color: var(--text-main);">Admitted Student Roster & Digital Passes (${allAdmissions.length})</strong>
+                <div style="font-size: 11px; color: var(--text-muted);">View registered student records and download or print student identity cards.</div>
+              </div>
             </div>
 
-            <div style="max-height: 280px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px;">
+            <div class="owner-table-container">
               ${allAdmissions.length === 0 ? 
-                `<div style="text-align: center; color: var(--text-muted); padding: 24px; font-size: 12px;">No student admissions registered yet.</div>` :
-                `<table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                `<div style="text-align: center; color: var(--text-muted); padding: 32px; font-size: 13px;">No student admissions registered yet.</div>` :
+                `<table class="owner-table">
                   <thead>
-                    <tr style="background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); text-align: left;">
-                      <th style="padding: 8px 10px;">Roll / Ref ID</th>
-                      <th style="padding: 8px 10px;">Student Name</th>
-                      <th style="padding: 8px 10px;">Class / Grade</th>
-                      <th style="padding: 8px 10px;">Parent Contact</th>
-                      <th style="padding: 8px 10px; text-align: right;">ID Card</th>
+                    <tr>
+                      <th>Roll / Ref ID</th>
+                      <th>Student Name</th>
+                      <th>Class / Grade</th>
+                      <th>Parent Details</th>
+                      <th style="text-align: right;">ID Card Pass</th>
                     </tr>
                   </thead>
                   <tbody>
                     ${allAdmissions.map(s => `
-                      <tr style="border-bottom: 1px solid var(--border-color);">
-                        <td style="padding: 8px 10px;">
-                          <strong style="color: var(--primary-color);">${SecurityGuard.escapeHTML(s.rollNo)}</strong>
+                      <tr>
+                        <td>
+                          <strong style="color: var(--primary-color); font-size: 12.5px;">${SecurityGuard.unescapeHTML(s.rollNo)}</strong>
                           <div style="font-size: 10px; color: var(--text-muted);">${SecurityGuard.escapeHTML(s.orderId)}</div>
                         </td>
-                        <td style="padding: 8px 10px; font-weight: 700;">${SecurityGuard.escapeHTML(s.studentName)}</td>
-                        <td style="padding: 8px 10px; color: var(--text-muted);">${SecurityGuard.escapeHTML(s.gradeApplied)}</td>
-                        <td style="padding: 8px 10px;">
-                          <div>${SecurityGuard.escapeHTML(s.parentName)}</div>
+                        <td style="font-weight: 700; color: var(--text-main);">${SecurityGuard.unescapeHTML(s.studentName)}</td>
+                        <td style="color: var(--text-muted); font-weight: 600;">${SecurityGuard.unescapeHTML(s.gradeApplied)}</td>
+                        <td>
+                          <div>${SecurityGuard.unescapeHTML(s.parentName)}</div>
                           <div style="font-size: 11px; color: var(--text-muted);">${SecurityGuard.escapeHTML(s.phone)}</div>
                         </td>
-                        <td style="padding: 8px 10px; text-align: right;">
-                          <button class="pill-btn" style="background: rgba(59, 130, 246, 0.12); color: var(--primary-color); font-size: 10px; font-weight: 800;" onclick="UniversalApp.printStudentIdDirect('${s.orderId}')">
-                            🪪 Print ID Card
-                          </button>
+                        <td style="text-align: right; white-space: nowrap;">
+                          <div style="display: inline-flex; gap: 6px; justify-content: flex-end;">
+                            <button class="pill-btn" style="background: rgba(59, 130, 246, 0.12); color: var(--primary-color); font-size: 11px; font-weight: 800; padding: 4px 10px;" onclick="UniversalApp.downloadStudentIdDirect('${s.orderId}')">
+                              ⬇️ PNG ID
+                            </button>
+                            <button class="pill-btn" style="background: rgba(99, 102, 241, 0.12); color: #6366f1; font-size: 11px; font-weight: 800; padding: 4px 10px;" onclick="UniversalApp.printStudentIdDirect('${s.orderId}')">
+                              🪪 Print
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     `).join('')}
@@ -1709,44 +1759,49 @@ const UniversalApp = {
         <!-- TAB 4: PAYMENT LEDGER & PROOF -->
         ${activeSubTab === 'ledger' ? `
           <div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-              <strong style="font-size: 13px;">Institutional Fee Ledger & Verified Receipts</strong>
-              <button class="pill-btn" style="font-size: 11px;" onclick="UniversalApp.exportOwnerData('${p.id}')">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <div>
+                <strong style="font-size: 13.5px; color: var(--text-main);">Institutional Fee Ledger & Verified Receipts</strong>
+                <div style="font-size: 11px; color: var(--text-muted);">Real-time log of UPI transactions and attached payment screenshots.</div>
+              </div>
+              <button class="pill-btn" style="font-size: 11.5px; font-weight: 800;" onclick="UniversalApp.exportOwnerData('${p.id}')">
                 📥 Export CSV
               </button>
             </div>
 
-            <div style="max-height: 280px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px;">
+            <div class="owner-table-container">
               ${allFees.length === 0 ? 
-                `<div style="text-align: center; color: var(--text-muted); padding: 24px; font-size: 12px;">No fee payment transactions recorded yet.</div>` :
-                `<table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                `<div style="text-align: center; color: var(--text-muted); padding: 32px; font-size: 13px;">No fee payment transactions recorded yet.</div>` :
+                `<table class="owner-table">
                   <thead>
-                    <tr style="background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); text-align: left;">
-                      <th style="padding: 8px 10px;">Receipt # / Student</th>
-                      <th style="padding: 8px 10px;">Fee Particulars</th>
-                      <th style="padding: 8px 10px;">Amount</th>
-                      <th style="padding: 8px 10px;">UTR Reference</th>
-                      <th style="padding: 8px 10px; text-align: center;">Proof</th>
+                    <tr>
+                      <th>Receipt # / Student</th>
+                      <th>Fee Particulars</th>
+                      <th>Amount Paid</th>
+                      <th>UTR Reference</th>
+                      <th style="text-align: center;">Proof</th>
                     </tr>
                   </thead>
                   <tbody>
                     ${allFees.map(f => `
-                      <tr style="border-bottom: 1px solid var(--border-color);">
-                        <td style="padding: 8px 10px;">
+                      <tr>
+                        <td>
                           <strong style="color: var(--primary-color);">${SecurityGuard.escapeHTML(f.receiptNo)}</strong>
-                          <div style="font-size: 11px; font-weight: 700;">${SecurityGuard.escapeHTML(f.studentName)} (${SecurityGuard.escapeHTML(f.rollNo || '')})</div>
+                          <div style="font-size: 11px; font-weight: 700; color: var(--text-main);">${SecurityGuard.unescapeHTML(f.studentName)} (${SecurityGuard.unescapeHTML(f.rollNo || '')})</div>
                         </td>
-                        <td style="padding: 8px 10px; color: var(--text-muted);">${SecurityGuard.escapeHTML(f.particulars)}</td>
-                        <td style="padding: 8px 10px; font-weight: 800; color: var(--primary-color);">
-                          ${f.currency || p.currency || '₹'}${Number(f.amount).toLocaleString()}
+                        <td style="color: var(--text-muted);">${SecurityGuard.escapeHTML(f.particulars)}</td>
+                        <td>
+                          <strong style="color: var(--primary-color); font-size: 13px;">
+                            ${f.currency || p.currency || '₹'}${Number(f.amount).toLocaleString()}
+                          </strong>
                         </td>
-                        <td style="padding: 8px 10px;">
-                          <code style="font-size: 10px;">${SecurityGuard.escapeHTML(f.txnId || f.transactionRef || 'N/A')}</code>
+                        <td>
+                          <code style="font-size: 11px; background: var(--bg-secondary); padding: 2px 6px; border-radius: 4px;">${SecurityGuard.escapeHTML(f.txnId || f.transactionRef || 'N/A')}</code>
                         </td>
-                        <td style="padding: 8px 10px; text-align: center;">
+                        <td style="text-align: center;">
                           ${f.screenshotData ? 
-                            `<img src="${f.screenshotData}" style="max-height: 32px; max-width: 32px; object-fit: cover; border-radius: 4px; cursor: pointer; border: 1px solid var(--border-color);" onclick="UniversalApp.previewScreenshot('${f.screenshotData}')" title="Click to enlarge proof" />` :
-                            `<span style="color: var(--text-muted); font-size: 10px;">None</span>`
+                            `<img src="${f.screenshotData}" style="max-height: 36px; max-width: 36px; object-fit: cover; border-radius: 6px; cursor: pointer; border: 1px solid var(--border-color);" onclick="UniversalApp.previewScreenshot('${f.screenshotData}')" title="Click to view payment proof" />` :
+                            `<span style="color: var(--text-muted); font-size: 11px;">None</span>`
                           }
                         </td>
                       </tr>
@@ -1760,35 +1815,35 @@ const UniversalApp = {
 
         <!-- TAB 5: MERCHANT STANDEE QR & BRANDING SETTINGS -->
         ${activeSubTab === 'branding' ? `
-          <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px;">
-            <h4 style="font-size: 13px; font-weight: 800; color: var(--text-main); margin-bottom: 10px;">💳 Merchant UPI Standee QR & Brand Logo</h4>
+          <div style="background: var(--bg-secondary); border: 1.5px solid var(--border-color); border-radius: 12px; padding: 20px;">
+            <h4 style="font-size: 14px; font-weight: 900; color: var(--text-main); margin-bottom: 12px;">💳 Merchant UPI Standee QR & Brand Logo</h4>
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
               <!-- QR Standee Box -->
-              <div style="border: 1px dashed var(--border-color); border-radius: 6px; padding: 10px; text-align: center; background: var(--surface-card);">
-                <label style="font-size: 11px; font-weight: 800; display: block; margin-bottom: 6px;">Merchant UPI QR Standee</label>
+              <div style="border: 1.5px dashed var(--border-color); border-radius: 10px; padding: 14px; text-align: center; background: var(--surface-card);">
+                <label style="font-size: 11.5px; font-weight: 800; display: block; margin-bottom: 8px;">Merchant UPI QR Standee</label>
                 ${customQr ? 
-                  `<img src="${customQr}" style="max-height: 80px; max-width: 80px; object-fit: contain; background: #fff; padding: 4px; border-radius: 4px; border: 1px solid var(--border-color);" alt="QR" />` :
-                  `<div style="font-size: 11px; color: var(--text-muted); padding: 16px 0;">⚡ Using Dynamic QR</div>`
+                  `<img src="${customQr}" style="max-height: 100px; max-width: 100px; object-fit: contain; background: #fff; padding: 6px; border-radius: 6px; border: 1px solid var(--border-color); margin: 0 auto;" alt="QR" />` :
+                  `<div style="font-size: 12px; color: var(--text-muted); padding: 24px 0;">⚡ Using Dynamic Instant QR</div>`
                 }
-                <div style="margin-top: 8px;">
+                <div style="margin-top: 12px;">
                   <input type="file" id="owner_qr_file" accept="image/*" style="display: none;" onchange="UniversalApp.updateOwnerQr(this, '${p.id}')" />
-                  <button class="pill-btn" style="font-size: 11px; width: 100%;" onclick="document.getElementById('owner_qr_file').click()">
+                  <button class="pill-btn" style="font-size: 11px; font-weight: 800; width: 100%;" onclick="document.getElementById('owner_qr_file').click()">
                     📤 ${customQr ? 'Change Standee QR' : 'Upload Standee QR'}
                   </button>
                 </div>
               </div>
 
               <!-- Brand Logo Box -->
-              <div style="border: 1px dashed var(--border-color); border-radius: 6px; padding: 10px; text-align: center; background: var(--surface-card);">
-                <label style="font-size: 11px; font-weight: 800; display: block; margin-bottom: 6px;">Official Brand Logo</label>
+              <div style="border: 1.5px dashed var(--border-color); border-radius: 10px; padding: 14px; text-align: center; background: var(--surface-card);">
+                <label style="font-size: 11.5px; font-weight: 800; display: block; margin-bottom: 8px;">Official Institution Logo</label>
                 ${customLogo ? 
-                  `<img src="${customLogo}" style="max-height: 50px; max-width: 120px; object-fit: contain; margin: 15px auto;" alt="Logo" />` :
-                  `<div style="font-size: 28px; padding: 10px 0;">${p.logoIcon || '🏛️'}</div>`
+                  `<img src="${customLogo}" style="max-height: 60px; max-width: 140px; object-fit: contain; margin: 15px auto;" alt="Logo" />` :
+                  `<div style="font-size: 36px; padding: 14px 0;">${p.logoIcon || '🏛️'}</div>`
                 }
-                <div style="margin-top: 8px;">
+                <div style="margin-top: 12px;">
                   <input type="file" id="owner_logo_file" accept="image/*" style="display: none;" onchange="UniversalApp.updateOwnerLogo(this, '${p.id}')" />
-                  <button class="pill-btn" style="font-size: 11px; width: 100%;" onclick="document.getElementById('owner_logo_file').click()">
+                  <button class="pill-btn" style="font-size: 11px; font-weight: 800; width: 100%;" onclick="document.getElementById('owner_logo_file').click()">
                     📤 ${customLogo ? 'Change Brand Logo' : 'Upload Brand Logo'}
                   </button>
                 </div>
@@ -1796,7 +1851,7 @@ const UniversalApp = {
             </div>
 
             <!-- Quick UPI & Phone Update -->
-            <form onsubmit="UniversalApp.saveOwnerSettings(event, '${p.id}')" style="margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: flex-end;">
+            <form onsubmit="UniversalApp.saveOwnerSettings(event, '${p.id}')" style="margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: flex-end;">
               <div>
                 <label style="font-size: 11px; font-weight: 700;">UPI VPA Address</label>
                 <input type="text" id="owner_upi_id" class="form-control" style="font-size: 12px;" value="${SecurityGuard.escapeHTML(p.upiId || '')}" placeholder="merchant@upi" required />
@@ -1805,8 +1860,8 @@ const UniversalApp = {
                 <label style="font-size: 11px; font-weight: 700;">WhatsApp Support Number</label>
                 <input type="tel" id="owner_whatsapp" class="form-control" style="font-size: 12px;" value="${SecurityGuard.escapeHTML(p.whatsappNumber || '')}" placeholder="+91 98765 43210" />
               </div>
-              <button type="submit" class="btn btn-primary" style="padding: 9px 16px; font-size: 12px; font-weight: 800;">
-                💾 Save
+              <button type="submit" class="btn btn-primary" style="padding: 10px 18px; font-size: 12px; font-weight: 800;">
+                💾 Save Settings
               </button>
             </form>
           </div>
@@ -1814,16 +1869,16 @@ const UniversalApp = {
 
         <!-- TAB 6: SECURITY & ENCRYPTED PASSWORD MANAGER -->
         ${activeSubTab === 'security' ? `
-          <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; max-width: 520px; margin: 0 auto;">
-            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
-              <span style="font-size: 26px;">🔐</span>
+          <div style="background: var(--bg-secondary); border: 1.5px solid var(--border-color); border-radius: 12px; padding: 24px; max-width: 520px; margin: 0 auto;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+              <span style="font-size: 32px;">🔐</span>
               <div>
-                <h4 style="font-size: 15px; font-weight: 800; color: var(--text-main); margin: 0;">Change Owner Password</h4>
+                <h4 style="font-size: 16px; font-weight: 900; color: var(--text-main); margin: 0;">Change Owner Password</h4>
                 <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0;">Secured with 256-bit client-side cryptographic SHA-256 encryption.</p>
               </div>
             </div>
 
-            <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 12px;">
+            <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; font-size: 12px;">
               <strong>Owner User ID:</strong> <code style="color: var(--primary-color); font-weight: 800; font-size: 13px;">${SecurityGuard.escapeHTML(p.ownerUserId || `owner_${p.slug || p.id}`)}</code>
             </div>
 
@@ -1843,11 +1898,9 @@ const UniversalApp = {
                 <input type="password" id="owner_conf_pass" class="form-control" required minlength="6" placeholder="Re-type new password" />
               </div>
 
-              <div style="display: flex; gap: 10px;">
-                <button type="submit" class="btn btn-primary" style="flex: 1; font-weight: 800; padding: 10px;">
-                  🛡️ Encrypt & Save Password
-                </button>
-              </div>
+              <button type="submit" class="btn btn-primary" style="width: 100%; font-weight: 800; padding: 12px;">
+                🛡️ Encrypt & Save Password
+              </button>
             </form>
 
             <div style="margin-top: 14px; font-size: 11px; color: var(--text-muted); text-align: center;">
@@ -1857,7 +1910,7 @@ const UniversalApp = {
         ` : ''}
 
       </div>
-    `);
+    `, 'owner-dashboard-modal');
   },
 
   async handleOwnerPasswordChange(e, profileId) {
@@ -2985,6 +3038,229 @@ const UniversalApp = {
     setTimeout(cleanup, 2500);
   },
 
+  downloadStudentIdDirect(orderId) {
+    this.closeModal();
+    if (window.StudentManagementModule && typeof StudentManagementModule.switchSubTab === 'function') {
+      StudentManagementModule.switchSubTab('idcard');
+      StudentManagementModule.onSelectStudentForId(orderId);
+    }
+    setTimeout(() => {
+      this.downloadIdCardImage();
+    }, 450);
+  },
+
+  downloadIdCardImage() {
+    this.playSound('click');
+    const nameEl = document.getElementById('id_card_name_preview');
+    const gradeEl = document.getElementById('id_card_grade_preview');
+    const rollEl = document.getElementById('id_card_roll_preview');
+
+    const rawName = nameEl ? nameEl.innerText.trim() : (document.getElementById('custom_id_name')?.value.trim() || 'Aarav Sharma');
+    const rawGrade = gradeEl ? gradeEl.innerText.trim() : (document.getElementById('custom_id_grade')?.value.trim() || 'Grade 7-A (Middle School)');
+    const rawRoll = rollEl ? rollEl.innerText.trim() : (document.getElementById('custom_id_roll')?.value.trim() || 'STU-2026-9821');
+
+    const studentName = SecurityGuard.unescapeHTML(rawName) || 'Student Name';
+    const grade = SecurityGuard.unescapeHTML(rawGrade) || 'Grade / Class';
+    const rollNo = SecurityGuard.unescapeHTML(rawRoll) || 'STU-2026-0000';
+
+    const config = window.MASTER_CONFIG;
+    const vData = (config.verticals && config.verticals[config.activeAppType]) || {};
+    const institutionName = SecurityGuard.unescapeHTML(vData.businessName || 'UNIVERSAL ACADEMY');
+
+    // Create High-DPI Canvas (800x500 at 2x)
+    const canvas = document.createElement('canvas');
+    canvas.width = 800;
+    canvas.height = 500;
+    const ctx = canvas.getContext('2d');
+
+    // Draw Card Background with Rounded Corners
+    const r = 24;
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(r, 0);
+    ctx.lineTo(800 - r, 0);
+    ctx.quadraticCurveTo(800, 0, 800, r);
+    ctx.lineTo(800, 500 - r);
+    ctx.quadraticCurveTo(800, 500, 800 - r, 500);
+    ctx.lineTo(r, 500);
+    ctx.quadraticCurveTo(0, 500, 0, 500 - r);
+    ctx.lineTo(0, r);
+    ctx.quadraticCurveTo(0, 0, r, 0);
+    ctx.closePath();
+    ctx.clip();
+
+    // Background Gradient (Sleek Deep Navy / Indigo)
+    const bgGrad = ctx.createLinearGradient(0, 0, 800, 500);
+    bgGrad.addColorStop(0, '#0f172a');
+    bgGrad.addColorStop(0.5, '#1e1b4b');
+    bgGrad.addColorStop(1, '#0284c7');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, 800, 500);
+
+    // Decorative Geometric Curves / Accents
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+    ctx.beginPath();
+    ctx.arc(750, 50, 180, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = 'rgba(245, 158, 11, 0.12)';
+    ctx.beginPath();
+    ctx.arc(80, 420, 140, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Top Header Banner
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.65)';
+    ctx.fillRect(0, 0, 800, 110);
+    ctx.fillStyle = '#f59e0b';
+    ctx.fillRect(0, 106, 800, 4);
+
+    // Institution Name & Tagline
+    ctx.fillStyle = '#fbbf24';
+    ctx.font = '900 24px Inter, system-ui, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(institutionName.toUpperCase(), 36, 48);
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+    ctx.font = '600 13px Inter, system-ui, sans-serif';
+    ctx.fillText('ACCREDITED K-12 INSTITUTION • OFFICIAL IDENTITY PASS', 36, 74);
+
+    // Header Badge Icon
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '36px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText('🎓', 760, 64);
+
+    // Student Photo Box
+    const photoX = 40;
+    const photoY = 145;
+    const photoW = 190;
+    const photoH = 240;
+    const pr = 16;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(photoX + pr, photoY);
+    ctx.lineTo(photoX + photoW - pr, photoY);
+    ctx.quadraticCurveTo(photoX + photoW, photoY, photoX + photoW, photoY + pr);
+    ctx.lineTo(photoX + photoW, photoY + photoH - pr);
+    ctx.quadraticCurveTo(photoX + photoW, photoY + photoH, photoX + photoW - pr, photoY + photoH);
+    ctx.lineTo(photoX + pr, photoY + photoH);
+    ctx.quadraticCurveTo(photoX, photoY + photoH, photoX, photoY + photoH - pr);
+    ctx.lineTo(photoX, photoY + pr);
+    ctx.quadraticCurveTo(photoX, photoY, photoX + pr, photoY);
+    ctx.closePath();
+    ctx.clip();
+
+    const photoImg = document.querySelector('#id_card_photo_display img');
+    if (photoImg && photoImg.src && !photoImg.src.startsWith('data:image/svg')) {
+      try {
+        ctx.drawImage(photoImg, photoX, photoY, photoW, photoH);
+      } catch (e) {
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(photoX, photoY, photoW, photoH);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '72px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('👨‍🎓', photoX + photoW / 2, photoY + 140);
+      }
+    } else {
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(photoX, photoY, photoW, photoH);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '72px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('👨‍🎓', photoX + photoW / 2, photoY + 140);
+    }
+    ctx.restore();
+
+    // Photo frame outline
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(photoX, photoY, photoW, photoH);
+
+    // Right Side: Student Details
+    const textX = 265;
+    ctx.textAlign = 'left';
+
+    // Student Name
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '900 28px Inter, system-ui, sans-serif';
+    ctx.fillText(studentName, textX, 185);
+
+    // Class / Grade
+    ctx.fillStyle = '#93c5fd';
+    ctx.font = '700 18px Inter, system-ui, sans-serif';
+    ctx.fillText(grade, textX, 222);
+
+    // ID / Roll Number Pill
+    ctx.fillStyle = 'rgba(56, 189, 248, 0.15)';
+    ctx.fillRect(textX, 246, 320, 36);
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(textX, 246, 320, 36);
+
+    ctx.fillStyle = '#38bdf8';
+    ctx.font = '800 15px Inter, system-ui, sans-serif';
+    ctx.fillText(`ID / ROLL: ${rollNo}`, textX + 16, 270);
+
+    // Metadata Details
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    ctx.font = '600 14px Inter, system-ui, sans-serif';
+    ctx.fillText('ACADEMIC SESSION: 2026-2027', textX, 320);
+    ctx.fillText('VALIDITY: MAY 2027 • REGULAR', textX, 348);
+
+    // Active Status Badge
+    ctx.fillStyle = 'rgba(34, 197, 94, 0.2)';
+    ctx.fillRect(textX, 368, 180, 28);
+    ctx.fillStyle = '#4ade80';
+    ctx.font = '800 13px Inter, system-ui, sans-serif';
+    ctx.fillText('● ACTIVE STUDENT', textX + 14, 387);
+
+    // Bottom Footer Stripe (Barcode Simulation)
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+    ctx.fillRect(0, 430, 800, 70);
+    ctx.fillStyle = '#334155';
+    ctx.fillRect(0, 430, 800, 1);
+
+    // Simulated Barcode Lines
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+    const barX = 40;
+    const barY = 445;
+    const barPatterns = [3, 1, 4, 2, 1, 3, 2, 4, 1, 2, 3, 1, 4, 2, 1, 3, 2, 1, 4, 3, 2, 1, 3, 4, 1, 2, 3, 1, 4, 2];
+    let currX = barX;
+    barPatterns.forEach(w => {
+      ctx.fillRect(currX, barY, w, 22);
+      currX += w + 3;
+    });
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.font = '600 11px Inter, system-ui, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText('SECURED RFID & DIGITAL BADGE • AUTHORIZED SIGNATURE', 760, 460);
+
+    ctx.restore();
+
+    // Trigger Instant Image Download
+    try {
+      const dataUrl = canvas.toDataURL('image/png');
+      const downloadLink = document.createElement('a');
+      const cleanFileName = `Student_ID_${rollNo.replace(/[^a-zA-Z0-9_-]/g, '_')}.png`;
+      downloadLink.download = cleanFileName;
+      downloadLink.href = dataUrl;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+
+      this.playSound('victory');
+      this.triggerConfetti();
+      this.showToast(`✅ ID Card downloaded successfully as PNG (${cleanFileName})!`, 'success');
+    } catch (err) {
+      console.error('Canvas export error:', err);
+      this.showToast('⚠️ Could not export canvas image directly. Opening print dialog...', 'info');
+      this.printIdCard();
+    }
+  },
+
   // =========================================================================
   // 🔗 WEBHOOK DISPATCH WITH CIRCUIT BREAKER RESILIENCE
   // =========================================================================
@@ -3103,17 +3379,29 @@ const UniversalApp = {
   // =========================================================================
   // 🔔 MODALS, TOASTS & KEYBOARD ACCESSIBILITY
   // =========================================================================
-  showModal(htmlContent) {
+  showModal(htmlContent, customClass = '') {
     this.playSound('click');
     const modal = document.getElementById('app-modal');
+    if (!modal) return;
+    const box = modal.querySelector('.modal-box');
+    if (box) {
+      box.className = 'modal-box' + (customClass ? ' ' + customClass : '');
+    }
     const body = document.getElementById('modal-body');
-    body.innerHTML = htmlContent;
+    if (body) {
+      body.innerHTML = htmlContent;
+    }
     modal.classList.add('active');
   },
 
   closeModal() {
     this.playSound('click');
     const modal = document.getElementById('app-modal');
+    if (!modal) return;
+    const box = modal.querySelector('.modal-box');
+    if (box) {
+      box.className = 'modal-box';
+    }
     modal.classList.remove('active');
   },
 

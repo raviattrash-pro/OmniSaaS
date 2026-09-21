@@ -260,8 +260,11 @@ const StudentManagementModule = {
               <input type="file" id="id_photo_upload" class="form-control" accept="image/*" onchange="StudentManagementModule.handlePhotoUpload(this)" />
             </div>
 
-            <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="UniversalApp.printIdCard()">
-              🖨️ Print Student Identity Card (Single Page Badge)
+            <button class="btn btn-primary" style="width: 100%; margin-top: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="UniversalApp.downloadIdCardImage()">
+              <span>⬇️</span> <span>Download ID Card (PNG Image)</span>
+            </button>
+            <button class="btn btn-secondary" style="width: 100%; margin-top: 8px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="UniversalApp.printIdCard()">
+              <span>🖨️</span> <span>Print Student Identity Card (Single Page Badge)</span>
             </button>
           </div>
 
@@ -712,7 +715,17 @@ const StudentManagementModule = {
     this.populateFeeQuickDropdown();
   },
 
-  populateStudentIdDropdown() {
+  _decode(str) {
+    if (!str) return '';
+    if (typeof SecurityGuard !== 'undefined' && SecurityGuard.unescapeHTML) {
+      return SecurityGuard.unescapeHTML(str);
+    }
+    const txt = document.createElement('textarea');
+    txt.innerHTML = str;
+    return txt.value;
+  },
+
+  populateIdCardStudentDropdown() {
     const select = document.getElementById('id_card_student_select');
     if (!select) return;
     const admissions = this._safeParse('student_admissions');
@@ -724,8 +737,12 @@ const StudentManagementModule = {
 
     select.innerHTML = `<option value="">-- Choose from Registered Students (${admissions.length}) --</option>` +
       admissions.map((s, idx) => `
-        <option value="${s.orderId}">${s.studentName} (${s.gradeApplied}) - Roll: ${s.rollNo}</option>
+        <option value="${s.orderId}">${this._decode(s.studentName)} (${this._decode(s.gradeApplied)}) - Roll: ${this._decode(s.rollNo)}</option>
       `).join('');
+  },
+
+  populateStudentIdDropdown() {
+    return this.populateIdCardStudentDropdown();
   },
 
   populateFeeQuickDropdown() {
@@ -740,7 +757,7 @@ const StudentManagementModule = {
 
     select.innerHTML = `<option value="">-- Choose Admitted Student (${admissions.length}) --</option>` +
       admissions.map(s => `
-        <option value="${s.orderId}">${s.studentName} (${s.gradeApplied}) - ${s.rollNo}</option>
+        <option value="${s.orderId}">${this._decode(s.studentName)} (${this._decode(s.gradeApplied)}) - ${this._decode(s.rollNo)}</option>
       `).join('');
   },
 
@@ -750,16 +767,16 @@ const StudentManagementModule = {
     const match = admissions.find(a => a.orderId === refId);
     if (!match) return;
 
-    document.getElementById('custom_id_name').value = match.studentName;
-    document.getElementById('custom_id_grade').value = match.gradeApplied;
-    document.getElementById('custom_id_roll').value = match.rollNo;
+    document.getElementById('custom_id_name').value = this._decode(match.studentName);
+    document.getElementById('custom_id_grade').value = this._decode(match.gradeApplied);
+    document.getElementById('custom_id_roll').value = this._decode(match.rollNo);
     this.updateIdCardPreview();
   },
 
   updateIdCardPreview() {
-    const name = document.getElementById('custom_id_name').value.trim() || "Student Name";
-    const grade = document.getElementById('custom_id_grade').value.trim() || "Grade / Class";
-    const roll = document.getElementById('custom_id_roll').value.trim() || "STU-2026-XXXX";
+    const name = this._decode(document.getElementById('custom_id_name').value.trim()) || "Student Name";
+    const grade = this._decode(document.getElementById('custom_id_grade').value.trim()) || "Grade / Class";
+    const roll = this._decode(document.getElementById('custom_id_roll').value.trim()) || "STU-2026-XXXX";
 
     document.getElementById('id_card_name_preview').innerText = name;
     document.getElementById('id_card_grade_preview').innerText = grade;

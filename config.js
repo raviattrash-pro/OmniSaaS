@@ -156,7 +156,10 @@ const MASTER_CONFIG = {
   upiId: "payments@upi", // e.g. "school@okhdfcbank" or "movex@okaxis"
   supportEmail: "support@universalplatform.com",
 
-  // 🔐 GOOGLE OAUTH CLIENT ID (Optional for 1-click Google Sign-in)
+  // 🔐 GOOGLE OAUTH CLIENT ID (Google Identity Services GIS)
+  enableGoogleAuth: true,
+  googleClientId: "942698725807-v4s9quuk13v8i81014egh34t4m1l1v6q.apps.googleusercontent.com",
+
   // 🌐 GLOBAL VENDOR PROFILES (Permanently active for all visitors and incognito windows)
   vendorProfiles: [
     {
