@@ -702,11 +702,14 @@ const AdminDashboard = {
           </div>
         </div>
 
-        <div style="display: flex; gap: 10px;">
-          <a href="${dedicatedLaunchUrl}" target="_blank" class="btn-admin btn-admin-primary" style="flex: 1; text-decoration: none; padding: 10px; font-weight: 800;">
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <a href="https://wa.me/${encodeURIComponent(req.phone.replace(/[^0-9]/g, ''))}?text=${encodeURIComponent(`🎉 *Congratulations! Your Business App is Verified & LIVE!*\n\n*Business:* ${req.businessName}\n*Dedicated Live URL:* ${dedicatedLaunchUrl}\n*Owner User ID:* ${req.ownerUserId || `owner_${req.slug}`}\n\nYou can now log in to your Owner Control Center and share your official business link with customers!`)}" target="_blank" class="btn-admin btn-admin-accent" style="flex: 1; text-decoration: none; padding: 10px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+            📲 WhatsApp Alert to Owner
+          </a>
+          <a href="${dedicatedLaunchUrl}" target="_blank" class="btn-admin btn-admin-primary" style="flex: 1; text-decoration: none; padding: 10px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
             🚀 Open Live App →
           </a>
-          <button class="btn-admin btn-admin-outline" style="flex: 1;" onclick="document.getElementById('admin-activation-modal').remove()">
+          <button class="btn-admin btn-admin-outline" style="padding: 10px 16px;" onclick="document.getElementById('admin-activation-modal').remove()">
             Done
           </button>
         </div>

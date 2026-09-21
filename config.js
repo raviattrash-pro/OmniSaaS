@@ -101,19 +101,24 @@ const CryptoSecurity = {
 
   async verifyPassword(inputPassword, storedHashOrPlain, defaultFallbackPlain = 'pass1234') {
     if (!inputPassword) return false;
-    const cleanInput = String(inputPassword);
+    const cleanInput = String(inputPassword).trim();
     const inputHash = await this.hashPassword(cleanInput);
 
-    // If stored value is already a 64-char SHA-256 hex digest
+    // If stored value is a 64-character SHA-256 hex hash
     if (storedHashOrPlain && storedHashOrPlain.length === 64 && /^[0-9a-f]{64}$/i.test(storedHashOrPlain)) {
       return inputHash.toLowerCase() === storedHashOrPlain.toLowerCase();
     }
 
-    // Check legacy plain or default values
-    const expectedPlain = storedHashOrPlain || defaultFallbackPlain;
-    if (cleanInput === expectedPlain || cleanInput === defaultFallbackPlain || cleanInput === 'admin1234') {
-      return true;
+    // If stored value is plaintext, compare directly
+    if (storedHashOrPlain && typeof storedHashOrPlain === 'string') {
+      return cleanInput === storedHashOrPlain;
     }
+
+    // If no stored value exists, match only the exact defaultFallbackPlain
+    if (defaultFallbackPlain) {
+      return cleanInput === defaultFallbackPlain;
+    }
+
     return false;
   }
 };
