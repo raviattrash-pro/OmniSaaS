@@ -117,6 +117,9 @@
 
       <!-- Main Navigation Tabs -->
       <nav class="admin-tabs">
+        <button class="admin-tab-btn" id="tab_btn_verification" onclick="AdminDashboard.switchTab('verification')">
+          📋 Pending Verifications <span id="badge_pending_count" style="background: #ef4444; color: #fff; padding: 2px 7px; border-radius: 999px; font-size: 11px; margin-left: 4px; display: none;">0</span>
+        </button>
         <button class="admin-tab-btn active" id="tab_btn_wizard" onclick="AdminDashboard.switchTab('wizard')">
           ⚡ 5-Minute Rapid Onboarder
         </button>
@@ -130,6 +133,28 @@
           ⚙️ GitHub Deployer & Backups
         </button>
       </nav>
+
+      <!-- TAB 0: PENDING SELF-SERVICE ONBOARDING VERIFICATIONS -->
+      <section id="tab_panel_verification" class="admin-tab-panel" style="display: none;">
+        <div class="onboard-card" style="max-width: 100%;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 24px;">
+            <div>
+              <span class="admin-badge-agency">Self-Service Intake Queue</span>
+              <h2 style="font-size: 24px; font-weight: 900; margin-top: 4px;">Pending Business Verifications</h2>
+              <p style="font-size: 13px; color: var(--admin-text-muted);">Review submitted business applications, verify contact & UPI details, and activate their dedicated live app.</p>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn-admin btn-admin-outline" onclick="AdminDashboard.renderVerificationQueue(); AdminDashboard.showToast('Queue refreshed', 'info');">
+                🔄 Refresh Queue
+              </button>
+            </div>
+          </div>
+
+          <div id="verification_queue_container">
+            <!-- Dynamically populated by AdminDashboard.renderVerificationQueue() -->
+          </div>
+        </div>
+      </section>
 
       <!-- TAB 1: 5-MINUTE RAPID ONBOARDING WIZARD -->
       <section id="tab_panel_wizard" class="admin-tab-panel" style="display: block;">

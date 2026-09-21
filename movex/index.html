@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MOVE-X Logistics & Freight Booking Portal | Fleet Dispatch OS</title>
+  <meta name="description" content="Instant Commercial Vehicle & Cargo Booking, Live Fare Distance Calculator, Return-Load Saver, and Real-Time OTP Delivery Confirmation." />
+  <meta name="keywords" content="logistics booking, truck booking, tempo transport, packers movers, tata ace booking, movex, omnisaas" />
+  <meta name="author" content="MOVE-X Logistics by OmniSaaS" />
+  <meta name="theme-color" content="#0284c7" />
+
+  <!-- Security: CSP & Frame Protection -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: https: blob:; font-src 'self' https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https:;" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Google Identity Services (GIS) OAuth 2.0 SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <!-- Favicon & Manifest -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚚</text></svg>" />
+  <link rel="manifest" href="../manifest.json" />
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="../styles.css?v=2.3" />
+</head>
+<body data-standalone="movex_booking">
+
+  <!-- Ambient Glow Meshes -->
+  <div class="ambient-glow-mesh"></div>
+
+  <!-- Confetti Canvas -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- NAVBAR & BRANDING -->
+  <nav class="navbar" id="main-navbar">
+    <div class="nav-container">
+      <a href="index.html" class="brand">
+        <img id="brand-logo-img" class="brand-logo-img" src="" alt="Brand Logo" style="display: none;" />
+        <span class="brand-icon" id="brand-icon">🚚</span>
+        <div class="brand-info">
+          <h1 id="brand-title">MOVE-X Logistics</h1>
+          <p id="brand-tagline">On-Demand Freight & City Fleet Dispatch</p>
+        </div>
+      </a>
+
+      <div class="nav-actions">
+        <!-- Quick Search -->
+        <button class="pill-btn nav-search-pill" onclick="UniversalApp.openUniversalSearch()">
+          🔍 Track Booking / OTP
+        </button>
+
+        <!-- Business Owner Login -->
+        <button class="pill-btn" style="background: rgba(2, 132, 199, 0.12); color: #0284c7; border: 1.5px solid #0284c7; font-weight: 800; font-size: 11px;" onclick="UniversalApp.openOwnerLoginModal()">
+          🏢 Fleet Owner Login
+        </button>
+
+        <!-- Google OAuth Profile Container -->
+        <div id="nav-auth-container"></div>
+
+        <button class="pill-btn" id="sound-toggle-btn" onclick="UniversalApp.toggleSound()" style="font-size: 11px;">🔊 Sound</button>
+        <button class="pill-btn" id="theme-toggle-btn" onclick="UniversalApp.toggleTheme()" style="font-size: 11px;">🌙</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO BANNER -->
+  <header class="hero">
+    <div class="hero-content">
+      <div class="hero-badge-wrap">
+        <span class="hero-badge" id="hero-badge" style="background: #0284c7;">OFFICIAL LOGISTICS PORTAL</span>
+        <span class="status-live-dot">● FLEET ACTIVE</span>
+      </div>
+      <h2 id="hero-headline">On-Demand Fleet & Freight Dispatch</h2>
+      <p id="hero-subtext">Book verified commercial vehicles, calculate transparent distance rates, unlock return-load discounts, and track delivery with secure OTP verification.</p>
+
+      <!-- Trust Badges -->
+      <div class="trust-badge-row">
+        <div class="trust-badge-item">
+          <span class="trust-icon">🔒</span>
+          <span>SHA-256 Encrypted</span>
+        </div>
+        <div class="trust-badge-item">
+          <span class="trust-icon">⚡</span>
+          <span>Live Google Sheets Ledger</span>
+        </div>
+        <div class="trust-badge-item">
+          <span class="trust-icon">🔑</span>
+          <span>Secure OTP Delivery (POD)</span>
+        </div>
+        <div class="trust-badge-item">
+          <span class="trust-icon">🏷️</span>
+          <span>15% Return-Load Saver</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN MODULE CONTAINER -->
+  <main class="main-wrapper" id="vertical-container">
+    <!-- MoveX Booking Module Mounts Here -->
+  </main>
+
+  <!-- UNIVERSAL MODAL OVERLAY -->
+  <div class="modal-overlay" id="app-modal" onclick="if(event.target === this) UniversalApp.closeModal()">
+    <div class="modal-box">
+      <button class="modal-close" onclick="UniversalApp.closeModal()">✕</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATIONS CONTAINER -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div style="max-width: 1200px; margin: 0 auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 18px; text-align: left;">
+        <div>
+          <p style="font-weight: 900; color: var(--text-main); font-size: 16px;" id="footer-brand">MOVE-X Logistics</p>
+          <p style="margin: 4px 0; font-size: 12px; color: var(--text-muted);">Empowering Transporters & Shippers &bull; Official Digital Fleet Operating System</p>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <button class="btn btn-outline" style="padding: 8px 16px; font-size: 12px; font-weight: 700;" onclick="UniversalApp.openOwnerLoginModal()">
+            🏢 Transporter Owner Login
+          </button>
+          <a href="../admin.html" class="btn btn-outline" style="padding: 8px 16px; font-size: 12px; text-decoration: none;">
+            🔐 Admin Console
+          </a>
+          <a href="../index.html" class="btn btn-primary" style="padding: 8px 16px; font-size: 12px; text-decoration: none; font-weight: 800;">
+            🏠 Platform Home
+          </a>
+        </div>
+      </div>
+      <div style="border-top: 1px solid var(--border-color); padding-top: 14px; font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+        <span>© 2026 All Rights Reserved &bull; Official Logistics & Freight Portal</span>
+        <span>Secure Cloud Architecture &bull; 99.9% Uptime SLA</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- SCRIPTS LOADER -->
+  <script src="../config.js?v=2.3"></script>
+  <script src="../modules/student-management.js?v=2.3"></script>
+  <script src="../modules/movex-booking.js?v=2.3"></script>
+  <script src="../modules/hotel-booking.js?v=2.3"></script>
+  <script src="../modules/food-ordering.js?v=2.3"></script>
+  <script src="../modules/ecommerce.js?v=2.3"></script>
+  <script src="../app.js?v=2.3"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      if (window.MASTER_CONFIG) {
+        window.MASTER_CONFIG.activeAppType = 'movex_booking';
+        window.MASTER_CONFIG.isProductionClientMode = true;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -43,6 +43,8 @@ const AdminDashboard = {
     this.loadGitHubConfigInputs();
     this.loadGoogleVerification();
     this.loadMetrics();
+    this.updatePendingCountBadge();
+    this.renderVerificationQueue();
     this.renderRoster();
     this.renderIndexingUrlsTable();
     this.initWizardDefaults('student_management');
@@ -231,15 +233,18 @@ const AdminDashboard = {
     return `https://${username}.github.io/${cleanSlug}/`;
   },
 
-  getDeepLaunchUrl(slug) {
+  getDeepLaunchUrl(slug, vertical = 'student_management') {
     const cleanSlug = this.slugify(slug || this.wizardData.slug || 'my-business');
-    const { username } = this.getGitHubConfig();
+    const folder = vertical === 'student_management' ? 'school' :
+                   vertical === 'movex_booking' ? 'movex' :
+                   vertical === 'hotel_booking' ? 'hotel' :
+                   vertical === 'food_order' ? 'food' : 'store';
     const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:');
     if (isLocal) {
-      return `index.html?slug=${cleanSlug}`;
+      return `${folder}/index.html?biz=${cleanSlug}`;
     }
     const basePath = window.location.pathname.includes('/OmniSaaS') ? '/OmniSaaS' : '';
-    return `${window.location.origin}${basePath}/?slug=${cleanSlug}`;
+    return `${window.location.origin}${basePath}/${folder}/?biz=${cleanSlug}`;
   },
 
   onBusinessNameInput(name) {
@@ -436,9 +441,307 @@ const AdminDashboard = {
     return defaults;
   },
 
-  saveProfiles(profiles) {
-    localStorage.setItem('saved_client_profiles', JSON.stringify(profiles));
+  // =========================================================================
+  // 📋 SELF-SERVICE VERIFICATION & APPROVAL ENGINE
+  // =========================================================================
+  updatePendingCountBadge() {
+    const list = JSON.parse(localStorage.getItem('pending_business_requests') || '[]');
+    const pendingCount = list.filter(r => r.status === 'pending_verification').length;
+    const badge = document.getElementById('badge_pending_count');
+    if (badge) {
+      badge.innerText = pendingCount;
+      badge.style.display = pendingCount > 0 ? 'inline-block' : 'none';
+    }
+  },
+
+  renderVerificationQueue() {
+    this.updatePendingCountBadge();
+    const container = document.getElementById('verification_queue_container');
+    if (!container) return;
+
+    const list = JSON.parse(localStorage.getItem('pending_business_requests') || '[]');
+    if (list.length === 0) {
+      container.innerHTML = `
+        <div style="text-align: center; padding: 48px 20px; color: var(--admin-text-muted); background: var(--admin-card-bg); border-radius: 12px; border: 1px dashed var(--admin-border);">
+          <div style="font-size: 40px; margin-bottom: 8px;">📭</div>
+          <h3 style="font-size: 16px; font-weight: 800; color: var(--admin-text-main); margin-bottom: 4px;">No Pending Business Applications</h3>
+          <p style="font-size: 12px; max-width: 400px; margin: 0 auto;">When business owners submit their application from the Platform Landing Page (index.html), they will appear here for review and instant 1-click activation.</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = list.map(req => {
+      const isPending = req.status === 'pending_verification';
+      const isApproved = req.status === 'approved';
+      const isRejected = req.status === 'rejected';
+
+      const statusBadge = isPending ?
+        `<span style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid #f59e0b; font-weight: 800; font-size: 11px; padding: 3px 10px; border-radius: 999px;">🟡 PENDING REVIEW</span>` :
+        (isApproved ?
+          `<span style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid #10b981; font-weight: 800; font-size: 11px; padding: 3px 10px; border-radius: 999px;">🟢 VERIFIED & LIVE</span>` :
+          `<span style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid #ef4444; font-weight: 800; font-size: 11px; padding: 3px 10px; border-radius: 999px;">🔴 REJECTED</span>`);
+
+      const vertIcon = req.vertical === 'student_management' ? '🎓 School' :
+                       req.vertical === 'movex_booking' ? '🚚 Logistics' :
+                       req.vertical === 'hotel_booking' ? '🏨 Hotel' :
+                       req.vertical === 'food_order' ? '🍔 Restaurant' : '🛍️ Retail Store';
+
+      const services = Array.isArray(req.services) ? req.services : [];
+      const dedicatedLaunchUrl = this.getDeepLaunchUrl(req.slug, req.vertical);
+
+      return `
+        <div style="background: var(--admin-card-bg); border: 1.5px solid ${isPending ? 'var(--admin-primary)' : 'var(--admin-border)'}; border-radius: 14px; padding: 22px; margin-bottom: 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.03);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; border-bottom: 1px solid var(--admin-border); padding-bottom: 14px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                <h3 style="font-size: 18px; font-weight: 900; color: var(--admin-text-main); margin: 0;">${this.escapeHTML(req.businessName)}</h3>
+                <span class="badge-slug" style="font-size: 11px;">/${this.escapeHTML(req.slug)}</span>
+                <span style="font-size: 11px; background: var(--admin-primary-light); color: var(--admin-primary); padding: 2px 8px; border-radius: 4px; font-weight: 800;">${vertIcon}</span>
+              </div>
+              <div style="font-size: 12px; color: var(--admin-text-muted);">
+                Tracking ID: <strong>${this.escapeHTML(req.requestId)}</strong> &bull; Submitted: ${new Date(req.timestamp).toLocaleString()}
+              </div>
+            </div>
+            <div>
+              ${statusBadge}
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin-bottom: 18px;">
+            <!-- Applicant Contact Details -->
+            <div style="background: var(--admin-bg-secondary); border-radius: 8px; padding: 14px; font-size: 12px;">
+              <strong style="color: var(--admin-primary); font-size: 13px; display: block; margin-bottom: 8px;">👤 Owner Contact & Identity</strong>
+              <div style="margin-bottom: 4px;"><strong>Owner Name:</strong> ${this.escapeHTML(req.ownerName)}</div>
+              <div style="margin-bottom: 4px;">
+                <strong>Phone / WhatsApp:</strong>
+                <a href="https://wa.me/${encodeURIComponent(req.phone.replace(/[^0-9]/g, ''))}" target="_blank" style="color: #10b981; font-weight: 700; text-decoration: underline; margin-left: 4px;">
+                  📱 ${this.escapeHTML(req.phone)}
+                </a>
+              </div>
+              <div style="margin-bottom: 4px;"><strong>Email:</strong> ${this.escapeHTML(req.email)}</div>
+              <div style="margin-bottom: 4px;"><strong>Address:</strong> ${this.escapeHTML(req.address || 'N/A')}</div>
+              <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--admin-border);">
+                <strong>Assigned User ID:</strong> <code>${this.escapeHTML(req.ownerUserId || `owner_${req.slug}`)}</code>
+              </div>
+            </div>
+
+            <!-- Payment & UPI Standee -->
+            <div style="background: var(--admin-bg-secondary); border-radius: 8px; padding: 14px; font-size: 12px;">
+              <strong style="color: #10b981; font-size: 13px; display: block; margin-bottom: 8px;">💳 Merchant UPI & Standee QR</strong>
+              <div style="margin-bottom: 6px;"><strong>UPI ID:</strong> <code style="font-weight: 800; color: #10b981;">${this.escapeHTML(req.upiId)}</code></div>
+              ${req.customQr ? `
+                <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
+                  <img src="${req.customQr}" style="width: 50px; height: 50px; object-fit: contain; border-radius: 6px; border: 1px solid var(--admin-border); background: #fff;" />
+                  <span style="font-size: 11px; color: var(--admin-text-muted);">Verified Merchant Standee QR Attached</span>
+                </div>
+              ` : `<div style="font-size: 11px; color: var(--admin-text-muted);">Standard UPI ID string provided</div>`}
+            </div>
+
+            <!-- Custom Services & Pricing Preview -->
+            <div style="background: var(--admin-bg-secondary); border-radius: 8px; padding: 14px; font-size: 12px;">
+              <strong style="color: #8b5cf6; font-size: 13px; display: block; margin-bottom: 8px;">🏷️ Custom Services & Catalog (${services.length})</strong>
+              ${services.length === 0 ? `<div style="color: var(--admin-text-muted);">Standard vertical defaults will apply.</div>` : `
+                <ul style="margin: 0; padding-left: 18px;">
+                  ${services.map(s => `
+                    <li style="margin-bottom: 3px;"><strong>${this.escapeHTML(s.title)}:</strong> ₹${Number(s.price).toLocaleString()} <span style="color: var(--admin-text-muted); font-size: 11px;">(${this.escapeHTML(s.description || 'Custom')})</span></li>
+                  `).join('')}
+                </ul>
+              `}
+            </div>
+          </div>
+
+          <!-- Actions Bar -->
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-top: 1px solid var(--admin-border); padding-top: 14px;">
+            <div style="display: flex; gap: 8px;">
+              <a href="${dedicatedLaunchUrl}" target="_blank" class="btn-admin btn-admin-outline" style="font-size: 12px; text-decoration: none;">
+                👁️ Live App Preview
+              </a>
+            </div>
+
+            <div style="display: flex; gap: 8px;">
+              ${isPending ? `
+                <button class="btn-admin btn-admin-danger" style="font-size: 12px;" onclick="AdminDashboard.rejectAppRequest('${this.escapeHTML(req.requestId)}')">
+                  ❌ Reject
+                </button>
+                <button class="btn-admin btn-admin-primary" style="font-size: 13px; font-weight: 900; padding: 8px 18px;" onclick="AdminDashboard.verifyAndActivateApp('${this.escapeHTML(req.requestId)}')">
+                  ✅ Verify & Activate App →
+                </button>
+              ` : (isApproved ? `
+                <a href="https://wa.me/${encodeURIComponent(req.phone.replace(/[^0-9]/g, ''))}?text=${encodeURIComponent(`🎉 Great news! Your business app for ${req.businessName} has been verified and is LIVE!\n\n👉 Access your portal: ${dedicatedLaunchUrl}\n🔐 Owner User ID: ${req.ownerUserId || `owner_${req.slug}`}`)}" target="_blank" class="btn-admin btn-admin-accent" style="font-size: 12px; text-decoration: none; font-weight: 800;">
+                  📲 WhatsApp Live Link to Owner
+                </a>
+                <button class="btn-admin btn-admin-outline" style="font-size: 12px;" onclick="AdminDashboard.deletePendingRequest('${this.escapeHTML(req.requestId)}')">
+                  🗑️ Archive
+                </button>
+              ` : `
+                <button class="btn-admin btn-admin-primary" style="font-size: 12px;" onclick="AdminDashboard.verifyAndActivateApp('${this.escapeHTML(req.requestId)}')">
+                  🔄 Re-Approve & Activate
+                </button>
+                <button class="btn-admin btn-admin-danger" style="font-size: 12px;" onclick="AdminDashboard.deletePendingRequest('${this.escapeHTML(req.requestId)}')">
+                  🗑️ Delete
+                </button>
+              `)}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  },
+
+  async verifyAndActivateApp(requestId) {
+    const list = JSON.parse(localStorage.getItem('pending_business_requests') || '[]');
+    const reqIndex = list.findIndex(r => r.requestId === requestId);
+    if (reqIndex === -1) {
+      this.showToast('Request not found.', 'error');
+      return;
+    }
+
+    const req = list[reqIndex];
+    const profiles = this.getSavedProfiles();
+
+    // Theme color presets by vertical
+    const defaultThemes = {
+      student_management: { theme: "#1e3a8a", accent: "#f59e0b", icon: "🎓" },
+      movex_booking: { theme: "#0284c7", accent: "#10b981", icon: "🚚" },
+      hotel_booking: { theme: "#4f46e5", accent: "#f59e0b", icon: "🏨" },
+      food_order: { theme: "#dc2626", accent: "#f59e0b", icon: "🍔" },
+      ecommerce: { theme: "#10b981", accent: "#ec4899", icon: "🛍️" }
+    };
+    const t = defaultThemes[req.vertical] || { theme: "#1e3a8a", accent: "#f59e0b", icon: "🏢" };
+
+    // Build or update profile
+    const profileId = "profile_" + (req.slug || Date.now());
+    const existingIndex = profiles.findIndex(p => p.id === profileId || p.slug === req.slug);
+
+    const newProfile = {
+      id: profileId,
+      slug: req.slug,
+      businessName: req.businessName,
+      vertical: req.vertical,
+      tagline: `Official ${req.businessName} Portal & Booking System`,
+      logoIcon: t.icon,
+      themeColor: t.theme,
+      accentColor: t.accent,
+      currency: "₹",
+      upiId: req.upiId,
+      whatsappNumber: req.phone,
+      googleScriptUrl: window.MASTER_CONFIG?.googleScriptUrl || "",
+      customLogo: null,
+      customQr: req.customQr || null,
+      isProductionClientMode: true,
+      ownerUserId: req.ownerUserId || `owner_${req.slug}`,
+      passwordHash: req.passwordHash,
+      status: "active",
+      createdAt: req.timestamp || new Date().toISOString()
+    };
+
+    if (existingIndex >= 0) {
+      profiles[existingIndex] = { ...profiles[existingIndex], ...newProfile };
+    } else {
+      profiles.unshift(newProfile);
+    }
+
+    this.saveProfiles(profiles);
+
+    // Save custom services for this slug if any
+    if (Array.isArray(req.services) && req.services.length > 0) {
+      if (req.vertical === 'student_management') {
+        const fees = req.services.map((s, idx) => ({
+          id: `fee_${req.slug}_${idx}`,
+          title: s.title,
+          grade: "All Classes",
+          amount: Number(s.price) || 5000,
+          badge: "Academic",
+          description: s.description || "Tuition & Institutional Fee"
+        }));
+        localStorage.setItem(`custom_fees_${req.slug}`, JSON.stringify(fees));
+      } else {
+        localStorage.setItem(`custom_catalog_${req.slug}`, JSON.stringify(req.services));
+      }
+    }
+
+    // Mark request as approved
+    req.status = 'approved';
+    req.approvedAt = new Date().toISOString();
+    list[reqIndex] = req;
+    localStorage.setItem('pending_business_requests', JSON.stringify(list));
+
+    // Update UI
+    this.renderVerificationQueue();
+    this.renderRoster();
     this.loadMetrics();
+    this.updatePendingCountBadge();
+
+    const dedicatedLaunchUrl = this.getDeepLaunchUrl(req.slug, req.vertical);
+
+    this.showToast(`🎉 Verified & Activated App for ${req.businessName}!`, 'success');
+
+    // Show Confirmation Modal
+    const modal = document.createElement('div');
+    modal.className = 'admin-modal-overlay';
+    modal.id = 'admin-activation-modal';
+    modal.innerHTML = `
+      <div class="admin-modal-card" style="max-width: 520px; text-align: center;">
+        <div style="font-size: 54px; margin-bottom: 10px;">🚀</div>
+        <h3 style="font-size: 22px; font-weight: 900; color: var(--admin-primary); margin-bottom: 6px;">Business App is Now Live!</h3>
+        <p style="font-size: 13px; color: var(--admin-text-muted); margin-bottom: 18px;">
+          <strong>${this.escapeHTML(req.businessName)}</strong> has been verified. Their dedicated portal is active and ready for customers.
+        </p>
+
+        <div style="background: var(--admin-bg-secondary); border: 1.5px solid var(--admin-border); border-radius: 10px; padding: 16px; margin-bottom: 20px; text-align: left; font-size: 12px;">
+          <div style="margin-bottom: 8px;">
+            <strong>🌐 Live Dedicated Portal:</strong><br/>
+            <a href="${dedicatedLaunchUrl}" target="_blank" style="color: var(--admin-primary); font-weight: 800; word-break: break-all;">${dedicatedLaunchUrl}</a>
+          </div>
+          <div style="margin-bottom: 8px;">
+            <strong>👤 Owner Login ID:</strong> <code>${this.escapeHTML(req.ownerUserId || `owner_${req.slug}`)}</code>
+          </div>
+          <div>
+            <strong>🔒 Password:</strong> Encrypted with SHA-256 (Set by owner)
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+          <a href="${dedicatedLaunchUrl}" target="_blank" class="btn-admin btn-admin-primary" style="flex: 1; text-decoration: none; padding: 10px; font-weight: 800;">
+            🚀 Open Live App →
+          </a>
+          <button class="btn-admin btn-admin-outline" style="flex: 1;" onclick="document.getElementById('admin-activation-modal').remove()">
+            Done
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  },
+
+  rejectAppRequest(requestId) {
+    const reason = prompt('Please enter the reason for rejection (optional):', 'Contact details or UPI ID could not be verified.');
+    if (reason === null) return;
+
+    const list = JSON.parse(localStorage.getItem('pending_business_requests') || '[]');
+    const req = list.find(r => r.requestId === requestId);
+    if (!req) return;
+
+    req.status = 'rejected';
+    req.rejectionReason = reason;
+    req.rejectedAt = new Date().toISOString();
+    localStorage.setItem('pending_business_requests', JSON.stringify(list));
+
+    this.renderVerificationQueue();
+    this.updatePendingCountBadge();
+    this.showToast('Application marked as rejected.', 'error');
+  },
+
+  deletePendingRequest(requestId) {
+    if (confirm('Are you sure you want to delete this application record?')) {
+      let list = JSON.parse(localStorage.getItem('pending_business_requests') || '[]');
+      list = list.filter(r => r.requestId !== requestId);
+      localStorage.setItem('pending_business_requests', JSON.stringify(list));
+      this.renderVerificationQueue();
+      this.updatePendingCountBadge();
+      this.showToast('Record deleted.', 'info');
+    }
   },
 
   // =========================================================================
@@ -454,6 +757,10 @@ const AdminDashboard = {
     if (btn) btn.classList.add('active');
     if (panel) panel.style.display = 'block';
 
+    if (tab === 'verification') {
+      this.updatePendingCountBadge();
+      this.renderVerificationQueue();
+    }
     if (tab === 'roster') this.renderRoster();
     if (tab === 'activity') this.renderActivityFeed();
     if (tab === 'backup') {

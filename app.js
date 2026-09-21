@@ -205,8 +205,14 @@ const URLQueryTenantEngine = {
     const params = new URLSearchParams(window.location.search);
     const config = window.MASTER_CONFIG;
 
-    // 1. Check for Business Slug in Query String (?b=... or ?business=... or ?slug=...)
-    let businessSlug = params.get('b') || params.get('business') || params.get('slug') || params.get('profile');
+    // Check if body specifies a dedicated standalone vertical
+    const standaloneVert = document.body ? document.body.getAttribute('data-standalone') : null;
+    if (standaloneVert && config.verticals[standaloneVert]) {
+      config.activeAppType = standaloneVert;
+    }
+
+    // 1. Check for Business Slug in Query String (?biz=... or ?b=... or ?business=... or ?slug=...)
+    let businessSlug = params.get('biz') || params.get('b') || params.get('business') || params.get('slug') || params.get('profile');
 
     // 2. Check for Business Slug in Pathname (e.g. /dps-school/ or /repo/dps-school/)
     if (!businessSlug) {

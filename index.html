@@ -3,370 +3,703 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OmniSaaS - School Admission Portal, Student Fee Invoicing & Business Management OS</title>
-  <meta name="description" content="OmniSaaS Universal Platform: Streamlined Online School Admissions, Dynamic Student Fee Invoicing with Instant UPI & Receipts, ID Card Generator, and Multi-Business Operating System." />
-  <meta name="keywords" content="school admission portal, student fee management, online fee payment upi, digital fee receipt generator, school id card maker, school management system, omnisaas, helloschool, dps school, st xaviers, movex logistics, universal business platform" />
+  <title>OmniSaaS - Universal Multi-Tenant Business Platform & Rapid App Launcher</title>
+  <meta name="description" content="Launch dedicated, isolated business apps for Schools, Logistics, Hotels, Restaurants, and Retail Stores in 5 minutes. Real-time Google Sheets backend, zero-fee UPI QR, and 256-bit encrypted security." />
+  <meta name="keywords" content="business apps, school management, logistics booking, hotel reservation, food ordering, ecommerce store, omnisaas, cloud business os" />
   <meta name="author" content="OmniSaaS Enterprise" />
-  <meta name="application-name" content="OmniSaaS" />
   <meta name="theme-color" content="#1e3a8a" />
 
   <!-- Security: Content-Security-Policy & Frame Protection -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: https: blob:; font-src 'self' https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https:;" />
   <meta http-equiv="X-Content-Type-Options" content="nosniff" />
 
-  <!-- Frame-Busting Defense against Clickjacking -->
-  <script>
-    if (window.top !== window.self) {
-      window.top.location = window.self.location;
-    }
-  </script>
-
   <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
-  <!-- Google Identity Services (GIS) OAuth 2.0 SDK -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-
-  <!-- SEO, Google Indexing & Open Graph Meta Tags -->
-  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large" />
-  <meta name="google-site-verification" id="google-site-verification-meta" content="google00f9059f5265dae5" />
-  <link rel="canonical" id="canonical-url" href="https://raviattrash-pro.github.io/OmniSaaS/" />
-  <meta property="og:title" id="og-title" content="OmniSaaS - School Admission Portal & Student Fee Management OS" />
-  <meta property="og:description" id="og-desc" content="Online Student Admissions, Dynamic Fee Invoicing with Instant Zero-Fee UPI Receipts, ID Card Generator & Google Sheets Sync." />
-  <meta property="og:url" id="og-url" content="https://raviattrash-pro.github.io/OmniSaaS/" />
-  <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="OmniSaaS Universal Platform" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="OmniSaaS - Universal School Management & Fee Invoicing" />
-  <meta name="twitter:description" content="Online Student Admissions, Dynamic Fee Invoicing with Instant UPI Receipts & ID Badges." />
-
-  <!-- Schema.org JSON-LD Rich Snippet Structured Data -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "WebSite",
-        "@id": "https://raviattrash-pro.github.io/OmniSaaS/#website",
-        "url": "https://raviattrash-pro.github.io/OmniSaaS/",
-        "name": "OmniSaaS Universal Business Platform",
-        "description": "Multi-Tenant Cloud Platform for School Admissions, Student Fee Invoicing, Logistics & E-Commerce",
-        "publisher": {
-          "@type": "Organization",
-          "name": "OmniSaaS",
-          "url": "https://raviattrash-pro.github.io/OmniSaaS/"
-        },
-        "potentialAction": {
-          "@type": "SearchAction",
-          "target": "https://raviattrash-pro.github.io/OmniSaaS/?search={search_term_string}",
-          "query-input": "required name=search_term_string"
-        }
-      },
-      {
-        "@type": "SoftwareApplication",
-        "name": "OmniSaaS School Management & Fee Portal",
-        "applicationCategory": "EducationalApplication",
-        "operatingSystem": "All modern web browsers, iOS, Android, Windows, macOS",
-        "offers": {
-          "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "INR"
-        },
-        "aggregateRating": {
-          "@type": "AggregateRating",
-          "ratingValue": "4.9",
-          "reviewCount": "128"
-        }
-      },
-      {
-        "@type": "FAQPage",
-        "mainEntity": [
-          {
-            "@type": "Question",
-            "name": "How can parents pay school fees online on OmniSaaS?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Parents can search for their child by typing their name or roll number, verify the student profile card, select the institutional fee structure, scan the official merchant standee UPI QR code with GPay/PhonePe/Paytm, and instantly generate an official verified printable receipt."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "How does the online school admission wizard work?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "The 4-step admission wizard collects student biodata, academic history, parent contact information, and generates an instant official Admission Reference ID with real-time application milestone tracking and Google Sheets sync."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "How do school owners customize fee categories and clubs?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "School owners log in with their dedicated Owner ID and password to access the Fee Structure Manager, Co-Curricular Clubs Manager, Student Admissions Roster, and Real-Time Payment Ledger."
-            }
-          }
-        ]
-      }
-    ]
-  </script>
-
-  <!-- Dynamic Schema.org JSON-LD Structured Data Container -->
-  <script id="schema-structured-data" type="application/ld+json"></script>
-
-  <!-- Favicon -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>" />
-
-  <!-- PWA Manifest -->
+  <!-- Favicon & Manifest -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>" />
   <link rel="manifest" href="manifest.json" />
 
   <!-- Stylesheet -->
   <link rel="stylesheet" href="styles.css?v=2.3" />
+
+  <style>
+    /* Home Platform Showcase & Onboarding Styling */
+    .platform-hero {
+      text-align: center;
+      padding: 60px 20px 40px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .platform-hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(59, 130, 246, 0.12);
+      color: var(--primary-color);
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      border: 1px solid rgba(59, 130, 246, 0.25);
+    }
+    .platform-hero h1 {
+      font-size: 2.8rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, var(--text-main) 30%, var(--primary-color) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .platform-hero p {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 720px;
+      margin: 0 auto 28px;
+      line-height: 1.6;
+    }
+    .hero-cta-group {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    
+    /* 5 Apps Showcase Grid */
+    .showcase-grid-section {
+      max-width: 1200px;
+      margin: 40px auto 60px;
+      padding: 0 20px;
+    }
+    .section-header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .section-header h2 {
+      font-size: 2rem;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+    .section-header p {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    .apps-card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+    }
+    .app-card {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      position: relative;
+      overflow: hidden;
+    }
+    .app-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+      border-color: var(--primary-color);
+    }
+    .app-card-top {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .app-card-icon {
+      font-size: 36px;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+    }
+    .app-card-title h3 {
+      font-size: 18px;
+      font-weight: 800;
+      margin: 0 0 4px 0;
+    }
+    .app-card-title span {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .app-features-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 20px 0;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .app-features-list li {
+      padding: 6px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px dashed var(--border-color);
+    }
+    .app-features-list li:last-child {
+      border-bottom: none;
+    }
+    .app-card-btn {
+      width: 100%;
+      padding: 12px;
+      font-size: 14px;
+      font-weight: 800;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border-radius: 10px;
+    }
+
+    /* 5-Min Onboarding Wizard Section */
+    .onboard-wizard-section {
+      max-width: 860px;
+      margin: 40px auto 80px;
+      padding: 0 20px;
+    }
+    .onboard-box {
+      background: var(--bg-card);
+      border: 2px solid var(--primary-color);
+      border-radius: 20px;
+      padding: 36px 30px;
+      box-shadow: 0 16px 40px rgba(59, 130, 246, 0.08);
+    }
+    .wizard-step-card {
+      display: none;
+    }
+    .wizard-step-card.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .wizard-cat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .wizard-cat-item {
+      border: 1.5px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: var(--bg-secondary);
+    }
+    .wizard-cat-item:hover {
+      border-color: var(--primary-color);
+      transform: translateY(-2px);
+    }
+    .wizard-cat-item.selected {
+      border-color: var(--primary-color);
+      background: rgba(59, 130, 246, 0.1);
+      box-shadow: 0 0 0 2px var(--primary-color);
+    }
+    .service-row-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      align-items: center;
+    }
+    .service-row-item input {
+      font-size: 13px;
+    }
+    
+    /* Stepper Header */
+    .step-progress-bar {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 30px;
+      position: relative;
+    }
+    .step-progress-bar::before {
+      content: '';
+      position: absolute;
+      top: 16px;
+      left: 20px;
+      right: 20px;
+      height: 3px;
+      background: var(--border-color);
+      z-index: 1;
+    }
+    .step-circle {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: 2px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 13px;
+      position: relative;
+      z-index: 2;
+      color: var(--text-muted);
+    }
+    .step-circle.active {
+      background: var(--primary-color);
+      border-color: var(--primary-color);
+      color: #fff;
+    }
+    .step-circle.completed {
+      background: #10b981;
+      border-color: #10b981;
+      color: #fff;
+    }
+  </style>
 </head>
 <body>
 
   <!-- Ambient Glow Meshes -->
   <div class="ambient-glow-mesh"></div>
 
-  <!-- =========================================================================
-       CANVAS CONFETTI PARTICLE OVERLAY
-       ========================================================================= -->
+  <!-- Confetti Canvas -->
   <canvas id="confetti-canvas"></canvas>
 
-  <!-- =========================================================================
-       SHOWCASE & CONTROLS BAR (FOR CLIENT DEMOS, REBRANDING & ADMIN DASHBOARD)
-       ========================================================================= -->
-  <div class="showcase-bar" id="showcase-bar">
-    <div class="showcase-bar-left">
-      <span>⚡ <strong>White-Label Engine:</strong></span>
-      <div class="showcase-select-wrapper">
-        <select id="showcase-select" class="showcase-select" onchange="UniversalApp.switchVertical(this.value)">
-          <option value="student_management">🎓 1. School Fee & Student Admission System</option>
-          <option value="movex_booking">🚚 2. MOVE-X Logistics & Vehicle Booking (V0 Plan)</option>
-          <option value="hotel_booking">🏨 3. Hotel & Table / Seat Reservation</option>
-          <option value="food_order">🍔 4. Restaurant Food Ordering App</option>
-          <option value="ecommerce">🛍️ 5. Quick-Commerce / E-Commerce Retail Store</option>
-        </select>
-      </div>
-    </div>
-
-    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-      <!-- Direct Link to Multi-Vendor Admin Dashboard -->
-      <a href="admin.html" target="_blank" class="pill-btn" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); border: none; font-weight: 800; text-decoration: none;">
-        🔐 Admin & Vendor Dashboard
-      </a>
-
-      <!-- Quick 5-Minute Rebrand & Client Generator -->
-      <button class="pill-btn" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; font-weight: 800;" onclick="UniversalApp.openRebrandingModal()">
-        ⚙️ 5-Min Client Generator
-      </button>
-
-      <button class="pill-btn" id="pwa-install-btn" style="display: none; background: #10b981; border-color: #10b981;" onclick="UniversalApp.installPwaApp()">📲 Install App</button>
-      <button class="pill-btn" id="sound-toggle-btn" onclick="UniversalApp.toggleSound()">🔊 Sound: ON</button>
-      <button class="pill-btn" id="theme-toggle-btn" onclick="UniversalApp.toggleTheme()">🌙 Dark</button>
-    </div>
-  </div>
-
-  <!-- =========================================================================
-       NAVBAR & AUTHENTICATION BADGE
-       ========================================================================= -->
+  <!-- NAVBAR -->
   <nav class="navbar" id="main-navbar">
     <div class="nav-container">
-      <a href="#" class="brand">
-        <img id="brand-logo-img" class="brand-logo-img" src="" alt="Brand Logo" style="display: none;" />
-        <span class="brand-icon" id="brand-icon">🎓</span>
+      <a href="index.html" class="brand">
+        <span class="brand-icon">⚡</span>
         <div class="brand-info">
-          <h1 id="brand-title">BrightStar Academy</h1>
-          <p id="brand-tagline">Online Admissions & Fee Portal</p>
+          <h1 id="brand-title">OmniSaaS Enterprise</h1>
+          <p id="brand-tagline">Universal Multi-Tenant Business OS</p>
         </div>
       </a>
 
       <div class="nav-actions">
-        <!-- Global Universal Multi-Entity Search Button -->
-        <button class="pill-btn nav-search-pill" onclick="UniversalApp.openUniversalSearch()">
-          🔍 Search Records
+        <a href="#apps-showcase" class="pill-btn" style="text-decoration: none;">
+          🚀 Dedicated Apps
+        </a>
+        <a href="#onboarding-wizard" class="pill-btn" style="background: rgba(59, 130, 246, 0.12); color: var(--primary-color); border: 1.5px solid var(--primary-color); font-weight: 800; text-decoration: none;">
+          ⚡ 5-Min App Launch
+        </a>
+        <button class="pill-btn" onclick="OmniLauncher.openTrackModal()">
+          🔍 Track Request
         </button>
-
-        <!-- Business Owner Dedicated Login Button -->
-        <button class="pill-btn" style="background: rgba(59, 130, 246, 0.12); color: var(--primary-color); border: 1.5px solid var(--primary-color); font-weight: 800; font-size: 11px;" onclick="UniversalApp.openOwnerLoginModal()">
-          🏢 Owner Login
-        </button>
-
-        <!-- Google OAuth Profile Container -->
-        <div id="nav-auth-container"></div>
-
-        <button class="cart-badge-btn" onclick="UniversalApp.toggleCart()">
-          🛒 <span id="cart-btn-label">Cart</span>
-          <span class="badge-count" id="cart-count">0</span>
-        </button>
+        <a href="admin.html" class="pill-btn" style="background: #1e293b; color: #fff; text-decoration: none; font-weight: 700;">
+          🔐 Admin Console
+        </a>
+        <button class="pill-btn" id="theme-toggle-btn" onclick="UniversalApp.toggleTheme()" style="font-size: 11px;">🌙</button>
       </div>
     </div>
   </nav>
 
-  <!-- =========================================================================
-       HERO SECTION WITH TRUST BADGES & ANIMATED GLOW
-       ========================================================================= -->
-  <header class="hero">
-    <div class="hero-content">
-      <div class="hero-badge-wrap">
-        <span class="hero-badge" id="hero-badge">ADMISSION PORTAL</span>
-        <span class="status-live-dot">● LIVE SYSTEM</span>
-      </div>
-      <h2 id="hero-headline">Online Student Admissions & Fee Portal</h2>
-      <p id="hero-subtext">Apply online for new admissions, pay term fees securely, and track academic & co-curricular activity milestones.</p>
-
-      <!-- Enterprise Trust & Security Badges -->
-      <div class="trust-badge-row">
-        <div class="trust-badge-item">
-          <span class="trust-icon">🔒</span>
-          <span>256-Bit SSL Encrypted</span>
-        </div>
-        <div class="trust-badge-item">
-          <span class="trust-icon">⚡</span>
-          <span>Real-Time Google Sheets Sync</span>
-        </div>
-        <div class="trust-badge-item">
-          <span class="trust-icon">🏛️</span>
-          <span>5-Min Multi-Tenant Ready</span>
-        </div>
-        <div class="trust-badge-item">
-          <span class="trust-icon">💳</span>
-          <span>Direct Merchant UPI (0% Fee)</span>
-        </div>
-      </div>
+  <!-- HERO SECTION -->
+  <section class="platform-hero">
+    <div class="platform-hero-badge">
+      <span>⚡ 5-MINUTE RAPID DEPLOYMENT ENGINE</span>
     </div>
-  </header>
-
-  <!-- =========================================================================
-       MAIN CONTENT CONTAINER (Dynamically injected per vertical)
-       ========================================================================= -->
-  <main class="main-wrapper" id="vertical-container">
-    <!-- Active Vertical Module Renders Here -->
-  </main>
-
-  <!-- =========================================================================
-       SLIDE-OUT SHOPPING / BOOKING CART DRAWER
-       ========================================================================= -->
-  <div class="cart-drawer" id="cart-drawer">
-    <div class="cart-header">
-      <h3 style="font-size: 1.15rem; color: var(--text-main);">🛍️ Your Selection</h3>
-      <button class="modal-close" onclick="UniversalApp.toggleCart()" style="position: static;">✕</button>
+    <h1>Run Your Business with an Isolated, Branded Web App</h1>
+    <p>
+      Create dedicated cloud portals for <strong>Schools & Colleges</strong>, <strong>Logistics & Fleet</strong>, <strong>Hotels & Resorts</strong>, <strong>Restaurants & Cafes</strong>, and <strong>Retail Stores</strong>. Zero commission, direct UPI payments, and automatic Google Sheets synchronization.
+    </p>
+    <div class="hero-cta-group">
+      <a href="#onboarding-wizard" class="btn btn-primary" style="padding: 14px 28px; font-size: 15px; font-weight: 800; text-decoration: none;">
+        🚀 Launch Your App in 5 Mins →
+      </a>
+      <a href="#apps-showcase" class="btn btn-outline" style="padding: 14px 24px; font-size: 15px; font-weight: 700; text-decoration: none;">
+        👁️ Explore 5 Dedicated Apps
+      </a>
     </div>
-    
-    <div class="cart-items-list" id="cart-items-list">
-      <!-- Items populated via JS -->
+  </section>
+
+  <!-- APPS SHOWCASE SECTION -->
+  <section class="showcase-grid-section" id="apps-showcase">
+    <div class="section-header">
+      <span class="hero-badge">ISOLATED APPS</span>
+      <h2>Choose a Dedicated App Portal</h2>
+      <p>Each business gets a standalone, high-performance web portal with dedicated routes, encrypted owner login, and zero clutter.</p>
     </div>
 
-    <!-- PROMO CODE & FREE DELIVERY PROGRESS -->
-    <div style="padding: 0 24px; background: var(--surface-card);">
-      <div class="promo-input-group">
-        <input type="text" id="cart_promo_input" class="form-control" placeholder="Promo code (e.g. WELCOME10)" style="padding: 8px 12px; font-size: 13px;" />
-        <button class="btn btn-primary" style="padding: 8px 14px; font-size: 13px;" onclick="UniversalApp.applyPromoCode()">Apply</button>
-      </div>
-      <div style="font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between;">
-        <span>Free Express Delivery:</span>
-        <span style="color: var(--success-color); font-weight: 700;">Unlocked!</span>
-      </div>
-      <div class="free-shipping-meter">
-        <div class="free-shipping-progress" style="width: 100%;"></div>
-      </div>
-    </div>
-
-    <div class="cart-footer">
-      <div style="display: flex; justify-content: space-between; margin-bottom: 14px; font-weight: 800;">
-        <span>Total Payable:</span>
-        <span id="cart-total-amt" style="color: var(--primary-color); font-size: 1.3rem;">$0.00</span>
-      </div>
-      <button class="btn btn-primary" style="width: 100%; font-size: 15px;" onclick="UniversalApp.openCartCheckout()">
-        Proceed to Checkout →
-      </button>
-    </div>
-  </div>
-
-  <!-- =========================================================================
-       UNIVERSAL MODAL OVERLAY
-       ========================================================================= -->
-  <div class="modal-overlay" id="app-modal" onclick="if(event.target === this) UniversalApp.closeModal()">
-    <div class="modal-box">
-      <button class="modal-close" onclick="UniversalApp.closeModal()">✕</button>
-      <div id="modal-body">
-        <!-- Injected dynamically -->
-      </div>
-    </div>
-  </div>
-
-  <!-- =========================================================================
-       TOAST CONTAINER
-       ========================================================================= -->
-  <div class="toast-container" id="toast-container"></div>
-
-  <!-- =========================================================================
-       SEO CRAWLABLE KEYWORDS & ENTERPRISE CAPABILITIES HUB
-       ========================================================================= -->
-  <section class="seo-keywords-section" style="max-width: 1200px; margin: 30px auto; padding: 0 20px; font-size: 13px; color: var(--text-muted);">
-    <div style="background: var(--surface-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 24px;">
-      <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin-bottom: 8px;">
-        🎓 Complete Digital School Management & Student Fee Portal
-      </h3>
-      <p style="line-height: 1.6; margin-bottom: 14px;">
-        <strong>OmniSaaS</strong> delivers an all-in-one cloud platform for educational institutions, K-12 schools, colleges, and academies. Features include the <strong>4-Step Student Admission Wizard</strong>, <strong>Instant UPI QR Fee Invoicing</strong> with verified receipts, <strong>Digital Student ID Card Creator</strong>, <strong>Real-Time Application Tracking</strong>, and seamless <strong>Google Sheets Database Synchronization</strong>.
-      </p>
-      
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 14px;">
-        <div style="background: var(--bg-secondary); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border-color);">
-          <strong style="color: var(--primary-color);">💳 Smart Fee Invoicing</strong>
-          <p style="font-size: 12px; margin-top: 4px;">Student auto-lookup by name or roll number, custom fee category selection, instant merchant standee UPI QR code, 12-digit UTR verification, and printable tax receipts.</p>
+    <div class="apps-card-grid">
+      <!-- 1. School Management -->
+      <div class="app-card">
+        <div>
+          <div class="app-card-top">
+            <div class="app-card-icon" style="color: #1e3a8a;">🎓</div>
+            <div class="app-card-title">
+              <h3>School & College OS</h3>
+              <span>BrightStar Academy &bull; Education</span>
+            </div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
+            Complete online admissions, dynamic grade fee invoicing, zero-surcharge UPI receipts, and digital student ID card creator.
+          </p>
+          <ul class="app-features-list">
+            <li><span>✅</span> 4-Step Online Admission Form</li>
+            <li><span>✅</span> Instant UPI Fee QR with Print Receipts</li>
+            <li><span>✅</span> Digital Student ID Badge Generator</li>
+            <li><span>✅</span> Real-Time Google Sheets Sync</li>
+          </ul>
         </div>
-        <div style="background: var(--bg-secondary); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border-color);">
-          <strong style="color: var(--primary-color);">📝 4-Step Admission Wizard</strong>
-          <p style="font-size: 12px; margin-top: 4px;">Online student registration from Nursery to Class 12, merit scholarship waiver calculator, parent contact records, and live application reference tracking.</p>
+        <a href="school/index.html" class="app-card-btn btn btn-primary">
+          🚀 Launch School App →
+        </a>
+      </div>
+
+      <!-- 2. MOVE-X Logistics -->
+      <div class="app-card">
+        <div>
+          <div class="app-card-top">
+            <div class="app-card-icon" style="color: #0284c7;">🚚</div>
+            <div class="app-card-title">
+              <h3>MOVE-X Logistics</h3>
+              <span>Fleet & City Freight &bull; Logistics</span>
+            </div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
+            On-demand commercial vehicle booking, transparent distance pricing calculator, return-load saver discounts, and OTP delivery verification.
+          </p>
+          <ul class="app-features-list">
+            <li><span>✅</span> Tata Ace to 32ft Container Booking</li>
+            <li><span>✅</span> Live Route Distance & Fare Calculator</li>
+            <li><span>✅</span> 15% Return-Load Saver Discount</li>
+            <li><span>✅</span> OTP Proof-of-Delivery Verification</li>
+          </ul>
         </div>
-        <div style="background: var(--bg-secondary); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border-color);">
-          <strong style="color: var(--primary-color);">🪪 Digital Student ID Badges</strong>
-          <p style="font-size: 12px; margin-top: 4px;">Single-page printable student identity cards with photo upload, roll number barcode, class details, and custom institutional logo branding.</p>
+        <a href="movex/index.html" class="app-card-btn btn btn-primary" style="background: #0284c7; border-color: #0284c7;">
+          🚀 Launch MOVE-X App →
+        </a>
+      </div>
+
+      <!-- 3. Hotel & Resort -->
+      <div class="app-card">
+        <div>
+          <div class="app-card-top">
+            <div class="app-card-icon" style="color: #4f46e5;">🏨</div>
+            <div class="app-card-title">
+              <h3>Grand Palace Resort</h3>
+              <span>Luxury Stays &bull; Hospitality</span>
+            </div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
+            Online room and suite reservations, private dining table booking, verified digital vouchers, and direct merchant UPI payment.
+          </p>
+          <ul class="app-features-list">
+            <li><span>✅</span> Deluxe Suites & Villa Room Picker</li>
+            <li><span>✅</span> Dining Table & Slot Booking</li>
+            <li><span>✅</span> Instant Printable Booking Voucher</li>
+            <li><span>✅</span> Guest Check-In Status Ledger</li>
+          </ul>
         </div>
-        <div style="background: var(--bg-secondary); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border-color);">
-          <strong style="color: var(--primary-color);">🏢 Owner Control Center</strong>
-          <p style="font-size: 12px; margin-top: 4px;">Dedicated school owner login, custom fee structure CRUD manager, co-curricular club registration, payment verification ledger, and CSV export.</p>
+        <a href="hotel/index.html" class="app-card-btn btn btn-primary" style="background: #4f46e5; border-color: #4f46e5;">
+          🚀 Launch Hotel App →
+        </a>
+      </div>
+
+      <!-- 4. Restaurant & Food Ordering -->
+      <div class="app-card">
+        <div>
+          <div class="app-card-top">
+            <div class="app-card-icon" style="color: #dc2626;">🍔</div>
+            <div class="app-card-title">
+              <h3>Spice Haven Kitchen</h3>
+              <span>Artisanal Dining &bull; Restaurant</span>
+            </div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
+            Contactless digital menu, dine-in table QR ordering, takeaway cart, dietary filters, and direct kitchen KOT order dispatching.
+          </p>
+          <ul class="app-features-list">
+            <li><span>✅</span> Interactive Visual Food Menu</li>
+            <li><span>✅</span> Table QR Dine-in & Takeaway Cart</li>
+            <li><span>✅</span> Zero-Commission Direct UPI Billing</li>
+            <li><span>✅</span> Kitchen Order Ticket (KOT) Dispatch</li>
+          </ul>
         </div>
+        <a href="food/index.html" class="app-card-btn btn btn-primary" style="background: #dc2626; border-color: #dc2626;">
+          🚀 Launch Food App →
+        </a>
+      </div>
+
+      <!-- 5. Quick-Commerce Retail -->
+      <div class="app-card">
+        <div>
+          <div class="app-card-top">
+            <div class="app-card-icon" style="color: #10b981;">🛍️</div>
+            <div class="app-card-title">
+              <h3>Nova SuperMart</h3>
+              <span>Express Delivery &bull; E-Commerce</span>
+            </div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
+            Rapid catalog browsing, instant add-to-cart, promo discount validation, zero-fee direct merchant UPI checkout, and delivery invoices.
+          </p>
+          <ul class="app-features-list">
+            <li><span>✅</span> Fast Product Catalog & Search</li>
+            <li><span>✅</span> Slide-Out Cart with Promo Codes</li>
+            <li><span>✅</span> Direct Merchant Standee UPI QR</li>
+            <li><span>✅</span> Instant Order Invoice & Tracking</li>
+          </ul>
+        </div>
+        <a href="store/index.html" class="app-card-btn btn btn-primary" style="background: #10b981; border-color: #10b981;">
+          🚀 Launch Store App →
+        </a>
       </div>
     </div>
   </section>
 
-  <!-- =========================================================================
-       FOOTER
-       ========================================================================= -->
+  <!-- 5-MINUTE ONBOARDING WIZARD SECTION -->
+  <section class="onboard-wizard-section" id="onboarding-wizard">
+    <div class="section-header">
+      <span class="hero-badge" style="background: #10b981;">SELF-SERVICE ONBOARDING</span>
+      <h2>Onboard Your Business in 5 Minutes</h2>
+      <p>Submit your business details, custom services, and pricing. Our Super Admin reviews & verifies your app before putting it live!</p>
+    </div>
+
+    <div class="onboard-box">
+      <!-- Step Progress Indicators -->
+      <div class="step-progress-bar">
+        <div class="step-circle active" id="st_circle_1">1</div>
+        <div class="step-circle" id="st_circle_2">2</div>
+        <div class="step-circle" id="st_circle_3">3</div>
+        <div class="step-circle" id="st_circle_4">4</div>
+        <div class="step-circle" id="st_circle_5">5</div>
+      </div>
+
+      <!-- STEP 1: SELECT CATEGORY -->
+      <div class="wizard-step-card active" id="onboard_step_1">
+        <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 8px;">Step 1: Choose Your Business Category</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Select the operational model that best matches your business.</p>
+
+        <div class="wizard-cat-grid">
+          <div class="wizard-cat-item selected" onclick="OmniLauncher.selectVertical('student_management', this)">
+            <div style="font-size: 28px; margin-bottom: 4px;">🎓</div>
+            <div style="font-weight: 800; font-size: 12px;">School / College</div>
+            <div style="font-size: 10px; color: var(--text-muted);">Admissions & Fees</div>
+          </div>
+          <div class="wizard-cat-item" onclick="OmniLauncher.selectVertical('movex_booking', this)">
+            <div style="font-size: 28px; margin-bottom: 4px;">🚚</div>
+            <div style="font-weight: 800; font-size: 12px;">Logistics / Fleet</div>
+            <div style="font-size: 10px; color: var(--text-muted);">Trucks & Cargo</div>
+          </div>
+          <div class="wizard-cat-item" onclick="OmniLauncher.selectVertical('hotel_booking', this)">
+            <div style="font-size: 28px; margin-bottom: 4px;">🏨</div>
+            <div style="font-weight: 800; font-size: 12px;">Hotel / Resort</div>
+            <div style="font-size: 10px; color: var(--text-muted);">Rooms & Stays</div>
+          </div>
+          <div class="wizard-cat-item" onclick="OmniLauncher.selectVertical('food_order', this)">
+            <div style="font-size: 28px; margin-bottom: 4px;">🍔</div>
+            <div style="font-weight: 800; font-size: 12px;">Restaurant / Cafe</div>
+            <div style="font-size: 10px; color: var(--text-muted);">Menu & Orders</div>
+          </div>
+          <div class="wizard-cat-item" onclick="OmniLauncher.selectVertical('ecommerce', this)">
+            <div style="font-size: 28px; margin-bottom: 4px;">🛍️</div>
+            <div style="font-weight: 800; font-size: 12px;">Retail Store</div>
+            <div style="font-size: 10px; color: var(--text-muted);">Products & Cart</div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: 800;" onclick="OmniLauncher.nextStep(2)">
+          Continue to Business Info →
+        </button>
+      </div>
+
+      <!-- STEP 2: BUSINESS & OWNER CONTACT -->
+      <div class="wizard-step-card" id="onboard_step_2">
+        <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 8px;">Step 2: Business & Owner Details</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Tell us about your business and how customers reach you.</p>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Business / Institution Name *</label>
+            <input type="text" id="ob_biz_name" class="form-control" required placeholder="e.g. Apex International School" />
+          </div>
+          <div class="form-group">
+            <label>Owner / Director Name *</label>
+            <input type="text" id="ob_owner_name" class="form-control" required placeholder="e.g. Dr. Rajesh Sharma" />
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>WhatsApp / Mobile Number *</label>
+            <input type="tel" id="ob_biz_phone" class="form-control" required placeholder="e.g. 9876543210" />
+          </div>
+          <div class="form-group">
+            <label>Official Email Address *</label>
+            <input type="email" id="ob_biz_email" class="form-control" required placeholder="e.g. contact@apexschool.com" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>City & Address *</label>
+          <input type="text" id="ob_biz_address" class="form-control" required placeholder="e.g. Sector 14, Rohini, New Delhi" />
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button class="btn btn-outline" style="flex: 1;" onclick="OmniLauncher.prevStep(1)">← Back</button>
+          <button class="btn btn-primary" style="flex: 2; font-weight: 800;" onclick="OmniLauncher.nextStep(3)">Continue to Password & Security →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: OWNER PASSWORD & SECURITY (SHA-256) -->
+      <div class="wizard-step-card" id="onboard_step_3">
+        <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 8px;">Step 3: Set Your Business Owner Password</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Your password is encrypted client-side with 256-bit SHA-256 before saving.</p>
+
+        <div class="form-group">
+          <label>Owner Private Password (Min 6 Characters) *</label>
+          <input type="password" id="ob_owner_pass" class="form-control" required minlength="6" placeholder="Enter strong password" oninput="OmniLauncher.updateHashPreview(this.value)" />
+        </div>
+
+        <div class="form-group">
+          <label>Confirm Password *</label>
+          <input type="password" id="ob_owner_pass_conf" class="form-control" required minlength="6" placeholder="Re-enter password" />
+        </div>
+
+        <!-- SHA-256 Live Encryption Preview -->
+        <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-bottom: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; margin-bottom: 4px;">
+            <span style="font-weight: 800; color: var(--primary-color);">🔒 Cryptographic Hash (SHA-256)</span>
+            <span style="color: #10b981; font-weight: 700;">Client-Side Encrypted</span>
+          </div>
+          <code id="ob_hash_preview" style="font-size: 10px; color: var(--text-muted); word-break: break-all; display: block;">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</code>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-outline" style="flex: 1;" onclick="OmniLauncher.prevStep(2)">← Back</button>
+          <button class="btn btn-primary" style="flex: 2; font-weight: 800;" onclick="OmniLauncher.nextStep(4)">Continue to Services & Pricing →</button>
+        </div>
+      </div>
+
+      <!-- STEP 4: CUSTOM SERVICES & PRICING BUILDER -->
+      <div class="wizard-step-card" id="onboard_step_4">
+        <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 8px;">Step 4: Add Your Services & Pricing</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Customize the items and prices your customers will see on your app.</p>
+
+        <div id="ob_services_container">
+          <!-- Dynamic Service Rows -->
+          <div class="service-row-item">
+            <input type="text" class="form-control ob-service-title" placeholder="Service / Item Name (e.g. Grade 10 Tuition)" style="flex: 2;" required />
+            <input type="number" class="form-control ob-service-price" placeholder="Price (₹)" style="flex: 1;" required />
+            <input type="text" class="form-control ob-service-desc" placeholder="Short description" style="flex: 2;" />
+            <button type="button" class="btn btn-outline" style="padding: 8px 12px; color: var(--danger-color);" onclick="OmniLauncher.removeServiceRow(this)">✕</button>
+          </div>
+          <div class="service-row-item">
+            <input type="text" class="form-control ob-service-title" placeholder="Service / Item Name (e.g. Annual Activity Fee)" style="flex: 2;" />
+            <input type="number" class="form-control ob-service-price" placeholder="Price (₹)" style="flex: 1;" />
+            <input type="text" class="form-control ob-service-desc" placeholder="Short description" style="flex: 2;" />
+            <button type="button" class="btn btn-outline" style="padding: 8px 12px; color: var(--danger-color);" onclick="OmniLauncher.removeServiceRow(this)">✕</button>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-outline" style="width: 100%; margin: 12px 0 20px; font-size: 12px; font-weight: 700;" onclick="OmniLauncher.addServiceRow()">
+          ➕ Add Another Service / Fee / Item
+        </button>
+
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-outline" style="flex: 1;" onclick="OmniLauncher.prevStep(3)">← Back</button>
+          <button class="btn btn-primary" style="flex: 2; font-weight: 800;" onclick="OmniLauncher.nextStep(5)">Continue to UPI Payment Setup →</button>
+        </div>
+      </div>
+
+      <!-- STEP 5: UPI ID & MERCHANT QR UPLOAD -->
+      <div class="wizard-step-card" id="onboard_step_5">
+        <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 8px;">Step 5: UPI Payment & Standee QR</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">100% of customer payments go directly to your bank account with 0% fees.</p>
+
+        <div class="form-group">
+          <label>Your Merchant UPI ID (GPay / PhonePe / Paytm / BHIM) *</label>
+          <input type="text" id="ob_upi_id" class="form-control" required placeholder="e.g. merchant@okaxis or 9876543210@paytm" />
+        </div>
+
+        <div class="form-group">
+          <label>Upload Official Standee QR Code Image (Optional)</label>
+          <input type="file" id="ob_qr_file" class="form-control" accept="image/*" onchange="OmniLauncher.handleQrUpload(this)" />
+          <div id="ob_qr_preview" style="margin-top: 10px; display: none;"></div>
+        </div>
+
+        <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 8px; padding: 14px; margin-bottom: 20px; font-size: 12px;">
+          <strong>🛡️ Super Admin Review Guarantee:</strong> Once submitted, our admin reviews your contact and payment details to verify authenticity. Upon approval, your app link is activated immediately!
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-outline" style="flex: 1;" onclick="OmniLauncher.prevStep(4)">← Back</button>
+          <button class="btn btn-primary" style="flex: 2; font-weight: 900; font-size: 15px;" onclick="OmniLauncher.submitApplication()">
+            🚀 Submit for Verification & App Activation →
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- TRACK APPLICATION STATUS SECTION -->
+  <section style="max-width: 600px; margin: 0 auto 80px; padding: 0 20px; text-align: center;" id="track-app">
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 28px;">
+      <span style="font-size: 32px;">🔍</span>
+      <h3 style="font-size: 18px; font-weight: 800; margin: 8px 0;">Check Application Verification Status</h3>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 18px;">Already registered? Enter your Request ID or Phone number to check if your app is live.</p>
+
+      <div style="display: flex; gap: 8px;">
+        <input type="text" id="track_query_input" class="form-control" placeholder="e.g. REQ-2026-XXXX or Phone Number" onkeypress="if(event.key==='Enter') OmniLauncher.lookupStatus()" />
+        <button class="btn btn-primary" onclick="OmniLauncher.lookupStatus()">Check Status</button>
+      </div>
+
+      <div id="track_result_box" style="margin-top: 16px; text-align: left; display: none;"></div>
+    </div>
+  </section>
+
+  <!-- UNIVERSAL MODAL OVERLAY -->
+  <div class="modal-overlay" id="app-modal" onclick="if(event.target === this) UniversalApp.closeModal()">
+    <div class="modal-box">
+      <button class="modal-close" onclick="UniversalApp.closeModal()">✕</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATIONS CONTAINER -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- FOOTER -->
   <footer>
     <div style="max-width: 1200px; margin: 0 auto;">
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 18px; text-align: left;">
         <div>
-          <p style="font-weight: 900; color: var(--text-main); font-size: 16px;" id="footer-brand">BrightStar Academy</p>
-          <p style="margin: 4px 0; font-size: 12px; color: var(--text-muted);">Enterprise Multi-Tenant White-Label Architecture &bull; Pure HTML/CSS/JS Engine</p>
+          <p style="font-weight: 900; color: var(--text-main); font-size: 16px;">OmniSaaS Enterprise Platform</p>
+          <p style="margin: 4px 0; font-size: 12px; color: var(--text-muted);">Decoupled Cloud Multi-Tenant Business Architecture &bull; 99.9% Uptime SLA</p>
         </div>
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-          <button class="btn btn-outline" style="padding: 8px 16px; font-size: 12px; font-weight: 700;" onclick="UniversalApp.openOwnerLoginModal()">
-            🏢 Business Owner Login
-          </button>
-          <a href="admin.html" class="btn btn-outline" style="padding: 8px 16px; font-size: 12px; text-decoration: none;">
-            🔐 Admin Console
-          </a>
-          <button class="btn btn-outline" style="padding: 8px 16px; font-size: 12px;" onclick="UniversalApp.openUniversalSearch()">
-            🔍 Quick Lookup
-          </button>
+          <a href="school/index.html" class="btn btn-outline" style="padding: 6px 12px; font-size: 12px; text-decoration: none;">🎓 School</a>
+          <a href="movex/index.html" class="btn btn-outline" style="padding: 6px 12px; font-size: 12px; text-decoration: none;">🚚 MOVE-X</a>
+          <a href="hotel/index.html" class="btn btn-outline" style="padding: 6px 12px; font-size: 12px; text-decoration: none;">🏨 Hotel</a>
+          <a href="food/index.html" class="btn btn-outline" style="padding: 6px 12px; font-size: 12px; text-decoration: none;">🍔 Food</a>
+          <a href="store/index.html" class="btn btn-outline" style="padding: 6px 12px; font-size: 12px; text-decoration: none;">🛍️ Store</a>
+          <a href="admin.html" class="btn btn-primary" style="padding: 6px 14px; font-size: 12px; text-decoration: none; font-weight: 800;">🔐 Super Admin</a>
         </div>
       </div>
       <div style="border-top: 1px solid var(--border-color); padding-top: 14px; font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-        <span>© 2026 All Rights Reserved. Engineered for production deployment.</span>
-        <span>Hosted via GitHub Pages Static Architecture &bull; 99.9% Uptime SLA</span>
+        <span>© 2026 OmniSaaS Enterprise &bull; Universal Business Platform</span>
+        <span>Secured with SHA-256 Encryption & Google Cloud Sync</span>
       </div>
     </div>
   </footer>
 
-  <!-- =========================================================================
-       SCRIPTS LOADER
-       ========================================================================= -->
+  <!-- SCRIPTS LOADER -->
   <script src="config.js?v=2.3"></script>
   <script src="modules/student-management.js?v=2.3"></script>
   <script src="modules/movex-booking.js?v=2.3"></script>
@@ -374,5 +707,317 @@
   <script src="modules/food-ordering.js?v=2.3"></script>
   <script src="modules/ecommerce.js?v=2.3"></script>
   <script src="app.js?v=2.3"></script>
+
+  <!-- Self-Service Onboarding Logic adhering to SOLID & Design Patterns -->
+  <script>
+    /**
+     * OmniLauncher Controller (Facade & Builder Pattern for Business Onboarding)
+     */
+    const OmniLauncher = {
+      selectedVertical: 'student_management',
+      uploadedQrData: null,
+
+      selectVertical(vKey, elem) {
+        this.selectedVertical = vKey;
+        document.querySelectorAll('.wizard-cat-item').forEach(el => el.classList.remove('selected'));
+        if (elem) elem.classList.add('selected');
+      },
+
+      nextStep(stepNum) {
+        if (stepNum === 3) {
+          const name = document.getElementById('ob_biz_name').value.trim();
+          const owner = document.getElementById('ob_owner_name').value.trim();
+          const phone = document.getElementById('ob_biz_phone').value.trim();
+          const email = document.getElementById('ob_biz_email').value.trim();
+          if (!name || !owner || !phone || !email) {
+            UniversalApp.showToast('⚠️ Please fill in all required business details.', 'error');
+            return;
+          }
+        }
+        if (stepNum === 4) {
+          const p1 = document.getElementById('ob_owner_pass').value;
+          const p2 = document.getElementById('ob_owner_pass_conf').value;
+          if (p1.length < 6) {
+            UniversalApp.showToast('⚠️ Password must be at least 6 characters long.', 'error');
+            return;
+          }
+          if (p1 !== p2) {
+            UniversalApp.showToast('⚠️ Passwords do not match.', 'error');
+            return;
+          }
+        }
+
+        document.querySelectorAll('.wizard-step-card').forEach(el => el.classList.remove('active'));
+        const target = document.getElementById('onboard_step_' + stepNum);
+        if (target) target.classList.add('active');
+
+        // Update progress circles
+        for (let i = 1; i <= 5; i++) {
+          const c = document.getElementById('st_circle_' + i);
+          if (c) {
+            c.classList.remove('active', 'completed');
+            if (i < stepNum) c.classList.add('completed');
+            if (i === stepNum) c.classList.add('active');
+          }
+        }
+      },
+
+      prevStep(stepNum) {
+        document.querySelectorAll('.wizard-step-card').forEach(el => el.classList.remove('active'));
+        const target = document.getElementById('onboard_step_' + stepNum);
+        if (target) target.classList.add('active');
+
+        for (let i = 1; i <= 5; i++) {
+          const c = document.getElementById('st_circle_' + i);
+          if (c) {
+            c.classList.remove('active', 'completed');
+            if (i < stepNum) c.classList.add('completed');
+            if (i === stepNum) c.classList.add('active');
+          }
+        }
+      },
+
+      async updateHashPreview(val) {
+        if (!val) {
+          document.getElementById('ob_hash_preview').innerText = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+          return;
+        }
+        const hash = await CryptoSecurity.hashPassword(val);
+        document.getElementById('ob_hash_preview').innerText = hash;
+      },
+
+      addServiceRow() {
+        const container = document.getElementById('ob_services_container');
+        const div = document.createElement('div');
+        div.className = 'service-row-item';
+        div.innerHTML = `
+          <input type="text" class="form-control ob-service-title" placeholder="Service / Item Name" style="flex: 2;" required />
+          <input type="number" class="form-control ob-service-price" placeholder="Price (₹)" style="flex: 1;" required />
+          <input type="text" class="form-control ob-service-desc" placeholder="Short description" style="flex: 2;" />
+          <button type="button" class="btn btn-outline" style="padding: 8px 12px; color: var(--danger-color);" onclick="OmniLauncher.removeServiceRow(this)">✕</button>
+        `;
+        container.appendChild(div);
+      },
+
+      removeServiceRow(btn) {
+        const row = btn.closest('.service-row-item');
+        if (row && document.querySelectorAll('.service-row-item').length > 1) {
+          row.remove();
+        } else {
+          UniversalApp.showToast('At least one service is recommended.', 'info');
+        }
+      },
+
+      async handleQrUpload(input) {
+        if (input.files && input.files[0]) {
+          try {
+            const compressed = await ImageCompressor.compress(input.files[0], 400, 0.85);
+            this.uploadedQrData = compressed;
+            const prev = document.getElementById('ob_qr_preview');
+            prev.style.display = 'block';
+            prev.innerHTML = `<img src="${compressed}" style="width: 120px; height: 120px; object-fit: contain; border: 1px solid var(--border-color); border-radius: 8px;" />`;
+            UniversalApp.showToast('✅ Merchant Standee QR uploaded & optimized!', 'success');
+          } catch (e) {
+            UniversalApp.showToast('Failed to process QR image.', 'error');
+          }
+        }
+      },
+
+      async submitApplication() {
+        const upi = document.getElementById('ob_upi_id').value.trim();
+        if (!upi) {
+          UniversalApp.showToast('⚠️ Please enter your Merchant UPI ID.', 'error');
+          return;
+        }
+
+        const bizName = document.getElementById('ob_biz_name').value.trim();
+        const ownerName = document.getElementById('ob_owner_name').value.trim();
+        const phone = document.getElementById('ob_biz_phone').value.trim();
+        const email = document.getElementById('ob_biz_email').value.trim();
+        const address = document.getElementById('ob_biz_address').value.trim();
+        const rawPassword = document.getElementById('ob_owner_pass').value;
+
+        // Extract custom services
+        const services = [];
+        document.querySelectorAll('.service-row-item').forEach(row => {
+          const t = row.querySelector('.ob-service-title')?.value.trim();
+          const p = Number(row.querySelector('.ob-service-price')?.value) || 0;
+          const d = row.querySelector('.ob-service-desc')?.value.trim();
+          if (t && p > 0) {
+            services.push({ title: t, price: p, description: d });
+          }
+        });
+
+        const slug = bizName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') || 'app-' + Date.now();
+        const passwordHash = await CryptoSecurity.hashPassword(rawPassword);
+        const reqId = "REQ-" + new Date().getFullYear() + "-" + Math.floor(1000 + Math.random() * 9000);
+
+        // Build Application Request Entity
+        const applicationRecord = {
+          requestId: reqId,
+          timestamp: new Date().toISOString(),
+          businessName: bizName,
+          slug: slug,
+          ownerName: ownerName,
+          phone: phone,
+          email: email,
+          address: address,
+          vertical: this.selectedVertical,
+          passwordHash: passwordHash,
+          ownerUserId: `owner_${slug}`,
+          upiId: upi,
+          customQr: this.uploadedQrData || null,
+          services: services,
+          status: 'pending_verification' // pending_verification | approved | rejected
+        };
+
+        // Save to Pending Applications in localStorage
+        const pendingList = JSON.parse(localStorage.getItem('pending_business_requests') || '[]');
+        pendingList.unshift(applicationRecord);
+        localStorage.setItem('pending_business_requests', JSON.stringify(pendingList));
+
+        // Dispatch Webhook to Google Sheets
+        try {
+          if (UniversalApp && typeof UniversalApp.dispatchWebhook === 'function') {
+            await UniversalApp.dispatchWebhook({
+              type: 'business_onboarding_request',
+              requestId: reqId,
+              businessName: bizName,
+              ownerName: ownerName,
+              phone: phone,
+              email: email,
+              vertical: this.selectedVertical,
+              status: 'pending_verification',
+              upiId: upi,
+              servicesSummary: services.map(s => `${s.title}: ₹${s.price}`).join(', ')
+            });
+          }
+        } catch (err) {
+          console.warn('Webhook notification dispatched offline: ', err);
+        }
+
+        UniversalApp.playSound('victory');
+        UniversalApp.triggerConfetti();
+
+        // Show Success Tracker Modal
+        UniversalApp.showModal(`
+          <div style="text-align: center; max-width: 480px; margin: 0 auto;">
+            <div style="font-size: 54px; margin-bottom: 10px;">🎉</div>
+            <h3 style="color: var(--primary-color); font-weight: 900; font-size: 22px; margin-bottom: 6px;">Application Submitted!</h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+              Your business onboarding request is now in the <strong>Super Admin Verification Queue</strong>.
+            </p>
+
+            <div style="background: var(--bg-secondary); border: 2px dashed var(--primary-color); border-radius: 12px; padding: 18px; margin-bottom: 20px;">
+              <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 800;">Your Request Tracking ID</div>
+              <div style="font-size: 26px; font-weight: 900; color: var(--primary-color); margin: 6px 0;">${reqId}</div>
+              <div style="font-size: 12px; color: #10b981; font-weight: 700;">● STATUS: PENDING ADMIN APPROVAL</div>
+            </div>
+
+            <div style="text-align: left; font-size: 13px; background: rgba(59, 130, 246, 0.08); border-radius: 8px; padding: 14px; margin-bottom: 20px;">
+              <p style="margin: 0 0 6px 0;"><strong>🏢 Business:</strong> ${bizName}</p>
+              <p style="margin: 0 0 6px 0;"><strong>👤 Owner:</strong> ${ownerName} (${phone})</p>
+              <p style="margin: 0 0 6px 0;"><strong>📦 App Route:</strong> <code>/${this.selectedVertical.replace('_booking','').replace('_management','').replace('_order','')}/?biz=${slug}</code></p>
+              <p style="margin: 0;"><strong>🔐 Owner ID:</strong> <code>owner_${slug}</code></p>
+            </div>
+
+            <button class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: 800;" onclick="UniversalApp.closeModal(); OmniLauncher.resetForm();">
+              Done & Check Status →
+            </button>
+          </div>
+        `);
+      },
+
+      resetForm() {
+        document.getElementById('ob_biz_name').value = '';
+        document.getElementById('ob_owner_name').value = '';
+        document.getElementById('ob_biz_phone').value = '';
+        document.getElementById('ob_biz_email').value = '';
+        document.getElementById('ob_biz_address').value = '';
+        document.getElementById('ob_owner_pass').value = '';
+        document.getElementById('ob_owner_pass_conf').value = '';
+        document.getElementById('ob_upi_id').value = '';
+        this.uploadedQrData = null;
+        this.prevStep(1);
+      },
+
+      openTrackModal() {
+        document.getElementById('track-app')?.scrollIntoView({ behavior: 'smooth' });
+        document.getElementById('track_query_input')?.focus();
+      },
+
+      lookupStatus() {
+        const query = document.getElementById('track_query_input').value.trim().toLowerCase();
+        const box = document.getElementById('track_result_box');
+        if (!query) {
+          UniversalApp.showToast('Please enter your Request ID or Phone.', 'error');
+          return;
+        }
+
+        const pendingList = JSON.parse(localStorage.getItem('pending_business_requests') || '[]');
+        const profiles = JSON.parse(localStorage.getItem('saved_client_profiles') || '[]');
+
+        const cleanPhone = query.replace(/[^0-9]/g, '');
+
+        // Check if pending
+        const pendingMatch = pendingList.find(r => r.requestId.toLowerCase() === query || (cleanPhone && r.phone.includes(cleanPhone)));
+        // Check if approved in profiles
+        const activeProfile = profiles.find(p => (p.slug && p.slug.toLowerCase() === query) || (cleanPhone && p.whatsappNumber && p.whatsappNumber.includes(cleanPhone)) || (p.businessName && p.businessName.toLowerCase().includes(query)));
+
+        box.style.display = 'block';
+
+        if (activeProfile) {
+          const vertFolder = activeProfile.vertical === 'student_management' ? 'school' :
+                             activeProfile.vertical === 'movex_booking' ? 'movex' :
+                             activeProfile.vertical === 'hotel_booking' ? 'hotel' :
+                             activeProfile.vertical === 'food_order' ? 'food' : 'store';
+          const liveUrl = `${vertFolder}/?biz=${activeProfile.slug || activeProfile.id}`;
+
+          box.innerHTML = `
+            <div style="background: rgba(16, 185, 129, 0.1); border: 1.5px solid #10b981; border-radius: 10px; padding: 16px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                <strong style="color: #10b981; font-size: 14px;">🟢 APP VERIFIED & LIVE!</strong>
+                <span style="font-size: 11px; background: #10b981; color: #fff; padding: 2px 8px; border-radius: 4px;">ACTIVE</span>
+              </div>
+              <p style="margin: 4px 0; font-size: 13px;"><strong>Business:</strong> ${activeProfile.businessName}</p>
+              <p style="margin: 4px 0; font-size: 13px;"><strong>Owner User ID:</strong> <code>${activeProfile.ownerUserId || `owner_${activeProfile.slug}`}</code></p>
+              <div style="margin-top: 12px; display: flex; gap: 8px;">
+                <a href="${liveUrl}" target="_blank" class="btn btn-primary" style="flex: 1; padding: 8px; font-size: 12px; text-decoration: none; text-align: center; font-weight: 800;">
+                  🚀 Open Live App →
+                </a>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        if (pendingMatch) {
+          box.innerHTML = `
+            <div style="background: rgba(245, 158, 11, 0.1); border: 1.5px solid #f59e0b; border-radius: 10px; padding: 16px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                <strong style="color: #f59e0b; font-size: 14px;">🟡 PENDING VERIFICATION</strong>
+                <span style="font-size: 11px; background: #f59e0b; color: #fff; padding: 2px 8px; border-radius: 4px;">IN REVIEW</span>
+              </div>
+              <p style="margin: 4px 0; font-size: 13px;"><strong>Request ID:</strong> ${pendingMatch.requestId}</p>
+              <p style="margin: 4px 0; font-size: 13px;"><strong>Business:</strong> ${pendingMatch.businessName} (${pendingMatch.vertical})</p>
+              <p style="margin: 4px 0; font-size: 13px; color: var(--text-muted);">Submitted: ${new Date(pendingMatch.timestamp).toLocaleString()}</p>
+              <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                Super Admin is currently verifying your details. Once verified, your app will be activated automatically.
+              </p>
+            </div>
+          `;
+          return;
+        }
+
+        box.innerHTML = `
+          <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 10px; padding: 14px; text-align: center; font-size: 13px; color: var(--text-muted);">
+            ❌ No matching application found for "${SecurityGuard.escapeHTML(query)}". Please verify your Request ID or phone number.
+          </div>
+        `;
+      }
+    };
+
+    window.OmniLauncher = OmniLauncher;
+  </script>
 </body>
 </html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spice Haven Restaurant & Kitchen | Online Food Ordering & Table QR</title>
+  <meta name="description" content="Online Food Ordering, Dine-in Contactless QR Menu, Instant Kitchen Orders, and Direct UPI Payment with Invoices." />
+  <meta name="keywords" content="food order online, restaurant menu, table qr ordering, spice haven, omnisaas" />
+  <meta name="author" content="Spice Haven Restaurant by OmniSaaS" />
+  <meta name="theme-color" content="#dc2626" />
+
+  <!-- Security: CSP & Frame Protection -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: https: blob:; font-src 'self' https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https:;" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Google Identity Services (GIS) OAuth 2.0 SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <!-- Favicon & Manifest -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍔</text></svg>" />
+  <link rel="manifest" href="../manifest.json" />
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="../styles.css?v=2.3" />
+</head>
+<body data-standalone="food_order">
+
+  <!-- Ambient Glow Meshes -->
+  <div class="ambient-glow-mesh"></div>
+
+  <!-- Confetti Canvas -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- NAVBAR & BRANDING -->
+  <nav class="navbar" id="main-navbar">
+    <div class="nav-container">
+      <a href="index.html" class="brand">
+        <img id="brand-logo-img" class="brand-logo-img" src="" alt="Brand Logo" style="display: none;" />
+        <span class="brand-icon" id="brand-icon">🍔</span>
+        <div class="brand-info">
+          <h1 id="brand-title">Spice Haven Kitchen</h1>
+          <p id="brand-tagline">Artisanal Dining & Express Fast Delivery</p>
+        </div>
+      </a>
+
+      <div class="nav-actions">
+        <!-- Quick Search -->
+        <button class="pill-btn nav-search-pill" onclick="UniversalApp.openUniversalSearch()">
+          🔍 Track Order / Bill
+        </button>
+
+        <!-- Business Owner Login -->
+        <button class="pill-btn" style="background: rgba(220, 38, 38, 0.12); color: #dc2626; border: 1.5px solid #dc2626; font-weight: 800; font-size: 11px;" onclick="UniversalApp.openOwnerLoginModal()">
+          🏢 Restro Owner Login
+        </button>
+
+        <!-- Google OAuth Profile Container -->
+        <div id="nav-auth-container"></div>
+
+        <button class="cart-badge-btn" onclick="UniversalApp.toggleCart()">
+          🛒 <span id="cart-btn-label">Order</span>
+          <span class="badge-count" id="cart-count">0</span>
+        </button>
+
+        <button class="pill-btn" id="sound-toggle-btn" onclick="UniversalApp.toggleSound()" style="font-size: 11px;">🔊 Sound</button>
+        <button class="pill-btn" id="theme-toggle-btn" onclick="UniversalApp.toggleTheme()" style="font-size: 11px;">🌙</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO BANNER -->
+  <header class="hero">
+    <div class="hero-content">
+      <div class="hero-badge-wrap">
+        <span class="hero-badge" id="hero-badge" style="background: #dc2626;">KITCHEN OPEN</span>
+        <span class="status-live-dot">● TAKING ORDERS</span>
+      </div>
+      <h2 id="hero-headline">Artisanal Gourmet Flavors & Fast Delivery</h2>
+      <p id="hero-subtext">Order handcrafted meals, contactless table dining, customize dietary preferences, and pay zero-commission UPI with instant bills.</p>
+
+      <!-- Trust Badges -->
+      <div class="trust-badge-row">
+        <div class="trust-badge-item">
+          <span class="trust-icon">🔒</span>
+          <span>SHA-256 Encrypted</span>
+        </div>
+        <div class="trust-badge-item">
+          <span class="trust-icon">⚡</span>
+          <span>Live Kitchen KOT Sync</span>
+        </div>
+        <div class="trust-badge-item">
+          <span class="trust-icon">🍲</span>
+          <span>100% Fresh Guaranteed</span>
+        </div>
+        <div class="trust-badge-item">
+          <span class="trust-icon">💳</span>
+          <span>Direct Merchant UPI (0% Fee)</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN MODULE CONTAINER -->
+  <main class="main-wrapper" id="vertical-container">
+    <!-- Food Ordering Module Mounts Here -->
+  </main>
+
+  <!-- SLIDE-OUT CART DRAWER -->
+  <div class="cart-drawer-overlay" id="cart-drawer" onclick="if(event.target === this) UniversalApp.toggleCart()">
+    <div class="cart-drawer-content">
+      <div class="cart-drawer-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 20px;">🛒</span>
+          <h3 style="font-size: 17px; font-weight: 800; margin: 0;">Your Food Order</h3>
+        </div>
+        <button class="btn btn-outline" style="padding: 4px 10px; font-size: 12px;" onclick="UniversalApp.toggleCart()">✕</button>
+      </div>
+
+      <div class="cart-items-container" id="cart-items-list">
+        <!-- Dynamic Cart Items -->
+      </div>
+
+      <div class="cart-drawer-footer">
+        <div class="promo-box" style="margin-bottom: 12px;">
+          <div style="display: flex; gap: 6px;">
+            <input type="text" id="cart_promo_input" class="form-control" placeholder="Promo Code (WELCOME10)" style="text-transform: uppercase; font-size: 12px;" />
+            <button class="btn btn-outline" style="padding: 6px 12px; font-size: 12px;" onclick="UniversalApp.applyPromoCode()">Apply</button>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 15px;">
+          <span style="color: var(--text-muted); font-weight: 600;">Total Amount:</span>
+          <strong id="cart-total-amt" style="font-size: 18px; color: var(--primary-color);">$0.00</strong>
+        </div>
+
+        <button class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 14px; font-weight: 800;" onclick="UniversalApp.openCheckoutModal()">
+          Proceed to Checkout →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- UNIVERSAL MODAL OVERLAY -->
+  <div class="modal-overlay" id="app-modal" onclick="if(event.target === this) UniversalApp.closeModal()">
+    <div class="modal-box">
+      <button class="modal-close" onclick="UniversalApp.closeModal()">✕</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATIONS CONTAINER -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div style="max-width: 1200px; margin: 0 auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 18px; text-align: left;">
+        <div>
+          <p style="font-weight: 900; color: var(--text-main); font-size: 16px;" id="footer-brand">Spice Haven Kitchen</p>
+          <p style="margin: 4px 0; font-size: 12px; color: var(--text-muted);">Mastering Taste &bull; Official Digital Restaurant Operating System</p>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <button class="btn btn-outline" style="padding: 8px 16px; font-size: 12px; font-weight: 700;" onclick="UniversalApp.openOwnerLoginModal()">
+            🏢 Restro Owner Login
+          </button>
+          <a href="../admin.html" class="btn btn-outline" style="padding: 8px 16px; font-size: 12px; text-decoration: none;">
+            🔐 Admin Console
+          </a>
+          <a href="../index.html" class="btn btn-primary" style="padding: 8px 16px; font-size: 12px; text-decoration: none; font-weight: 800;">
+            🏠 Platform Home
+          </a>
+        </div>
+      </div>
+      <div style="border-top: 1px solid var(--border-color); padding-top: 14px; font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+        <span>© 2026 All Rights Reserved &bull; Official Restaurant Dining Portal</span>
+        <span>Secure Cloud Architecture &bull; 99.9% Uptime SLA</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- SCRIPTS LOADER -->
+  <script src="../config.js?v=2.3"></script>
+  <script src="../modules/student-management.js?v=2.3"></script>
+  <script src="../modules/movex-booking.js?v=2.3"></script>
+  <script src="../modules/hotel-booking.js?v=2.3"></script>
+  <script src="../modules/food-ordering.js?v=2.3"></script>
+  <script src="../modules/ecommerce.js?v=2.3"></script>
+  <script src="../app.js?v=2.3"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      if (window.MASTER_CONFIG) {
+        window.MASTER_CONFIG.activeAppType = 'food_order';
+        window.MASTER_CONFIG.isProductionClientMode = true;
+      }
+    });
+  </script>
+</body>
+</html>

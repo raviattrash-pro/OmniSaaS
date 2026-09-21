@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nova Quick-Commerce Retail Store | Instant Shopping & Delivery</title>
+  <meta name="description" content="Instant E-Commerce Shopping, Flash Deals, Digital Cart, Zero-Fee Direct UPI Invoicing & Live Delivery Tracking." />
+  <meta name="keywords" content="ecommerce store, quick commerce, online shopping, flash deals, nova mart, omnisaas" />
+  <meta name="author" content="Nova Quick-Commerce by OmniSaaS" />
+  <meta name="theme-color" content="#10b981" />
+
+  <!-- Security: CSP & Frame Protection -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: https: blob:; font-src 'self' https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https:;" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Google Identity Services (GIS) OAuth 2.0 SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <!-- Favicon & Manifest -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛍️</text></svg>" />
+  <link rel="manifest" href="../manifest.json" />
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="../styles.css?v=2.3" />
+</head>
+<body data-standalone="ecommerce">
+
+  <!-- Ambient Glow Meshes -->
+  <div class="ambient-glow-mesh"></div>
+
+  <!-- Confetti Canvas -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- NAVBAR & BRANDING -->
+  <nav class="navbar" id="main-navbar">
+    <div class="nav-container">
+      <a href="index.html" class="brand">
+        <img id="brand-logo-img" class="brand-logo-img" src="" alt="Brand Logo" style="display: none;" />
+        <span class="brand-icon" id="brand-icon">🛍️</span>
+        <div class="brand-info">
+          <h1 id="brand-title">Nova SuperMart</h1>
+          <p id="brand-tagline">10-Minute Express Delivery & Retail Hub</p>
+        </div>
+      </a>
+
+      <div class="nav-actions">
+        <!-- Quick Search -->
+        <button class="pill-btn nav-search-pill" onclick="UniversalApp.openUniversalSearch()">
+          🔍 Track Order / Invoice
+        </button>
+
+        <!-- Business Owner Login -->
+        <button class="pill-btn" style="background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1.5px solid #10b981; font-weight: 800; font-size: 11px;" onclick="UniversalApp.openOwnerLoginModal()">
+          🏢 Merchant Login
+        </button>
+
+        <!-- Google OAuth Profile Container -->
+        <div id="nav-auth-container"></div>
+
+        <button class="cart-badge-btn" onclick="UniversalApp.toggleCart()">
+          🛒 <span id="cart-btn-label">Cart</span>
+          <span class="badge-count" id="cart-count">0</span>
+        </button>
+
+        <button class="pill-btn" id="sound-toggle-btn" onclick="UniversalApp.toggleSound()" style="font-size: 11px;">🔊 Sound</button>
+        <button class="pill-btn" id="theme-toggle-btn" onclick="UniversalApp.toggleTheme()" style="font-size: 11px;">🌙</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO BANNER -->
+  <header class="hero">
+    <div class="hero-content">
+      <div class="hero-badge-wrap">
+        <span class="hero-badge" id="hero-badge" style="background: #10b981;">SUPER STORE</span>
+        <span class="status-live-dot">● STORE OPEN</span>
+      </div>
+      <h2 id="hero-headline">Curated Essentials & Flash Delivery</h2>
+      <p id="hero-subtext">Discover top-rated electronic essentials, everyday products, instant checkout with zero-fee merchant UPI, and rapid doorstep delivery.</p>
+
+      <!-- Trust Badges -->
+      <div class="trust-badge-row">
+        <div class="trust-badge-item">
+          <span class="trust-icon">🔒</span>
+          <span>SHA-256 Encrypted</span>
+        </div>
+        <div class="trust-badge-item">
+          <span class="trust-icon">⚡</span>
+          <span>Instant Inventory Sync</span>
+        </div>
+        <div class="trust-badge-item">
+          <span class="trust-icon">📦</span>
+          <span>Express Dispatch</span>
+        </div>
+        <div class="trust-badge-item">
+          <span class="trust-icon">💳</span>
+          <span>Direct Merchant UPI (0% Fee)</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN MODULE CONTAINER -->
+  <main class="main-wrapper" id="vertical-container">
+    <!-- Ecommerce Module Mounts Here -->
+  </main>
+
+  <!-- SLIDE-OUT CART DRAWER -->
+  <div class="cart-drawer-overlay" id="cart-drawer" onclick="if(event.target === this) UniversalApp.toggleCart()">
+    <div class="cart-drawer-content">
+      <div class="cart-drawer-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 20px;">🛒</span>
+          <h3 style="font-size: 17px; font-weight: 800; margin: 0;">Shopping Cart</h3>
+        </div>
+        <button class="btn btn-outline" style="padding: 4px 10px; font-size: 12px;" onclick="UniversalApp.toggleCart()">✕</button>
+      </div>
+
+      <div class="cart-items-container" id="cart-items-list">
+        <!-- Dynamic Cart Items -->
+      </div>
+
+      <div class="cart-drawer-footer">
+        <div class="promo-box" style="margin-bottom: 12px;">
+          <div style="display: flex; gap: 6px;">
+            <input type="text" id="cart_promo_input" class="form-control" placeholder="Promo Code (WELCOME10)" style="text-transform: uppercase; font-size: 12px;" />
+            <button class="btn btn-outline" style="padding: 6px 12px; font-size: 12px;" onclick="UniversalApp.applyPromoCode()">Apply</button>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 15px;">
+          <span style="color: var(--text-muted); font-weight: 600;">Total Amount:</span>
+          <strong id="cart-total-amt" style="font-size: 18px; color: var(--primary-color);">$0.00</strong>
+        </div>
+
+        <button class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 14px; font-weight: 800;" onclick="UniversalApp.openCheckoutModal()">
+          Proceed to Checkout →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- UNIVERSAL MODAL OVERLAY -->
+  <div class="modal-overlay" id="app-modal" onclick="if(event.target === this) UniversalApp.closeModal()">
+    <div class="modal-box">
+      <button class="modal-close" onclick="UniversalApp.closeModal()">✕</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATIONS CONTAINER -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div style="max-width: 1200px; margin: 0 auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 18px; text-align: left;">
+        <div>
+          <p style="font-weight: 900; color: var(--text-main); font-size: 16px;" id="footer-brand">Nova SuperMart</p>
+          <p style="margin: 4px 0; font-size: 12px; color: var(--text-muted);">Express Commerce &bull; Official Digital Store Operating System</p>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <button class="btn btn-outline" style="padding: 8px 16px; font-size: 12px; font-weight: 700;" onclick="UniversalApp.openOwnerLoginModal()">
+            🏢 Store Owner Login
+          </button>
+          <a href="../admin.html" class="btn btn-outline" style="padding: 8px 16px; font-size: 12px; text-decoration: none;">
+            🔐 Admin Console
+          </a>
+          <a href="../index.html" class="btn btn-primary" style="padding: 8px 16px; font-size: 12px; text-decoration: none; font-weight: 800;">
+            🏠 Platform Home
+          </a>
+        </div>
+      </div>
+      <div style="border-top: 1px solid var(--border-color); padding-top: 14px; font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+        <span>© 2026 All Rights Reserved &bull; Official Quick-Commerce Portal</span>
+        <span>Secure Cloud Architecture &bull; 99.9% Uptime SLA</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- SCRIPTS LOADER -->
+  <script src="../config.js?v=2.3"></script>
+  <script src="../modules/student-management.js?v=2.3"></script>
+  <script src="../modules/movex-booking.js?v=2.3"></script>
+  <script src="../modules/hotel-booking.js?v=2.3"></script>
+  <script src="../modules/food-ordering.js?v=2.3"></script>
+  <script src="../modules/ecommerce.js?v=2.3"></script>
+  <script src="../app.js?v=2.3"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      if (window.MASTER_CONFIG) {
+        window.MASTER_CONFIG.activeAppType = 'ecommerce';
+        window.MASTER_CONFIG.isProductionClientMode = true;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>School & College Management Portal | Admissions & Fee Invoicing</title>
+  <meta name="description" content="Online Student Admissions, Instant UPI Fee Invoicing with Receipts, Digital ID Card Creator, and School Management System." />
+  <meta name="keywords" content="school admission, student fee payment, upi fee receipt, student id card, school portal, omnisaas" />
+  <meta name="author" content="OmniSaaS Enterprise" />
+  <meta name="theme-color" content="#1e3a8a" />
+
+  <!-- Security: CSP & Frame Protection -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: https: blob:; font-src 'self' https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https:;" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Google Identity Services (GIS) OAuth 2.0 SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <!-- Favicon & Manifest -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>" />
+  <link rel="manifest" href="../manifest.json" />
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="../styles.css?v=2.3" />
+</head>
+<body data-standalone="student_management">
+
+  <!-- Ambient Glow Meshes -->
+  <div class="ambient-glow-mesh"></div>
+
+  <!-- Confetti Canvas -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- NAVBAR & BRANDING -->
+  <nav class="navbar" id="main-navbar">
+    <div class="nav-container">
+      <a href="index.html" class="brand">
+        <img id="brand-logo-img" class="brand-logo-img" src="" alt="Brand Logo" style="display: none;" />
+        <span class="brand-icon" id="brand-icon">🎓</span>
+        <div class="brand-info">
+          <h1 id="brand-title">BrightStar Academy</h1>
+          <p id="brand-tagline">Online Admissions & Fee Portal</p>
+        </div>
+      </a>
+
+      <div class="nav-actions">
+        <!-- Quick Search -->
+        <button class="pill-btn nav-search-pill" onclick="UniversalApp.openUniversalSearch()">
+          🔍 Search Records
+        </button>
+
+        <!-- Business Owner Login -->
+        <button class="pill-btn" style="background: rgba(59, 130, 246, 0.12); color: var(--primary-color); border: 1.5px solid var(--primary-color); font-weight: 800; font-size: 11px;" onclick="UniversalApp.openOwnerLoginModal()">
+          🏢 Owner Login
+        </button>
+
+        <!-- Google OAuth Profile Container -->
+        <div id="nav-auth-container"></div>
+
+        <button class="pill-btn" id="sound-toggle-btn" onclick="UniversalApp.toggleSound()" style="font-size: 11px;">🔊 Sound</button>
+        <button class="pill-btn" id="theme-toggle-btn" onclick="UniversalApp.toggleTheme()" style="font-size: 11px;">🌙</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO BANNER -->
+  <header class="hero">
+    <div class="hero-content">
+      <div class="hero-badge-wrap">
+        <span class="hero-badge" id="hero-badge">OFFICIAL SCHOOL PORTAL</span>
+        <span class="status-live-dot">● ONLINE</span>
+      </div>
+      <h2 id="hero-headline">Student Admissions & Digital Fee Portal</h2>
+      <p id="hero-subtext">Apply online for student admissions, pay verified institutional fees with instant UPI receipts, and access digital student ID cards.</p>
+
+      <!-- Trust Badges -->
+      <div class="trust-badge-row">
+        <div class="trust-badge-item">
+          <span class="trust-icon">🔒</span>
+          <span>SHA-256 Encrypted</span>
+        </div>
+        <div class="trust-badge-item">
+          <span class="trust-icon">⚡</span>
+          <span>Instant Google Sheets Sync</span>
+        </div>
+        <div class="trust-badge-item">
+          <span class="trust-icon">💳</span>
+          <span>Zero-Fee UPI QR (0% Surcharge)</span>
+        </div>
+        <div class="trust-badge-item">
+          <span class="trust-icon">🪪</span>
+          <span>Digital Student ID Creator</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN MODULE CONTAINER -->
+  <main class="main-wrapper" id="vertical-container">
+    <!-- Student Management Module Mounts Here -->
+  </main>
+
+  <!-- UNIVERSAL MODAL OVERLAY -->
+  <div class="modal-overlay" id="app-modal" onclick="if(event.target === this) UniversalApp.closeModal()">
+    <div class="modal-box">
+      <button class="modal-close" onclick="UniversalApp.closeModal()">✕</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATIONS CONTAINER -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div style="max-width: 1200px; margin: 0 auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 18px; text-align: left;">
+        <div>
+          <p style="font-weight: 900; color: var(--text-main); font-size: 16px;" id="footer-brand">BrightStar Academy</p>
+          <p style="margin: 4px 0; font-size: 12px; color: var(--text-muted);">Empowering Next-Gen Students &bull; Official Digital School Operating System</p>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <button class="btn btn-outline" style="padding: 8px 16px; font-size: 12px; font-weight: 700;" onclick="UniversalApp.openOwnerLoginModal()">
+            🏢 School Owner Login
+          </button>
+          <a href="../admin.html" class="btn btn-outline" style="padding: 8px 16px; font-size: 12px; text-decoration: none;">
+            🔐 Admin Console
+          </a>
+          <a href="../index.html" class="btn btn-primary" style="padding: 8px 16px; font-size: 12px; text-decoration: none; font-weight: 800;">
+            🏠 Platform Home
+          </a>
+        </div>
+      </div>
+      <div style="border-top: 1px solid var(--border-color); padding-top: 14px; font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+        <span>© 2026 All Rights Reserved &bull; Official Educational Portal</span>
+        <span>Secure Static Architecture &bull; 99.9% Uptime SLA</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- SCRIPTS LOADER -->
+  <script src="../config.js?v=2.3"></script>
+  <script src="../modules/student-management.js?v=2.3"></script>
+  <script src="../modules/movex-booking.js?v=2.3"></script>
+  <script src="../modules/hotel-booking.js?v=2.3"></script>
+  <script src="../modules/food-ordering.js?v=2.3"></script>
+  <script src="../modules/ecommerce.js?v=2.3"></script>
+  <script src="../app.js?v=2.3"></script>
+  <script>
+    // Lock into student management vertical immediately upon load
+    window.addEventListener('DOMContentLoaded', () => {
+      if (window.MASTER_CONFIG) {
+        window.MASTER_CONFIG.activeAppType = 'student_management';
+        window.MASTER_CONFIG.isProductionClientMode = true;
+      }
+    });
+  </script>
+</body>
+</html>
