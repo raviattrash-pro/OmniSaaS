@@ -465,11 +465,26 @@ const AdminDashboard = {
   },
 
   renderVerificationQueue() {
+    let list = JSON.parse(localStorage.getItem('pending_business_requests') || '[]');
+
+    // Automatic Queue Deduplication: Keep only 1 pending application per business slug / phone
+    const seen = new Set();
+    const uniqueList = [];
+    for (const item of list) {
+      const key = (item.status === 'pending_verification') ? `pending_${item.slug || item.businessName || item.phone}` : `done_${item.requestId}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        uniqueList.push(item);
+      }
+    }
+    if (uniqueList.length !== list.length) {
+      list = uniqueList;
+      localStorage.setItem('pending_business_requests', JSON.stringify(list));
+    }
+
     this.updatePendingCountBadge();
     const container = document.getElementById('verification_queue_container');
     if (!container) return;
-
-    const list = JSON.parse(localStorage.getItem('pending_business_requests') || '[]');
     if (list.length === 0) {
       container.innerHTML = `
         <div style="text-align: center; padding: 48px 20px; color: var(--admin-text-muted); background: var(--admin-card-bg); border-radius: 12px; border: 1px dashed var(--admin-border);">

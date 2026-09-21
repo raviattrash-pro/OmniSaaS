@@ -981,111 +981,136 @@
         }
       },
 
+      isSubmitting: false,
+
       async submitApplication() {
+        if (this.isSubmitting) return;
+
         const upi = document.getElementById('ob_upi_id').value.trim();
         if (!upi) {
           UniversalApp.showToast('⚠️ Please enter your Merchant UPI ID.', 'error');
           return;
         }
 
-        const bizName = document.getElementById('ob_biz_name').value.trim();
-        const ownerName = document.getElementById('ob_owner_name').value.trim();
-        const phone = document.getElementById('ob_biz_phone').value.trim();
-        const email = document.getElementById('ob_biz_email').value.trim();
-        const address = document.getElementById('ob_biz_address').value.trim();
-        const rawPassword = document.getElementById('ob_owner_pass').value;
-
-        // Extract custom services
-        const services = [];
-        document.querySelectorAll('.service-row-item').forEach(row => {
-          const t = row.querySelector('.ob-service-title')?.value.trim();
-          const p = Number(row.querySelector('.ob-service-price')?.value) || 0;
-          const d = row.querySelector('.ob-service-desc')?.value.trim();
-          if (t && p > 0) {
-            services.push({ title: t, price: p, description: d });
-          }
-        });
-
-        const slug = bizName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') || 'app-' + Date.now();
-        const passwordHash = await CryptoSecurity.hashPassword(rawPassword);
-        const reqId = "REQ-" + new Date().getFullYear() + "-" + Math.floor(1000 + Math.random() * 9000);
-
-        // Build Application Request Entity
-        const applicationRecord = {
-          requestId: reqId,
-          timestamp: new Date().toISOString(),
-          businessName: bizName,
-          slug: slug,
-          ownerName: ownerName,
-          phone: phone,
-          email: email,
-          address: address,
-          vertical: this.selectedVertical,
-          passwordHash: passwordHash,
-          ownerUserId: `owner_${slug}`,
-          upiId: upi,
-          customQr: this.uploadedQrData || null,
-          services: services,
-          status: 'pending_verification' // pending_verification | approved | rejected
-        };
-
-        // Save to Pending Applications in localStorage
-        const pendingList = JSON.parse(localStorage.getItem('pending_business_requests') || '[]');
-        pendingList.unshift(applicationRecord);
-        localStorage.setItem('pending_business_requests', JSON.stringify(pendingList));
-
-        // Dispatch Webhook to Google Sheets
-        try {
-          if (UniversalApp && typeof UniversalApp.dispatchWebhook === 'function') {
-            await UniversalApp.dispatchWebhook({
-              type: 'business_onboarding_request',
-              requestId: reqId,
-              businessName: bizName,
-              ownerName: ownerName,
-              phone: phone,
-              email: email,
-              vertical: this.selectedVertical,
-              status: 'pending_verification',
-              upiId: upi,
-              servicesSummary: services.map(s => `${s.title}: ₹${s.price}`).join(', ')
-            });
-          }
-        } catch (err) {
-          console.warn('Webhook notification dispatched offline: ', err);
+        const submitBtn = document.querySelector('#onboard_step_5 button.btn-primary');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerText = '⏳ Submitting Application...';
         }
+        this.isSubmitting = true;
 
-        UniversalApp.playSound('victory');
-        UniversalApp.triggerConfetti();
+        try {
+          const bizName = document.getElementById('ob_biz_name').value.trim();
+          const ownerName = document.getElementById('ob_owner_name').value.trim();
+          const phone = document.getElementById('ob_biz_phone').value.trim();
+          const email = document.getElementById('ob_biz_email').value.trim();
+          const address = document.getElementById('ob_biz_address').value.trim();
+          const rawPassword = document.getElementById('ob_owner_pass').value;
 
-        // Show Success Tracker Modal
-        UniversalApp.showModal(`
-          <div style="text-align: center; max-width: 480px; margin: 0 auto;">
-            <div style="font-size: 54px; margin-bottom: 10px;">🎉</div>
-            <h3 style="color: var(--primary-color); font-weight: 900; font-size: 22px; margin-bottom: 6px;">Application Submitted!</h3>
-            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
-              Your business onboarding request is now in the <strong>Super Admin Verification Queue</strong>.
-            </p>
+          // Extract custom services
+          const services = [];
+          document.querySelectorAll('.service-row-item').forEach(row => {
+            const t = row.querySelector('.ob-service-title')?.value.trim();
+            const p = Number(row.querySelector('.ob-service-price')?.value) || 0;
+            const d = row.querySelector('.ob-service-desc')?.value.trim();
+            if (t && p > 0) {
+              services.push({ title: t, price: p, description: d });
+            }
+          });
 
-            <div style="background: var(--bg-secondary); border: 2px dashed var(--primary-color); border-radius: 12px; padding: 18px; margin-bottom: 20px;">
-              <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 800;">Your Request Tracking ID</div>
-              <div style="font-size: 26px; font-weight: 900; color: var(--primary-color); margin: 6px 0;">${reqId}</div>
-              <div style="font-size: 12px; color: #10b981; font-weight: 700;">● STATUS: PENDING ADMIN APPROVAL</div>
+          const slug = bizName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') || 'app-' + Date.now();
+          const passwordHash = await CryptoSecurity.hashPassword(rawPassword);
+          const reqId = "REQ-" + new Date().getFullYear() + "-" + Math.floor(1000 + Math.random() * 9000);
+
+          // Build Application Request Entity
+          const applicationRecord = {
+            requestId: reqId,
+            timestamp: new Date().toISOString(),
+            businessName: bizName,
+            slug: slug,
+            ownerName: ownerName,
+            phone: phone,
+            email: email,
+            address: address,
+            vertical: this.selectedVertical,
+            passwordHash: passwordHash,
+            ownerUserId: `owner_${slug}`,
+            upiId: upi,
+            customQr: this.uploadedQrData || null,
+            services: services,
+            status: 'pending_verification' // pending_verification | approved | rejected
+          };
+
+          // Save to Pending Applications in localStorage with Deduping / Upsert
+          let pendingList = JSON.parse(localStorage.getItem('pending_business_requests') || '[]');
+          const existingIdx = pendingList.findIndex(r => (r.slug === slug || (r.phone && r.phone === phone)) && r.status === 'pending_verification');
+          if (existingIdx >= 0) {
+            pendingList[existingIdx] = applicationRecord;
+          } else {
+            pendingList.unshift(applicationRecord);
+          }
+          localStorage.setItem('pending_business_requests', JSON.stringify(pendingList));
+
+          // Dispatch Webhook to Google Sheets
+          try {
+            if (UniversalApp && typeof UniversalApp.dispatchWebhook === 'function') {
+              await UniversalApp.dispatchWebhook({
+                type: 'business_onboarding_request',
+                requestId: reqId,
+                businessName: bizName,
+                ownerName: ownerName,
+                phone: phone,
+                email: email,
+                vertical: this.selectedVertical,
+                status: 'pending_verification',
+                upiId: upi,
+                servicesSummary: services.map(s => `${s.title}: ₹${s.price}`).join(', ')
+              });
+            }
+          } catch (err) {
+            console.warn('Webhook notification dispatched offline: ', err);
+          }
+
+          UniversalApp.playSound('victory');
+          UniversalApp.triggerConfetti();
+
+          // Show Success Tracker Modal
+          UniversalApp.showModal(`
+            <div style="text-align: center; max-width: 480px; margin: 0 auto;">
+              <div style="font-size: 54px; margin-bottom: 10px;">🎉</div>
+              <h3 style="color: var(--primary-color); font-weight: 900; font-size: 22px; margin-bottom: 6px;">Application Submitted!</h3>
+              <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+                Your business onboarding request is now in the <strong>Super Admin Verification Queue</strong>.
+              </p>
+
+              <div style="background: var(--bg-secondary); border: 2px dashed var(--primary-color); border-radius: 12px; padding: 18px; margin-bottom: 20px;">
+                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 800;">Your Request Tracking ID</div>
+                <div style="font-size: 26px; font-weight: 900; color: var(--primary-color); margin: 6px 0;">${reqId}</div>
+                <div style="font-size: 12px; color: #10b981; font-weight: 700;">● STATUS: PENDING ADMIN APPROVAL</div>
+              </div>
+
+              <div style="text-align: left; font-size: 13px; background: rgba(59, 130, 246, 0.08); border-radius: 8px; padding: 14px; margin-bottom: 20px;">
+                <p style="margin: 0 0 6px 0;"><strong>🏢 Business:</strong> ${bizName}</p>
+                <p style="margin: 0 0 6px 0;"><strong>👤 Owner:</strong> ${ownerName} (${phone})</p>
+                <p style="margin: 0 0 6px 0;"><strong>📦 App Route:</strong> <code>/${this.selectedVertical.replace('_booking','').replace('_management','').replace('_order','')}/?biz=${slug}</code></p>
+                <p style="margin: 0;"><strong>🔐 Owner ID:</strong> <code>owner_${slug}</code></p>
+              </div>
+
+              <button class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: 800;" onclick="UniversalApp.closeModal(); OmniLauncher.resetForm();">
+                Done & Check Status →
+              </button>
             </div>
-
-            <div style="text-align: left; font-size: 13px; background: rgba(59, 130, 246, 0.08); border-radius: 8px; padding: 14px; margin-bottom: 20px;">
-              <p style="margin: 0 0 6px 0;"><strong>🏢 Business:</strong> ${bizName}</p>
-              <p style="margin: 0 0 6px 0;"><strong>👤 Owner:</strong> ${ownerName} (${phone})</p>
-              <p style="margin: 0 0 6px 0;"><strong>📦 App Route:</strong> <code>/${this.selectedVertical.replace('_booking','').replace('_management','').replace('_order','')}/?biz=${slug}</code></p>
-              <p style="margin: 0;"><strong>🔐 Owner ID:</strong> <code>owner_${slug}</code></p>
-            </div>
-
-            <button class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: 800;" onclick="UniversalApp.closeModal(); OmniLauncher.resetForm();">
-              Done & Check Status →
-            </button>
-          </div>
-        `);
-      },
-
+          `);
+        } catch (error) {
+          console.error(error);
+          UniversalApp.showToast('Submission error. Please try again.', 'error');
+        } finally {
+          this.isSubmitting = false;
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = '🚀 Submit Application for Verification →';
+          }
+        }
       resetForm() {
         document.getElementById('ob_biz_name').value = '';
         document.getElementById('ob_owner_name').value = '';
