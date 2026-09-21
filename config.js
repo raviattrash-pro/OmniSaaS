@@ -152,11 +152,23 @@ const MASTER_CONFIG = {
   supportEmail: "support@universalplatform.com",
 
   // 🔐 GOOGLE OAUTH CLIENT ID (Optional for 1-click Google Sign-in)
-  enableGoogleAuth: true,
-  googleClientId: "939865483008-0uas0dhk55a1a0ppefo8svilqfe6a5qj.apps.googleusercontent.com",
-
   // 🌐 GLOBAL VENDOR PROFILES (Permanently active for all visitors and incognito windows)
   vendorProfiles: [
+    {
+      id: "profile_stmarys",
+      slug: "st-marys-convent-school",
+      businessName: "St. Mary's Convent School",
+      vertical: "student_management",
+      tagline: "Admissions 2026-27 & Digital Fee Portal",
+      logoIcon: "🎓",
+      themeColor: "#1e3a8a",
+      accentColor: "#f59e0b",
+      currency: "₹",
+      upiId: "payments@upi",
+      whatsappNumber: "+919876543210",
+      googleScriptUrl: "https://script.google.com/macros/s/AKfycbybFqjzb480F0xfDD9CxUyblL5750FqT3x143HikFypoFXCFrJMgmyekaNq7G4_Zzo2/exec",
+      isProductionClientMode: true
+    },
     {
       id: "profile_helloschool",
       slug: "helloschool",

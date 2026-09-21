@@ -222,13 +222,27 @@ const URLQueryTenantEngine = {
 
     // 3. If a business slug is detected, look up in Client Profiles
     if (businessSlug) {
-      const normalizedSlug = businessSlug.toLowerCase().trim();
+      const decodedSlug = decodeURIComponent(businessSlug).trim();
+      const normalizedSlug = decodedSlug.toLowerCase();
+      const cleanSlug = normalizedSlug.replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+      const compactSlug = cleanSlug.replace(/-/g, '');
+
       const profiles = ClientProfileManager.getProfiles();
       const match = profiles.find(p => {
-        const idMatch = p.id.toLowerCase() === normalizedSlug || p.id.replace('profile_', '').toLowerCase() === normalizedSlug;
-        const slugMatch = p.slug && p.slug.toLowerCase() === normalizedSlug;
-        const nameSlug = p.businessName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-');
-        return idMatch || slugMatch || nameSlug === normalizedSlug;
+        const pSlug = (p.slug || '').toLowerCase().trim();
+        const pCleanSlug = pSlug.replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+        const pCompact = pCleanSlug.replace(/-/g, '');
+        const pNameSlug = (p.businessName || '').toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+        const pId = (p.id || '').toLowerCase().replace('profile_', '').trim();
+
+        return (
+          pSlug === normalizedSlug ||
+          pCleanSlug === cleanSlug ||
+          pCompact === compactSlug ||
+          pNameSlug === cleanSlug ||
+          pId === cleanSlug ||
+          pId === normalizedSlug
+        );
       });
 
       if (match) {
@@ -236,6 +250,57 @@ const URLQueryTenantEngine = {
         config.isProductionClientMode = true;
         localStorage.setItem('production_client_mode', 'true');
         document.title = `${match.businessName} | Official Portal`;
+        return;
+      }
+
+      // If no pre-seeded profile found, auto-generate customized tenant profile from slug on the fly
+      if (cleanSlug) {
+        // Generate formatted business title from slug (e.g. "st-marys-convent-school" -> "St. Mary's Convent School")
+        const formattedTitle = decodedSlug
+          .split(/[\s-_]+/)
+          .map(word => {
+            const lower = word.toLowerCase();
+            if (lower === 'st' || lower === 'st.') return "St.";
+            if (lower === 'marys') return "Mary's";
+            if (lower === 'xaviers') return "Xavier's";
+            if (lower === 'dps') return "DPS";
+            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+          })
+          .join(' ');
+
+        // Auto-detect vertical based on keywords in slug
+        let detectedVertical = "student_management";
+        if (/hotel|resort|palace|suites|inn|stay/i.test(cleanSlug)) {
+          detectedVertical = "hotel_booking";
+        } else if (/move|logistics|fleet|transport|cab|cargo|freight/i.test(cleanSlug)) {
+          detectedVertical = "movex_booking";
+        } else if (/bistro|cafe|restaurant|food|kitchen|dhaba|dine|pizza|burger/i.test(cleanSlug)) {
+          detectedVertical = "food_order";
+        } else if (/mart|store|shop|retail|market|supermarket|bazaar/i.test(cleanSlug)) {
+          detectedVertical = "ecommerce";
+        }
+
+        const onTheFlyProfile = {
+          id: `profile_${cleanSlug}`,
+          slug: cleanSlug,
+          businessName: formattedTitle,
+          vertical: detectedVertical,
+          tagline: "Admissions 2026-27 & Digital Fee Portal",
+          logoIcon: detectedVertical === "student_management" ? "🎓" : "🏛️",
+          themeColor: "#1e3a8a",
+          accentColor: "#f59e0b",
+          currency: "₹",
+          upiId: "payments@upi",
+          whatsappNumber: "+919876543210",
+          googleScriptUrl: config.googleScriptUrl || "https://script.google.com/macros/s/AKfycbybFqjzb480F0xfDD9CxUyblL5750FqT3x143HikFypoFXCFrJMgmyekaNq7G4_Zzo2/exec",
+          isProductionClientMode: true
+        };
+
+        ClientProfileManager.saveProfile(onTheFlyProfile);
+        ClientProfileManager.loadProfile(onTheFlyProfile.id);
+        config.isProductionClientMode = true;
+        localStorage.setItem('production_client_mode', 'true');
+        document.title = `${formattedTitle} | Official Portal`;
         return;
       }
     }
