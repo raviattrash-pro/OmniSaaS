@@ -1,0 +1,7 @@
+# Credentials & Private Keys
+service_account*.json
+*.key
+*.pem
+.env
+.DS_Store
+Thumbs.db
