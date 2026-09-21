@@ -48,6 +48,16 @@ const AdminDashboard = {
     this.renderRoster();
     this.renderIndexingUrlsTable();
     this.initWizardDefaults('student_management');
+
+    // Real-time cross-tab synchronization
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'pending_business_requests' || e.key === 'saved_client_profiles') {
+        this.updatePendingCountBadge();
+        this.renderVerificationQueue();
+        this.renderRoster();
+        this.loadMetrics();
+      }
+    });
   },
 
   checkAuth() {
@@ -465,7 +475,10 @@ const AdminDashboard = {
         <div style="text-align: center; padding: 48px 20px; color: var(--admin-text-muted); background: var(--admin-card-bg); border-radius: 12px; border: 1px dashed var(--admin-border);">
           <div style="font-size: 40px; margin-bottom: 8px;">📭</div>
           <h3 style="font-size: 16px; font-weight: 800; color: var(--admin-text-main); margin-bottom: 4px;">No Pending Business Applications</h3>
-          <p style="font-size: 12px; max-width: 400px; margin: 0 auto;">When business owners submit their application from the Platform Landing Page (index.html), they will appear here for review and instant 1-click activation.</p>
+          <p style="font-size: 12px; max-width: 420px; margin: 0 auto 16px;">When business owners submit their application from the Platform Landing Page (index.html), they will appear here for review and instant 1-click activation.</p>
+          <button class="btn-admin btn-admin-accent" style="font-size: 12px;" onclick="AdminDashboard.seedSampleRequest()">
+            🧪 Load Demo Submission (Sample Intake)
+          </button>
         </div>
       `;
       return;
@@ -1534,6 +1547,63 @@ window.MASTER_CONFIG = {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     this.showToast('💾 config.js Downloaded for Client Repository!', 'success');
+  },
+
+  seedSampleRequest() {
+    const sample = {
+      requestId: "REQ-" + new Date().getFullYear() + "-" + Math.floor(1000 + Math.random() * 9000),
+      timestamp: new Date().toISOString(),
+      businessName: "Greenwood Valley Academy",
+      slug: "greenwood-valley-academy",
+      ownerName: "Dr. Arvind Saxena",
+      phone: "+919876543210",
+      email: "contact@greenwoodvalley.edu",
+      address: "Plot 42, Knowledge Park, Noida, UP",
+      vertical: "student_management",
+      passwordHash: "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+      ownerUserId: "owner_greenwood-valley-academy",
+      upiId: "admissions@greenwoodvalley.edu",
+      customQr: null,
+      services: [
+        { title: "Class 10 Tuition & Smart Lab Fee", price: 4500, description: "Monthly composite academic fee" },
+        { title: "Annual Registration & Sports Dues", price: 2500, description: "Annual institutional dues" }
+      ],
+      status: "pending_verification"
+    };
+
+    const list = JSON.parse(localStorage.getItem('pending_business_requests') || '[]');
+    list.unshift(sample);
+    localStorage.setItem('pending_business_requests', JSON.stringify(list));
+    this.renderVerificationQueue();
+    this.showToast('🧪 Loaded sample pending application for instant verification testing!', 'success');
+  },
+
+  getSavedProfiles() {
+    const configGlobal = (window.MASTER_CONFIG && Array.isArray(window.MASTER_CONFIG.vendorProfiles)) ? window.MASTER_CONFIG.vendorProfiles : [];
+    const saved = localStorage.getItem('saved_client_profiles');
+    if (!saved) return configGlobal;
+    try {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const merged = [...parsed];
+        for (const bp of configGlobal) {
+          if (!merged.some(p => p.id === bp.id || (p.slug && bp.slug && p.slug.toLowerCase() === bp.slug.toLowerCase()))) {
+            merged.push(bp);
+          }
+        }
+        return merged;
+      }
+      return configGlobal;
+    } catch(e) {
+      return configGlobal;
+    }
+  },
+
+  saveProfiles(profiles) {
+    localStorage.setItem('saved_client_profiles', JSON.stringify(profiles));
+    if (window.MASTER_CONFIG) {
+      window.MASTER_CONFIG.vendorProfiles = profiles;
+    }
   },
 
   // =========================================================================
