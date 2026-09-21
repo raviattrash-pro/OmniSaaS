@@ -137,7 +137,12 @@ const AdminDashboard = {
   getDeepLaunchUrl(slug) {
     const cleanSlug = this.slugify(slug || this.wizardData.slug || 'my-business');
     const { username } = this.getGitHubConfig();
-    return `https://${username}.github.io/OmniSaaS/?slug=${cleanSlug}`;
+    const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:');
+    if (isLocal) {
+      return `index.html?slug=${cleanSlug}`;
+    }
+    const basePath = window.location.pathname.includes('/OmniSaaS') ? '/OmniSaaS' : '';
+    return `${window.location.origin}${basePath}/?slug=${cleanSlug}`;
   },
 
   onBusinessNameInput(name) {
@@ -549,13 +554,43 @@ const AdminDashboard = {
         this.showToast('Please upload a valid image file.', 'error');
         return;
       }
+      if (file.size > 4 * 1024 * 1024) {
+        this.showToast('Logo file must be under 4MB.', 'error');
+        return;
+      }
       const reader = new FileReader();
       reader.onload = (e) => {
         this.wizardData.customLogoData = e.target.result;
+        const prev = document.getElementById('wiz_logo_preview');
+        if (prev) {
+          prev.style.display = 'block';
+          prev.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 12px; background: var(--admin-bg-surface); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--admin-border); width: fit-content; margin-top: 8px;">
+              <img src="${e.target.result}" style="max-height: 48px; max-width: 140px; object-fit: contain; border-radius: 4px;" alt="Logo Preview" />
+              <div>
+                <div style="font-size: 12px; font-weight: 800; color: var(--admin-success);">✅ Custom Logo Uploaded</div>
+                <div style="font-size: 10px; color: var(--admin-text-muted);">${file.name} (${Math.round(file.size / 1024)} KB)</div>
+              </div>
+              <button type="button" class="btn-admin btn-admin-danger" style="padding: 2px 8px; font-size: 11px; margin-left: 8px;" onclick="AdminDashboard.removeLogoUpload()">✕</button>
+            </div>
+          `;
+        }
         this.showToast('✅ Brand logo uploaded successfully!', 'success');
       };
       reader.readAsDataURL(file);
     }
+  },
+
+  removeLogoUpload() {
+    this.wizardData.customLogoData = null;
+    const prev = document.getElementById('wiz_logo_preview');
+    if (prev) {
+      prev.style.display = 'none';
+      prev.innerHTML = '';
+    }
+    const inp = document.getElementById('wiz_logo_file');
+    if (inp) inp.value = '';
+    this.showToast('Logo removed', 'info');
   },
 
   handleQrUpload(input) {
@@ -565,13 +600,43 @@ const AdminDashboard = {
         this.showToast('Please upload a valid image file.', 'error');
         return;
       }
+      if (file.size > 4 * 1024 * 1024) {
+        this.showToast('QR file must be under 4MB.', 'error');
+        return;
+      }
       const reader = new FileReader();
       reader.onload = (e) => {
         this.wizardData.customQrData = e.target.result;
+        const prev = document.getElementById('wiz_qr_preview');
+        if (prev) {
+          prev.style.display = 'block';
+          prev.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 12px; background: var(--admin-bg-surface); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--admin-border); width: fit-content; margin-top: 8px;">
+              <img src="${e.target.result}" style="max-height: 80px; max-width: 80px; object-fit: contain; border-radius: 6px; background: #fff; padding: 4px;" alt="QR Standee Preview" />
+              <div>
+                <div style="font-size: 12px; font-weight: 800; color: var(--admin-success);">✅ Merchant QR Standee Uploaded</div>
+                <div style="font-size: 10px; color: var(--admin-text-muted);">${file.name} (${Math.round(file.size / 1024)} KB)</div>
+              </div>
+              <button type="button" class="btn-admin btn-admin-danger" style="padding: 2px 8px; font-size: 11px; margin-left: 8px;" onclick="AdminDashboard.removeQrUpload()">✕</button>
+            </div>
+          `;
+        }
         this.showToast('✅ UPI Standee QR uploaded successfully!', 'success');
       };
       reader.readAsDataURL(file);
     }
+  },
+
+  removeQrUpload() {
+    this.wizardData.customQrData = null;
+    const prev = document.getElementById('wiz_qr_preview');
+    if (prev) {
+      prev.style.display = 'none';
+      prev.innerHTML = '';
+    }
+    const inp = document.getElementById('wiz_qr_file');
+    if (inp) inp.value = '';
+    this.showToast('QR standee removed', 'info');
   },
 
   // =========================================================================
@@ -633,6 +698,29 @@ const AdminDashboard = {
     if (nameEl) nameEl.innerText = data.businessName;
     if (vertEl) vertEl.innerText = data.vertical.replace('_', ' ').toUpperCase();
     if (urlEl) urlEl.value = dedicatedUrl;
+
+    // Render Live Verification Badges for Uploaded Assets
+    const assetsSummaryEl = document.getElementById('res_assets_summary');
+    if (assetsSummaryEl) {
+      let html = '';
+      if (data.customLogoData) {
+        html += `
+          <div style="background: var(--admin-bg-surface); border: 1px solid var(--admin-border); padding: 10px 16px; border-radius: 8px; display: flex; align-items: center; gap: 10px;">
+            <img src="${data.customLogoData}" style="max-height: 40px; max-width: 90px; object-fit: contain;" alt="Logo" />
+            <span style="font-size: 12px; font-weight: 800; color: var(--admin-success);">Official Logo Attached</span>
+          </div>
+        `;
+      }
+      if (data.customQrData) {
+        html += `
+          <div style="background: var(--admin-bg-surface); border: 1px solid var(--admin-border); padding: 10px 16px; border-radius: 8px; display: flex; align-items: center; gap: 10px;">
+            <img src="${data.customQrData}" style="max-height: 40px; max-width: 40px; object-fit: contain; background: #fff; padding: 2px; border-radius: 4px;" alt="QR" />
+            <span style="font-size: 12px; font-weight: 800; color: var(--admin-success);">Merchant QR Standee Linked</span>
+          </div>
+        `;
+      }
+      assetsSummaryEl.innerHTML = html;
+    }
 
     const waMsg = `🎉 *Congratulations! Your App is Live!* 🎉\n\n*Business:* ${data.businessName}\n*Category:* ${data.vertical.replace('_', ' ').toUpperCase()}\n*Official Portal:* ${dedicatedUrl}\n*Direct Link:* ${deepLaunchUrl}\n\nYour app is equipped with Instant zero-fee UPI checkout, real-time Google Sheets sync, and PWA offline capability. Welcome aboard!`;
     const waLink = `https://wa.me/${(data.whatsappNumber || '').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(waMsg)}`;
@@ -997,7 +1085,10 @@ window.MASTER_CONFIG = {
         <tr>
           <td>
             <div style="display: flex; align-items: center; gap: 12px;">
-              <span style="font-size: 24px;">${this.escapeHTML(v.logoIcon || '🏛️')}</span>
+              ${v.customLogo ? 
+                `<img src="${v.customLogo}" style="height: 38px; width: 38px; object-fit: contain; border-radius: 6px; border: 1px solid var(--admin-border); background: #fff; padding: 2px;" alt="Logo" />` :
+                `<span style="font-size: 24px;">${this.escapeHTML(v.logoIcon || '🏛️')}</span>`
+              }
               <div>
                 <div style="font-weight: 800; font-size: 14px; color: var(--admin-text-main);">${this.escapeHTML(v.businessName)}</div>
                 <div style="font-size: 11px; color: var(--admin-text-muted);">${this.escapeHTML(v.tagline || 'No tagline')}</div>
@@ -1028,6 +1119,7 @@ window.MASTER_CONFIG = {
           <td>
             <div style="font-size: 12px;">UPI: <strong>${this.escapeHTML(v.upiId || 'N/A')}</strong></div>
             <div style="font-size: 11px; color: var(--admin-text-muted);">${this.escapeHTML(v.whatsappNumber || 'No WhatsApp')}</div>
+            ${v.customQr ? `<div style="font-size: 10px; color: var(--admin-success); font-weight: 800; margin-top: 3px;">🟢 Standee QR Linked</div>` : `<div style="font-size: 10px; color: var(--admin-text-muted); margin-top: 3px;">⚡ Dynamic UPI QR</div>`}
           </td>
           <td>
             <span class="status-pill ${isSuspended ? 'suspended' : 'active'}">

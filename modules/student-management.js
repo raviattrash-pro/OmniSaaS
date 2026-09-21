@@ -28,6 +28,7 @@ const StudentManagementModule = {
 
   render(container, config) {
     const data = config.verticals.student_management;
+    const customLogo = (data && data.customLogo) || config.customLogo || localStorage.getItem('custom_brand_logo');
     this.currentStep = 1;
 
     container.innerHTML = `
@@ -245,7 +246,7 @@ const StudentManagementModule = {
                   <div style="font-size: 13px; font-weight: 800; letter-spacing: 1px; color: var(--accent-color);">${data.businessName.toUpperCase()}</div>
                   <div style="font-size: 10px; opacity: 0.8;">ACCREDITED K-12 INSTITUTION</div>
                 </div>
-                <div style="font-size: 1.6rem;">🏛️</div>
+                ${customLogo ? `<img src="${customLogo}" style="max-height: 32px; max-width: 50px; object-fit: contain;" alt="School Logo" />` : '<div style="font-size: 1.6rem;">🏛️</div>'}
               </div>
 
               <div class="id-card-body">
@@ -509,11 +510,14 @@ const StudentManagementModule = {
     UniversalApp.triggerConfetti();
     UniversalApp.playSound('victory');
 
+    const customLogo = (config.verticals.student_management && config.verticals.student_management.customLogo) || config.customLogo || localStorage.getItem('custom_brand_logo');
+
     UniversalApp.showModal(`
-      <div class="receipt-box">
+      <div class="receipt-box" id="printableReceipt">
         <div class="receipt-header">
-          <span style="font-size: 3.2rem;">🎓</span>
-          <h3 style="color: var(--primary-color); margin-top: 6px;">Admission Application Received!</h3>
+          ${customLogo ? `<img src="${customLogo}" style="max-height: 48px; max-width: 140px; object-fit: contain; margin-bottom: 6px;" alt="Logo" />` : '<span style="font-size: 3.2rem;">🎓</span>'}
+          <h3 style="color: var(--primary-color); margin-top: 6px;">${SecurityGuard.escapeHTML(config.verticals.student_management.businessName)}</h3>
+          <p style="font-size: 13px; color: var(--text-muted);">Admission Application Received</p>
           <p style="font-size: 13px; color: var(--text-muted);">Application Reference ID: <strong style="color: var(--text-main); font-size: 16px;">${refId}</strong></p>
         </div>
         <div class="receipt-row"><span>Student Name:</span><strong>${record.studentName}</strong></div>
@@ -767,10 +771,12 @@ const StudentManagementModule = {
     UniversalApp.triggerConfetti();
     UniversalApp.playSound('victory');
 
+    const customLogo = (config.verticals.student_management && config.verticals.student_management.customLogo) || config.customLogo || localStorage.getItem('custom_brand_logo');
+
     UniversalApp.showModal(`
       <div class="receipt-box" id="printableReceipt">
         <div class="receipt-header">
-          <span style="font-size: 2.4rem;">🏛️</span>
+          ${customLogo ? `<img src="${customLogo}" style="max-height: 48px; max-width: 140px; object-fit: contain; margin-bottom: 6px;" alt="Logo" />` : '<span style="font-size: 2.4rem;">🏛️</span>'}
           <h3 style="color: var(--primary-color); margin-top: 4px;">${SecurityGuard.escapeHTML(config.verticals.student_management.businessName)}</h3>
           <p style="font-size: 13px; color: var(--text-muted);">Official Fee Payment Receipt</p>
           <div style="font-size: 13px; font-weight: 800; color: var(--text-main); margin-top: 6px;">Receipt #: ${receiptNo}</div>

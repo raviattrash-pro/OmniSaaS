@@ -251,6 +251,7 @@
             <div class="admin-form-group">
               <label>Optional: Upload Custom Merchant Logo Image</label>
               <input type="file" id="wiz_logo_file" accept="image/*" class="admin-input" onchange="AdminDashboard.handleLogoUpload(this)" />
+              <div id="wiz_logo_preview" style="display: none; margin-top: 10px;"></div>
             </div>
 
             <div style="display: flex; justify-content: space-between; margin-top: 24px;">
@@ -287,6 +288,7 @@
               <label>Optional: Upload Merchant UPI Standee QR Image</label>
               <input type="file" id="wiz_qr_file" accept="image/*" class="admin-input" onchange="AdminDashboard.handleQrUpload(this)" />
               <div style="font-size: 11px; color: var(--admin-text-muted);">This QR standee will be shown directly during customer checkout.</div>
+              <div id="wiz_qr_preview" style="display: none; margin-top: 10px;"></div>
             </div>
 
             <div style="display: flex; justify-content: space-between; margin-top: 24px;">
@@ -337,6 +339,9 @@
                   <button class="btn-admin btn-admin-primary" onclick="AdminDashboard.copyDedicatedUrl()">📋 Copy</button>
                 </div>
               </div>
+
+              <!-- Uploaded Assets Live Verification Box -->
+              <div id="res_assets_summary" style="margin-top: 20px; display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;"></div>
 
               <!-- Action Buttons for Automated & 1-Click Deployment -->
               <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 24px;">

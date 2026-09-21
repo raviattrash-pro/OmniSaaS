@@ -540,8 +540,8 @@ const UniversalApp = {
     const config = window.MASTER_CONFIG;
     const currentVertical = config.activeAppType;
     const vData = config.verticals[currentVertical];
-    const customLogo = localStorage.getItem('custom_brand_logo') || "";
-    const customQr = localStorage.getItem('custom_upi_qr') || "";
+    const customLogo = (vData && vData.customLogo) || config.customLogo || localStorage.getItem('custom_brand_logo') || "";
+    const customQr = (vData && vData.customQr) || config.customQr || localStorage.getItem('custom_upi_qr') || "";
     const profiles = ClientProfileManager.getProfiles();
 
     // Generate Instant Shareable Live Link
@@ -601,7 +601,9 @@ const UniversalApp = {
               <div class="form-group">
                 <label>Upload Business Logo (PNG/SVG/JPG)</label>
                 <input type="file" id="rebrand_logo_file" class="form-control" accept="image/*" onchange="UniversalApp.handleLogoFileUpload(this)" />
-                <div id="logo_preview_badge" style="font-size: 11px; color: var(--success-color); font-weight: 700; margin-top: 4px; ${customLogo ? '' : 'display:none;'}">✓ Custom Logo Active</div>
+                <div id="logo_preview_badge" style="margin-top: 6px; ${customLogo ? '' : 'display:none;'}">
+                  ${customLogo ? `<img src="${customLogo}" style="max-height: 38px; max-width: 120px; object-fit: contain; border-radius: 4px; border: 1px solid var(--border-color); background: #fff; padding: 2px;" alt="Logo Preview" /><div style="font-size: 11px; color: var(--success-color); font-weight: 700; margin-top: 2px;">✓ Custom Logo Active</div>` : ''}
+                </div>
               </div>
 
               <div class="form-group">
@@ -645,7 +647,9 @@ const UniversalApp = {
             <div class="form-group">
               <label>Upload Business UPI QR Code Standee (PNG/JPG)</label>
               <input type="file" id="rebrand_qr_file" class="form-control" accept="image/*" onchange="UniversalApp.handleQrFileUpload(this)" />
-              <div id="qr_preview_badge" style="font-size: 11px; color: var(--success-color); font-weight: 700; margin-top: 4px; ${customQr ? '' : 'display:none;'}">✓ Custom Business QR Standee Active</div>
+              <div id="qr_preview_badge" style="margin-top: 6px; ${customQr ? '' : 'display:none;'}">
+                ${customQr ? `<img src="${customQr}" style="max-height: 60px; max-width: 60px; object-fit: contain; border-radius: 4px; border: 1px solid var(--border-color); background: #fff; padding: 2px;" alt="QR Preview" /><div style="font-size: 11px; color: var(--success-color); font-weight: 700; margin-top: 2px;">✓ Custom Standee QR Active</div>` : ''}
+              </div>
             </div>
 
             <div class="form-group">
@@ -797,27 +801,45 @@ const UniversalApp = {
 
   handleLogoFileUpload(input) {
     if (input.files && input.files[0]) {
+      const file = input.files[0];
+      if (file.size > 4 * 1024 * 1024) {
+        UniversalApp.showToast('Logo must be under 4MB', 'error');
+        return;
+      }
       const reader = new FileReader();
       reader.onload = (e) => {
         localStorage.setItem('custom_brand_logo', e.target.result);
+        window.MASTER_CONFIG.customLogo = e.target.result;
         const badge = document.getElementById('logo_preview_badge');
-        if (badge) badge.style.display = 'block';
-        UniversalApp.showToast('✅ Business Logo Image Uploaded!', 'success');
+        if (badge) {
+          badge.style.display = 'block';
+          badge.innerHTML = `<img src="${e.target.result}" style="max-height: 38px; max-width: 120px; object-fit: contain; border-radius: 4px; border: 1px solid var(--border-color); background: #fff; padding: 2px;" alt="Logo Preview" /><div style="font-size: 11px; color: var(--success-color); font-weight: 700; margin-top: 2px;">✓ Custom Logo Active</div>`;
+        }
+        UniversalApp.showToast('✅ Business Logo Image Uploaded & Live!', 'success');
       };
-      reader.readAsDataURL(input.files[0]);
+      reader.readAsDataURL(file);
     }
   },
 
   handleQrFileUpload(input) {
     if (input.files && input.files[0]) {
+      const file = input.files[0];
+      if (file.size > 4 * 1024 * 1024) {
+        UniversalApp.showToast('QR standee must be under 4MB', 'error');
+        return;
+      }
       const reader = new FileReader();
       reader.onload = (e) => {
         localStorage.setItem('custom_upi_qr', e.target.result);
+        window.MASTER_CONFIG.customQr = e.target.result;
         const badge = document.getElementById('qr_preview_badge');
-        if (badge) badge.style.display = 'block';
-        UniversalApp.showToast('✅ Custom Business UPI QR Standee Uploaded!', 'success');
+        if (badge) {
+          badge.style.display = 'block';
+          badge.innerHTML = `<img src="${e.target.result}" style="max-height: 60px; max-width: 60px; object-fit: contain; border-radius: 4px; border: 1px solid var(--border-color); background: #fff; padding: 2px;" alt="QR Preview" /><div style="font-size: 11px; color: var(--success-color); font-weight: 700; margin-top: 2px;">✓ Custom Standee QR Active</div>`;
+        }
+        UniversalApp.showToast('✅ Custom Business UPI QR Standee Uploaded & Live!', 'success');
       };
-      reader.readAsDataURL(input.files[0]);
+      reader.readAsDataURL(file);
     }
   },
 
@@ -851,6 +873,11 @@ const UniversalApp = {
     config.googleScriptUrl = document.getElementById('rebrand_script_url').value.trim();
     config.whatsappNumber = document.getElementById('rebrand_whatsapp').value.trim();
     config.upiId = document.getElementById('rebrand_upi').value.trim();
+
+    config.customLogo = localStorage.getItem('custom_brand_logo') || null;
+    config.customQr = localStorage.getItem('custom_upi_qr') || null;
+    vData.customLogo = config.customLogo;
+    vData.customQr = config.customQr;
 
     const isProdLock = document.getElementById('rebrand_prod_lock').checked;
     config.isProductionClientMode = isProdLock;
@@ -888,6 +915,8 @@ const UniversalApp = {
       upiId: upi,
       whatsappNumber: whatsapp,
       googleScriptUrl: script,
+      customLogo: (window.MASTER_CONFIG.verticals[vKey] && window.MASTER_CONFIG.verticals[vKey].customLogo) || window.MASTER_CONFIG.customLogo || localStorage.getItem('custom_brand_logo') || null,
+      customQr: (window.MASTER_CONFIG.verticals[vKey] && window.MASTER_CONFIG.verticals[vKey].customQr) || window.MASTER_CONFIG.customQr || localStorage.getItem('custom_upi_qr') || null,
       isProductionClientMode: true
     };
 
@@ -1533,7 +1562,7 @@ const UniversalApp = {
     document.getElementById('brand-tagline').innerText = vData.tagline;
 
     // Check custom logo image vs emoji
-    const customLogo = localStorage.getItem('custom_brand_logo');
+    const customLogo = (vData && vData.customLogo) || config.customLogo || localStorage.getItem('custom_brand_logo');
     const logoImg = document.getElementById('brand-logo-img');
     const logoIcon = document.getElementById('brand-icon');
 
@@ -1541,6 +1570,15 @@ const UniversalApp = {
       logoImg.src = customLogo;
       logoImg.style.display = 'inline-block';
       if (logoIcon) logoIcon.style.display = 'none';
+
+      // Update Favicon dynamically
+      let fav = document.querySelector("link[rel~='icon']");
+      if (!fav) {
+        fav = document.createElement('link');
+        fav.rel = 'icon';
+        document.head.appendChild(fav);
+      }
+      fav.href = customLogo;
     } else {
       if (logoImg) logoImg.style.display = 'none';
       if (logoIcon) {
@@ -1725,7 +1763,7 @@ const UniversalApp = {
     const defaultName = this.currentUser ? this.currentUser.name : "";
     const defaultPhone = this.currentUser && this.currentUser.phone ? this.currentUser.phone : "";
 
-    const customQr = config.customQr || localStorage.getItem('custom_upi_qr');
+    const customQr = (vData && vData.customQr) || config.customQr || localStorage.getItem('custom_upi_qr');
     const dynamicQrUri = `upi://pay?pa=${config.upiId}&pn=${encodeURIComponent(vData.businessName)}&am=${finalTotal.toFixed(2)}&cu=INR`;
     const dynamicQr = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(dynamicQrUri)}`;
     const qrDisplayUrl = customQr || dynamicQr;
@@ -1753,13 +1791,13 @@ const UniversalApp = {
           <div class="form-group" style="text-align: left;">
             <label>Payment Mode *</label>
             <select id="cart_payment_mode" class="form-control" onchange="UniversalApp.toggleCartUpiFields(this.value)">
-              <option value="Cash on Delivery / Pay at Doorstep">Cash on Delivery / Pay at Doorstep</option>
-              <option value="UPI / Instant Online Payment">UPI / Instant Online Payment (Instant Zero-Fee)</option>
+              <option value="Cash on Delivery / Pay at Doorstep" ${!customQr ? 'selected' : ''}>Cash on Delivery / Pay at Doorstep</option>
+              <option value="UPI / Instant Online Payment" ${customQr ? 'selected' : ''}>UPI / Instant Online Payment (Instant Zero-Fee)</option>
             </select>
           </div>
 
           <!-- Dynamic UPI Standee & Proof Verification Box -->
-          <div id="cart_upi_container" style="display: none; margin-top: 12px; background: var(--bg-secondary); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center;">
+          <div id="cart_upi_container" style="display: ${customQr ? 'block' : 'none'}; margin-top: 12px; background: var(--bg-secondary); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center;">
             <p style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">
               ${customQr ? '🏢 OFFICIAL MERCHANT STAND-IN QR' : '⚡ SCAN WITH GPAY / PHONEPE / PAYTM'}
             </p>
@@ -1770,11 +1808,11 @@ const UniversalApp = {
             </div>
             <div class="form-group" style="text-align: left; margin-top: 10px;">
               <label style="font-size: 11px;">UPI Transaction Reference / UTR ID *</label>
-              <input type="text" id="cart_txn_id" class="form-control" placeholder="Enter 12-digit UTR or Transaction Ref" />
+              <input type="text" id="cart_txn_id" class="form-control" ${customQr ? 'required' : ''} placeholder="Enter 12-digit UTR or Transaction Ref" />
             </div>
             <div class="form-group" style="text-align: left; margin-top: 8px;">
               <label style="font-size: 11px;">Upload Payment Screenshot *</label>
-              <input type="file" id="cart_screenshot_file" class="form-control" accept="image/*" onchange="UniversalApp.handleCartScreenshotUpload(this)" />
+              <input type="file" id="cart_screenshot_file" class="form-control" accept="image/*" ${customQr ? 'required' : ''} onchange="UniversalApp.handleCartScreenshotUpload(this)" />
               <div id="cart_screenshot_preview" style="display: none; margin-top: 6px;"></div>
             </div>
           </div>
@@ -1904,11 +1942,13 @@ const UniversalApp = {
     this.triggerConfetti();
     this.playSound('victory');
 
+    const customLogo = (vData && vData.customLogo) || config.customLogo || localStorage.getItem('custom_brand_logo');
+
     this.showModal(`
-      <div class="receipt-box">
+      <div class="receipt-box" id="printableReceipt">
         <div class="receipt-header">
-          <span style="font-size: 3rem;">🎉</span>
-          <h3 style="color: var(--primary-color);">Order Placed Successfully!</h3>
+          ${customLogo ? `<img src="${customLogo}" style="max-height: 48px; max-width: 140px; object-fit: contain; margin-bottom: 6px;" alt="Logo" />` : '<span style="font-size: 3rem;">🎉</span>'}
+          <h3 style="color: var(--primary-color);">${SecurityGuard.escapeHTML(vData.businessName || 'Order Receipt')}</h3>
           <p style="font-size: 13px; color: var(--text-muted);">Order ID: <strong>${orderId}</strong></p>
         </div>
         <div class="receipt-row"><span>Customer:</span><strong>${custName}</strong></div>

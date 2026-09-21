@@ -324,11 +324,14 @@ const HotelBookingModule = {
     UniversalApp.triggerConfetti();
     UniversalApp.playSound('victory');
 
+    const customLogo = (config.verticals.hotel_booking && config.verticals.hotel_booking.customLogo) || config.customLogo || localStorage.getItem('custom_brand_logo');
+
     UniversalApp.showModal(`
       <div class="receipt-box" id="printableReceipt">
         <div class="receipt-header">
-          <span style="font-size: 3rem;">🛎️</span>
-          <h3 style="color: var(--primary-color);">Booking Voucher Confirmed!</h3>
+          ${customLogo ? `<img src="${customLogo}" style="max-height: 48px; max-width: 140px; object-fit: contain; margin-bottom: 6px;" alt="Logo" />` : '<span style="font-size: 3rem;">🛎️</span>'}
+          <h3 style="color: var(--primary-color);">${SecurityGuard.escapeHTML(config.verticals.hotel_booking.businessName)}</h3>
+          <p style="font-size: 13px; color: var(--text-muted);">Official Reservation Voucher</p>
           <p style="font-size: 13px; color: var(--text-muted);">Voucher ID: <strong>${resId}</strong></p>
         </div>
         <div class="receipt-row"><span>Guest Name:</span><strong>${guestName}</strong></div>
