@@ -1,7 +1,7 @@
 # ⚡ OmniSaaS — Universal Multi-Business Operating System & Rapid Onboarding Engine
 
 > **Live Platform URL**: [https://raviattrash-pro.github.io/OmniSaaS/](https://raviattrash-pro.github.io/OmniSaaS/)  
-> **Dedicated Admin Portal**: [https://raviattrash-pro.github.io/OmniSaaS/admin/](https://raviattrash-pro.github.io/OmniSaaS/admin/) *(PIN: 1234)*  
+> **Dedicated Admin Portal**: [https://raviattrash-pro.github.io/OmniSaaS/admin/](https://raviattrash-pro.github.io/OmniSaaS/admin/) *(Protected via SHA-256 Encrypted Master Security)*  
 > **Zero-Backend Architecture**: 100% Static HTML5, CSS3 & Vanilla JavaScript hosted on GitHub Pages with Google Sheets Cloud Database Sync.
 
 ---
@@ -24,7 +24,7 @@ Every business onboarded receives its **own dedicated GitHub Pages URL named dir
 │  https://raviattrash-pro.    │ │ https://raviattrash-pro.    │ │ https://raviattrash-pro.    │
 │  github.io/dps-school/       │ │ github.io/grand-oberoi/      │ │ github.io/OmniSaaS/admin/    │
 │                              │ │                              │ │                              │
-│ • Locked school branding     │ │ • Locked hotel branding      │ │ • Master PIN Protected       │
+│ • Locked school branding     │ │ • Locked hotel branding      │ │ • Encrypted Access Guard     │
 │ • Student Admissions & Fees  │ │ • Room Reservations & Dining │ │ • 5-Minute Rapid Onboarder   │
 │ • Direct merchant UPI        │ │ • Direct merchant UPI        │ │ • 1-Click GitHub Deployer    │
 │ • Dedicated Sheet Tab        │ │ • Dedicated Sheet Tab        │ │ • Cross-Vendor Ledger Feed   │
@@ -33,19 +33,19 @@ Every business onboarded receives its **own dedicated GitHub Pages URL named dir
 
 ---
 
-## 📊 Pre-Mapped Google Sheets Databases
+## 📊 Cloud Database & Google Sheets Integration
 
-Each vertical routes transactions and registrations to its own master Google Spreadsheet, and automatically creates a **separate, dedicated tab for each business**:
+Each vertical routes transactions and registrations securely via Google Apps Script webhooks, automatically organizing data into **dedicated business tabs**:
 
-| Business Vertical | Official Connected Google Sheet |
-|:---|:---|
-| 🎓 **School / College Admissions & Fees** | [Open School Sheet](https://docs.google.com/spreadsheets/d/1z1K_O8vl9ftwTlJmnLMzLrjC5V7sfhEMbToWjPuCL-w/edit?usp=sharing) |
-| 🚚 **MOVE-X Freight Logistics Ledger** | [Open MoveX Sheet](https://docs.google.com/spreadsheets/d/1Mnb-CnvAhb8bTr5dulfzHZTEoD1rs2BbwgwkGKZxnnY/edit?usp=sharing) |
-| 🛍️ **Ecommerce Retail Store Orders** | [Open Ecommerce Sheet](https://docs.google.com/spreadsheets/d/1G1Z3GKyzP9Y_s8av1GSHj1UKwctlwhLuvW9L8FO0zGk/edit?usp=sharing) |
-| 🏨 **Hotel & Resort Reservations** | [Open Hotel Sheet](https://docs.google.com/spreadsheets/d/1YYurMFHrew8GZtfXsoJetuAEjd58t58LSVb6QogrW1k/edit?usp=sharing) |
-| 🍲 **Restaurant & Food Orders** | [Open Food Sheet](https://docs.google.com/spreadsheets/d/1YYurMFHrew8GZtfXsoJetuAEjd58t58LSVb6QogrW1k/edit?usp=sharing) |
+| Business Vertical | Cloud Database Routing | Status |
+|:---|:---|:---|
+| 🎓 **School / College Admissions & Fees** | Secure Google Sheets Webhook Routing | 🟢 Connected |
+| 🚚 **MOVE-X Freight Logistics Ledger** | Secure Google Sheets Webhook Routing | 🟢 Connected |
+| 🛍️ **Ecommerce Retail Store Orders** | Secure Google Sheets Webhook Routing | 🟢 Connected |
+| 🏨 **Hotel & Resort Reservations** | Secure Google Sheets Webhook Routing | 🟢 Connected |
+| 🍲 **Restaurant & Food Orders** | Secure Google Sheets Webhook Routing | 🟢 Connected |
 
-> 💡 **Multi-Business Tab Automation**: When you onboard 5 different schools (e.g. DPS, St. Xaviers, Cambridge High), each school gets its own cleanly separated tab with all its students, admissions, and fee payments organized independently.
+> 💡 **Multi-Business Tab Automation**: When onboarding multiple schools or businesses (e.g. DPS, St. Xaviers, Cambridge High), each business automatically receives its own cleanly separated tab with all transactions, student profiles, and fee receipts organized independently.
 
 ---
 
@@ -73,7 +73,7 @@ Each vertical routes transactions and registrations to its own master Google Spr
 ## 🔐 Standalone Admin Management Portal
 
 - **URL**: `admin/index.html` or `admin.html`
-- **Default Master PIN**: `1234`
+- **Security**: Protected with SHA-256 cryptographic master password & customizable PIN
 - **Features**:
   - **Cross-Vendor Revenue Engine**: Real-time aggregated platform volume across all schools, hotels, logistics, restaurants, and retail stores
   - **5-Minute Rapid Onboarder**: 5-step wizard with auto-slug generation, custom branding, UPI standee upload, and fee catalog configuration

@@ -85,7 +85,7 @@ If you prefer to host all businesses inside one master repository:
 
 - **Dedicated Admin URL**:
   - `https://<YOUR_USERNAME>.github.io/<REPO_NAME>/admin/` (or `admin.html`)
-- **Default Master PIN**: `1234`
+- **Security**: Protected with SHA-256 cryptographic master password & customizable PIN
 - **Capabilities**:
   - **Cross-Vendor Revenue Engine**: Real-time aggregated gross volume across all schools, hotels, logistics, restaurants, and retail stores.
   - **5-Minute Rapid Onboarder**: 5-step wizard with auto-slug generation, custom branding, UPI standee upload, and fee catalog configuration.
