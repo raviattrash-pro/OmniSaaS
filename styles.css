@@ -1206,6 +1206,16 @@ footer {
     color: #0f172a !important;
   }
 
+  #app-modal.active .btn,
+  #app-modal.active button,
+  .modal-overlay.active .btn,
+  .modal-overlay.active button,
+  .receipt-box .btn,
+  .receipt-box button {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
   /* 2. When printing an ID Card */
   body.printing-id-card #printableStudentIdCard,
   body.printing-id-card #printableStudentIdCard * {

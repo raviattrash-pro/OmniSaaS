@@ -2498,13 +2498,15 @@ const UniversalApp = {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 8000);
       try {
-        await fetch(url, {
+        const response = await fetch(url, {
           method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify(payload),
           signal: controller.signal
         });
+        if (!response.ok && response.status !== 0) {
+          throw new Error(`Google Apps Script HTTP ${response.status}`);
+        }
       } finally {
         clearTimeout(timeoutId);
       }

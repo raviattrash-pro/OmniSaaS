@@ -26,6 +26,11 @@ const StudentManagementModule = {
     meritScholarshipPct: 0
   },
 
+  _safeParse(key) {
+    try { return JSON.parse(localStorage.getItem(key) || '[]'); }
+    catch(e) { console.warn('Corrupted localStorage data in', key, '- resetting.'); localStorage.removeItem(key); return []; }
+  },
+
   render(container, config) {
     const data = config.verticals.student_management;
     const customLogo = (data && data.customLogo) || config.customLogo || localStorage.getItem('custom_brand_logo');
@@ -297,7 +302,7 @@ const StudentManagementModule = {
       <div id="subtab-activities" class="subtab-panel" style="display: none; margin-top: 25px;">
         <div class="grid-container">
           ${data.activityCatalog.map(act => {
-            const enrollments = JSON.parse(localStorage.getItem('student_activities') || '[]').filter(e => e.activityName === act.title);
+            const enrollments = StudentManagementModule._safeParse('student_activities').filter(e => e.activityName === act.title);
             return `
               <div class="card">
                 <div class="card-body">
@@ -345,12 +350,16 @@ const StudentManagementModule = {
   switchSubTab(tabName) {
     UniversalApp.playSound('click');
     document.querySelectorAll('.subtab-panel').forEach(p => p.style.display = 'none');
-    document.querySelectorAll('.nav-tabs .tab-btn').forEach(b => b.classList.remove('active'));
+    const allBtns = document.querySelectorAll('.nav-tabs .tab-btn');
+    allBtns.forEach(b => b.classList.remove('active'));
     
     const target = document.getElementById(`subtab-${tabName}`);
     if (target) target.style.display = 'block';
 
-    if (event && event.target) event.target.classList.add('active');
+    const tabMap = { admissions: 0, idcard: 1, fees: 2, activities: 3, status: 4 };
+    if (tabMap[tabName] !== undefined && allBtns[tabMap[tabName]]) {
+      allBtns[tabMap[tabName]].classList.add('active');
+    }
   },
 
   onScholarshipChange(val) {
@@ -373,6 +382,7 @@ const StudentManagementModule = {
       this.goToStep(2);
     } else if (this.currentStep === 2) {
       this.wizardData.prevSchool = document.getElementById('wiz_prev_school').value;
+      this.wizardData.prevGpa = document.getElementById('wiz_prev_gpa') ? document.getElementById('wiz_prev_gpa').value.trim() : '';
       this.goToStep(3);
     } else if (this.currentStep === 3) {
       const pName = document.getElementById('wiz_parent_name').value.trim();
@@ -426,7 +436,15 @@ const StudentManagementModule = {
       "Step 3: Parent & Contact Details",
       "Step 4: Application Review & Confirmation"
     ];
+    const descs = [
+      "Enter the applicant's primary identity and birth details.",
+      "Provide academic background and scholarship eligibility.",
+      "Enter parent/guardian identity and contact information.",
+      "Review and confirm all details before final submission."
+    ];
     document.getElementById('wizard-step-title').innerText = titles[step - 1];
+    const descEl = document.getElementById('wizard-step-desc');
+    if (descEl) descEl.innerText = descs[step - 1];
 
     document.getElementById('wiz_prev_btn').style.visibility = (step === 1) ? 'hidden' : 'visible';
     document.getElementById('wiz_next_btn').style.display = (step === 4) ? 'none' : 'inline-flex';
@@ -435,17 +453,11 @@ const StudentManagementModule = {
   },
 
   async handleWizardSubmit(e) {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
 
     // Mandatory Google Sign-In Gate
     if (!UniversalApp.currentUser) {
-      UniversalApp.showGoogleLoginPrompt("Please sign in with Google to submit student admission.", () => this.handleWizardSubmit(e));
-      return;
-    }
-
-    const rateCheck = RateLimiter.checkLimit();
-    if (!rateCheck.allowed) {
-      UniversalApp.showToast(`⚠️ Rate limit reached. Please wait ${rateCheck.waitSeconds}s.`, 'error');
+      UniversalApp.showGoogleLoginPrompt("Please sign in with Google to submit student admission.", () => this.handleWizardSubmit());
       return;
     }
 
@@ -467,12 +479,13 @@ const StudentManagementModule = {
       email: SecurityGuard.escapeHTML(this.wizardData.email),
       address: SecurityGuard.escapeHTML(this.wizardData.address),
       previousSchool: SecurityGuard.escapeHTML(this.wizardData.prevSchool || "None"),
+      previousGpa: SecurityGuard.escapeHTML(this.wizardData.prevGpa || "N/A"),
       scholarshipPct: `${Number(this.wizardData.meritScholarshipPct || 0)}%`,
       status: "Submitted (Under Council Review)"
     };
 
     // Save to real database in localStorage
-    const admissions = JSON.parse(localStorage.getItem('student_admissions') || '[]');
+    const admissions = this._safeParse('student_admissions');
     admissions.unshift(record);
     localStorage.setItem('student_admissions', JSON.stringify(admissions));
 
@@ -495,6 +508,7 @@ const StudentManagementModule = {
         gradeApplied: record.gradeApplied,
         relationship: record.relationship,
         previousSchool: record.previousSchool,
+        previousGpa: record.previousGpa,
         scholarshipPct: record.scholarshipPct,
         address: record.address
       },
@@ -545,7 +559,7 @@ const StudentManagementModule = {
   populateStudentIdDropdown() {
     const select = document.getElementById('id_card_student_select');
     if (!select) return;
-    const admissions = JSON.parse(localStorage.getItem('student_admissions') || '[]');
+    const admissions = this._safeParse('student_admissions');
 
     if (admissions.length === 0) {
       select.innerHTML = `<option value="">-- No registered students yet. Type details below --</option>`;
@@ -560,7 +574,7 @@ const StudentManagementModule = {
 
   onSelectStudentForId(refId) {
     if (!refId) return;
-    const admissions = JSON.parse(localStorage.getItem('student_admissions') || '[]');
+    const admissions = this._safeParse('student_admissions');
     const match = admissions.find(a => a.orderId === refId);
     if (!match) return;
 
@@ -650,12 +664,14 @@ const StudentManagementModule = {
     const dynamicQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=190x190&data=${encodeURIComponent(upiUri)}`;
     const qrDisplayUrl = customQr || dynamicQrUrl;
     const defaultName = UniversalApp.currentUser ? UniversalApp.currentUser.name : "";
+    const safeFeeId = String(feeId).replace(/'/g, "\\'");
+    const safeFeeTitle = String(feeTitle).replace(/'/g, "\\'");
     this.uploadedFeeScreenshotData = null;
 
     UniversalApp.showModal(`
       <div style="text-align: center;">
         <h3 style="color: var(--primary-color); margin-bottom: 4px;">Online Fee Invoicing</h3>
-        <p style="color: var(--text-muted); font-size: 13px;"><strong>${feeTitle}</strong></p>
+        <p style="color: var(--text-muted); font-size: 13px;"><strong>${SecurityGuard.escapeHTML(feeTitle)}</strong></p>
         <div style="font-size: 2.2rem; font-weight: 900; color: var(--primary-color); margin: 10px 0;">${currency}${amount.toLocaleString()}</div>
 
         <div style="background: var(--bg-secondary); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 16px;">
@@ -669,10 +685,10 @@ const StudentManagementModule = {
           </div>
         </div>
 
-        <form onsubmit="StudentManagementModule.handleFeeSubmit(event, '${feeId}', '${feeTitle}', ${amount})">
+        <form onsubmit="StudentManagementModule.handleFeeSubmit(event, '${safeFeeId}', '${safeFeeTitle}', ${amount})">
           <div class="form-group" style="text-align: left;">
             <label>Student Full Name *</label>
-            <input type="text" id="fee_student_name" class="form-control" required placeholder="Student Name" value="${defaultName}" />
+            <input type="text" id="fee_student_name" class="form-control" required placeholder="Student Name" value="${SecurityGuard.sanitizeAttr(defaultName)}" />
           </div>
           <div class="form-group" style="text-align: left;">
             <label>Student Roll No / ID *</label>
@@ -700,12 +716,7 @@ const StudentManagementModule = {
   },
 
   async handleFeeSubmit(e, feeId, feeTitle, amount) {
-    e.preventDefault();
-    const rateCheck = RateLimiter.checkLimit();
-    if (!rateCheck.allowed) {
-      UniversalApp.showToast(`⚠️ Rate limit reached. Please wait ${rateCheck.waitSeconds}s.`, 'error');
-      return;
-    }
+    if (e && e.preventDefault) e.preventDefault();
 
     const config = window.MASTER_CONFIG;
     const receiptNo = "REC-" + new Date().getFullYear() + "-" + Math.floor(10000 + Math.random() * 90000);
@@ -733,11 +744,13 @@ const StudentManagementModule = {
       particulars: sanitizedFeeTitle,
       amount: amount,
       currency: config.verticals.student_management.currency,
+      txnId: txnId,
       transactionRef: txnId,
+      screenshotData: this.uploadedFeeScreenshotData,
       status: "Paid (Verified)"
     };
 
-    const fees = JSON.parse(localStorage.getItem('student_fees') || '[]');
+    const fees = this._safeParse('student_fees');
     fees.unshift(feeRecord);
     localStorage.setItem('student_fees', JSON.stringify(fees));
 
@@ -747,7 +760,7 @@ const StudentManagementModule = {
       appType: "student_management",
       customer: {
         name: studentName,
-        email: UniversalApp.currentUser ? UniversalApp.currentUser.email : "accounts@brightstar.edu",
+        email: UniversalApp.currentUser ? UniversalApp.currentUser.email : "",
         phone: phone,
         authProvider: UniversalApp.currentUser ? "google" : "guest"
       },
@@ -811,12 +824,12 @@ const StudentManagementModule = {
     }
 
     const defaultName = UniversalApp.currentUser ? UniversalApp.currentUser.name : "";
-    const sanitizedTitle = SecurityGuard.sanitizeAttr(title);
+    const safeTitle = String(title).replace(/'/g, "\\'");
     UniversalApp.showModal(`
       <div style="text-align: center;">
         <h3 style="color: var(--primary-color);">🏆 Co-Curricular Club Enrollment</h3>
         <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">Register for: <strong>${SecurityGuard.escapeHTML(title)}</strong></p>
-        <form onsubmit="StudentManagementModule.handleActivitySubmit(event, '${sanitizedTitle}')">
+        <form onsubmit="StudentManagementModule.handleActivitySubmit(event, '${safeTitle}')">
           <div class="form-group" style="text-align: left;">
             <label>Student Full Name *</label>
             <input type="text" id="act_name" class="form-control" required placeholder="Student Name" value="${SecurityGuard.sanitizeAttr(defaultName)}" />
@@ -836,13 +849,9 @@ const StudentManagementModule = {
   },
 
   async handleActivitySubmit(e, title) {
-    e.preventDefault();
-    const rateCheck = RateLimiter.checkLimit();
-    if (!rateCheck.allowed) {
-      UniversalApp.showToast(`⚠️ Rate limit reached. Please wait ${rateCheck.waitSeconds}s.`, 'error');
-      return;
-    }
+    if (e && e.preventDefault) e.preventDefault();
 
+    const config = window.MASTER_CONFIG;
     const studentName = SecurityGuard.escapeHTML(document.getElementById('act_name').value.trim());
     const grade = SecurityGuard.escapeHTML(document.getElementById('act_grade').value.trim());
     const phone = SecurityGuard.escapeHTML(document.getElementById('act_phone').value.trim());
@@ -858,7 +867,7 @@ const StudentManagementModule = {
       activityName: sanitizedTitle
     };
 
-    const acts = JSON.parse(localStorage.getItem('student_activities') || '[]');
+    const acts = this._safeParse('student_activities');
     acts.unshift(actRecord);
     localStorage.setItem('student_activities', JSON.stringify(acts));
 
@@ -866,8 +875,8 @@ const StudentManagementModule = {
       orderId: actRecord.orderId,
       timestamp: actRecord.timestamp,
       appType: "student_management",
-      customer: { name: studentName, phone: phone, email: UniversalApp.currentUser ? UniversalApp.currentUser.email : "activities@brightstar.edu", authProvider: UniversalApp.currentUser ? "google" : "guest" },
-      cart: { items: [{ id: "act_reg", title: "Club: " + sanitizedTitle, price: 0, quantity: 1, subtotal: 0 }], finalTotal: 0, currency: "₹" },
+      customer: { name: studentName, phone: phone, email: UniversalApp.currentUser ? UniversalApp.currentUser.email : "", authProvider: UniversalApp.currentUser ? "google" : "guest" },
+      cart: { items: [{ id: "act_reg", title: "Club: " + sanitizedTitle, price: 0, quantity: 1, subtotal: 0 }], finalTotal: 0, currency: config.verticals.student_management.currency || "₹" },
       customFields: { activityName: sanitizedTitle, grade: grade },
       payment: { method: "free_club_reg", status: "enrolled" }
     };
@@ -901,6 +910,7 @@ const StudentManagementModule = {
 
     const container = document.getElementById('vertical-container');
     this.render(container, window.MASTER_CONFIG);
+    this.switchSubTab('activities');
   },
 
   searchApplicationStatus() {
@@ -913,11 +923,12 @@ const StudentManagementModule = {
       return;
     }
 
-    const admissions = JSON.parse(localStorage.getItem('student_admissions') || '[]');
+    const admissions = this._safeParse('student_admissions');
+    const queryDigits = query.replace(/[^0-9]/g, '');
     const match = admissions.find(a => 
       a.orderId.toLowerCase() === query.toLowerCase() ||
       a.rollNo.toLowerCase() === query.toLowerCase() ||
-      a.phone.replace(/[^0-9]/g, '').includes(query.replace(/[^0-9]/g, ''))
+      (queryDigits.length >= 4 && a.phone.replace(/[^0-9]/g, '').includes(queryDigits))
     );
 
     const escapedQuery = SecurityGuard.escapeHTML(query);
