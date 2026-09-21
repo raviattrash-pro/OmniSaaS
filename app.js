@@ -360,106 +360,10 @@ const URLQueryTenantEngine = {
 // 📁 MULTI-CLIENT PROFILE MANAGER (SAVED CLIENT PROFILES)
 // =========================================================================
 const ClientProfileManager = {
-  defaultProfiles: [
-    {
-      id: "profile_dps",
-      slug: "dps-school",
-      businessName: "Delhi Public School (DPS)",
-      vertical: "student_management",
-      tagline: "Excellence in K-12 Education & Online Fee Portal",
-      logoIcon: "🏛️",
-      themeColor: "#047857",
-      accentColor: "#f59e0b",
-      currency: "₹",
-      upiId: "payments@dpsdelhi.edu",
-      whatsappNumber: "+919811223344",
-      googleScriptUrl: "",
-      isProductionClientMode: true
-    },
-    {
-      id: "profile_stxaviers",
-      slug: "st-xaviers",
-      businessName: "St. Xavier's International Collegiate",
-      vertical: "student_management",
-      tagline: "Admissions 2026-27 & Digital Student Portal",
-      logoIcon: "🎓",
-      themeColor: "#1e3a8a",
-      accentColor: "#38bdf8",
-      currency: "₹",
-      upiId: "admissions@stxaviers.edu",
-      whatsappNumber: "+919876543210",
-      googleScriptUrl: "",
-      isProductionClientMode: true
-    },
-    {
-      id: "profile_oberoi",
-      slug: "grand-oberoi",
-      businessName: "The Grand Oberoi Palace & Suites",
-      vertical: "hotel_booking",
-      tagline: "5-Star Heritage Hospitality & Dining Reservations",
-      logoIcon: "🏨",
-      themeColor: "#831843",
-      accentColor: "#f59e0b",
-      currency: "₹",
-      upiId: "reservations@oberoipalace.com",
-      whatsappNumber: "+919988776655",
-      googleScriptUrl: "",
-      isProductionClientMode: true
-    },
-    {
-      id: "profile_movex",
-      slug: "movex-logistics",
-      businessName: "MOVE-X Intra-City Logistics & Fleet",
-      vertical: "movex_booking",
-      tagline: "Instant Commercial Vehicle Dispatch (Tata Ace / Cabs)",
-      logoIcon: "🚚",
-      themeColor: "#0f172a",
-      accentColor: "#f59e0b",
-      currency: "₹",
-      upiId: "dispatch@movex.in",
-      whatsappNumber: "+919123456780",
-      googleScriptUrl: "",
-      isProductionClientMode: true
-    },
-    {
-      id: "profile_spicegarden",
-      slug: "spice-garden",
-      businessName: "Spice Garden Royal Bistro",
-      vertical: "food_order",
-      tagline: "Authentic Gourmet Delicacies Delivered in 30 Mins",
-      logoIcon: "🍲",
-      themeColor: "#991b1b",
-      accentColor: "#ea580c",
-      currency: "₹",
-      upiId: "billing@spicegarden.com",
-      whatsappNumber: "+919822334455",
-      googleScriptUrl: "",
-      isProductionClientMode: true
-    },
-    {
-      id: "profile_quickmart",
-      slug: "quickmart-store",
-      businessName: "QuickMart Express Superstore",
-      vertical: "ecommerce",
-      tagline: "Instant 15-Minute Groceries & Essentials",
-      logoIcon: "🛍️",
-      themeColor: "#065f46",
-      accentColor: "#10b981",
-      currency: "₹",
-      upiId: "store@quickmart.com",
-      whatsappNumber: "+919711223344",
-      googleScriptUrl: "",
-      isProductionClientMode: true
-    }
-  ],
-
   getProfiles() {
-    const configGlobal = (window.MASTER_CONFIG && Array.isArray(window.MASTER_CONFIG.vendorProfiles)) ? window.MASTER_CONFIG.vendorProfiles : [];
-    const baseProfiles = [...configGlobal, ...this.defaultProfiles];
+    const baseProfiles = (window.MASTER_CONFIG && Array.isArray(window.MASTER_CONFIG.vendorProfiles)) ? window.MASTER_CONFIG.vendorProfiles : [];
     const saved = localStorage.getItem('saved_client_profiles');
-    if (!saved) {
-      return baseProfiles;
-    }
+    if (!saved) return baseProfiles;
     try {
       const parsed = JSON.parse(saved);
       if (Array.isArray(parsed) && parsed.length > 0) {
@@ -490,8 +394,7 @@ const ClientProfileManager = {
   },
 
   deleteProfile(profileId) {
-    let profiles = this.getProfiles();
-    profiles = profiles.filter(p => p.id !== profileId);
+    let profiles = this.getProfiles().filter(p => p.id !== profileId);
     localStorage.setItem('saved_client_profiles', JSON.stringify(profiles));
     return profiles;
   },
@@ -504,16 +407,18 @@ const ClientProfileManager = {
     const config = window.MASTER_CONFIG;
     config.activeAppType = p.vertical;
     const vData = config.verticals[p.vertical];
-    vData.businessName = p.businessName;
-    vData.tagline = p.tagline;
-    vData.logoIcon = p.logoIcon;
-    vData.themeColor = p.themeColor;
-    vData.accentColor = p.accentColor;
-    vData.currency = p.currency;
+    if (vData) {
+      vData.businessName = p.businessName;
+      vData.tagline = p.tagline;
+      vData.logoIcon = p.logoIcon;
+      vData.themeColor = p.themeColor;
+      vData.accentColor = p.accentColor;
+      vData.currency = p.currency;
+    }
     config.upiId = p.upiId;
     config.whatsappNumber = p.whatsappNumber;
-    config.googleScriptUrl = p.googleScriptUrl || config.googleScriptUrl || "https://script.google.com/macros/s/AKfycbwwN9X-FoeMqef1wY2k3pyISpmNU7Svg-Qr_TXcUZTGgXCJCyoy34f4_CJvaRXFLRGD/exec";
-    config.isProductionClientMode = p.isProductionClientMode || false;
+    config.googleScriptUrl = p.googleScriptUrl || config.googleScriptUrl;
+    config.isProductionClientMode = Boolean(p.isProductionClientMode);
     localStorage.setItem('production_client_mode', config.isProductionClientMode ? 'true' : 'false');
 
     // Restore uploaded Merchant QR Standee and Brand Logo
@@ -543,63 +448,32 @@ const ClientProfileManager = {
 };
 
 // =========================================================================
-// 🏷️ FEE & CATALOG CUSTOMIZER ENGINE
+// 🏷️ FEE & CATALOG CUSTOMIZER ENGINE (UNIFIED GENERIC RENDERER)
 // =========================================================================
 const CatalogEditor = {
   renderCatalogRows(verticalKey, config) {
-    const currency = config.verticals[verticalKey]?.currency || "₹";
-
-    if (verticalKey === 'student_management') {
-      const fees = config.verticals.student_management.feeCategories || [];
-      if (fees.length === 0) return `<div style="text-align:center; color:var(--text-muted); padding:20px 0;">No fee tiers found. Click + Add New Item.</div>`;
-      return fees.map(f => `
-        <div class="catalog-item-row">
-          <div style="flex: 1;">
-            <strong style="font-size: 13px;">${SecurityGuard.escapeHTML(f.title)}</strong>
-            <div style="font-size: 11px; color: var(--text-muted);">${SecurityGuard.escapeHTML(f.grade)} | ${currency}${Number(f.amount || 0).toLocaleString()}</div>
-          </div>
-          <button class="btn" style="padding: 4px 8px; font-size: 11px; background: rgba(239,68,68,0.1); color: var(--danger-color);" onclick="UniversalApp.deleteCatalogItem('${verticalKey}', '${SecurityGuard.sanitizeAttr(f.id)}')">🗑️ Remove</button>
-        </div>
-      `).join('');
-    } else if (verticalKey === 'hotel_booking') {
-      const rooms = config.verticals.hotel_booking.rooms || [];
-      if (rooms.length === 0) return `<div style="text-align:center; color:var(--text-muted); padding:20px 0;">No rooms found. Click + Add New Item.</div>`;
-      return rooms.map(r => `
-        <div class="catalog-item-row">
-          <div style="flex: 1;">
-            <strong style="font-size: 13px;">${SecurityGuard.escapeHTML(r.title)}</strong>
-            <div style="font-size: 11px; color: var(--text-muted);">${currency}${Number(r.pricePerNight || 0)}/night | Max ${Number(r.maxGuests || 1)} Guests</div>
-          </div>
-          <button class="btn" style="padding: 4px 8px; font-size: 11px; background: rgba(239,68,68,0.1); color: var(--danger-color);" onclick="UniversalApp.deleteCatalogItem('${verticalKey}', '${SecurityGuard.sanitizeAttr(r.id)}')">🗑️ Remove</button>
-        </div>
-      `).join('');
-    } else if (verticalKey === 'food_order') {
-      const dishes = config.verticals.food_order.menu || [];
-      if (dishes.length === 0) return `<div style="text-align:center; color:var(--text-muted); padding:20px 0;">No dishes found. Click + Add New Item.</div>`;
-      return dishes.map(d => `
-        <div class="catalog-item-row">
-          <div style="flex: 1;">
-            <strong style="font-size: 13px;">${SecurityGuard.escapeHTML(d.title)}</strong>
-            <div style="font-size: 11px; color: var(--text-muted);">${SecurityGuard.escapeHTML(d.category)} | ${currency}${Number(d.price || 0)}</div>
-          </div>
-          <button class="btn" style="padding: 4px 8px; font-size: 11px; background: rgba(239,68,68,0.1); color: var(--danger-color);" onclick="UniversalApp.deleteCatalogItem('${verticalKey}', '${SecurityGuard.sanitizeAttr(d.id)}')">🗑️ Remove</button>
-        </div>
-      `).join('');
-    } else if (verticalKey === 'ecommerce') {
-      const prods = config.verticals.ecommerce.products || [];
-      if (prods.length === 0) return `<div style="text-align:center; color:var(--text-muted); padding:20px 0;">No products found. Click + Add New Item.</div>`;
-      return prods.map(p => `
-        <div class="catalog-item-row">
-          <div style="flex: 1;">
-            <strong style="font-size: 13px;">${SecurityGuard.escapeHTML(p.title)}</strong>
-            <div style="font-size: 11px; color: var(--text-muted);">${SecurityGuard.escapeHTML(p.category)} | ${currency}${Number(p.price || 0)}</div>
-          </div>
-          <button class="btn" style="padding: 4px 8px; font-size: 11px; background: rgba(239,68,68,0.1); color: var(--danger-color);" onclick="UniversalApp.deleteCatalogItem('${verticalKey}', '${SecurityGuard.sanitizeAttr(p.id)}')">🗑️ Remove</button>
-        </div>
-      `).join('');
-    } else {
-      return `<div style="text-align:center; color:var(--text-muted); padding:16px 0;">Fleet settings are managed through MOVE-X rules.</div>`;
+    const v = config.verticals[verticalKey];
+    if (!v) return `<div style="text-align:center; color:var(--text-muted); padding:16px 0;">Fleet settings are managed through MOVE-X rules.</div>`;
+    const currency = v.currency || "₹";
+    const items = v.feeCategories || v.rooms || v.menu || v.products || [];
+    if (items.length === 0) {
+      return `<div style="text-align:center; color:var(--text-muted); padding:20px 0;">No items found. Click + Add New Item.</div>`;
     }
+    return items.map(item => {
+      const title = SecurityGuard.escapeHTML(item.title || item.name || '');
+      const subtitle = SecurityGuard.escapeHTML(item.grade || item.category || (item.maxGuests ? `Max ${item.maxGuests} Guests` : ''));
+      const amount = Number(item.amount || item.pricePerNight || item.price || 0);
+      const subText = subtitle ? `${subtitle} | ` : '';
+      return `
+        <div class="catalog-item-row">
+          <div style="flex: 1;">
+            <strong style="font-size: 13px;">${title}</strong>
+            <div style="font-size: 11px; color: var(--text-muted);">${subText}${currency}${amount.toLocaleString()}</div>
+          </div>
+          <button class="btn" style="padding: 4px 8px; font-size: 11px; background: rgba(239,68,68,0.1); color: var(--danger-color);" onclick="UniversalApp.deleteCatalogItem('${verticalKey}', '${SecurityGuard.sanitizeAttr(item.id)}')">🗑️ Remove</button>
+        </div>
+      `;
+    }).join('');
   }
 };
 

@@ -28,9 +28,9 @@
         }
       }
 
-      // If subPath is admin or points to admin, redirect to admin/
+      // If subPath is admin or points to admin, redirect to admin.html
       if (subPath.startsWith('admin')) {
-        window.location.replace(repoBase + 'admin/index.html' + search + hash);
+        window.location.replace(repoBase + 'admin.html' + search + hash);
         return;
       }
 
