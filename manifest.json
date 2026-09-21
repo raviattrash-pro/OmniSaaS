@@ -1,6 +1,6 @@
 {
-  "name": "Universal Business Platform",
-  "short_name": "UniPlatform",
+  "name": "OmniSaaS Universal Business Platform",
+  "short_name": "OmniSaaS",
   "description": "Config-Driven White-Label Platform for Student Admissions, MOVE-X Vehicle Logistics, Reservations & E-Commerce",
   "start_url": "./index.html",
   "display": "standalone",
@@ -8,12 +8,12 @@
   "theme_color": "#1e3a8a",
   "icons": [
     {
-      "src": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=192",
+      "src": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=192&h=192&q=80",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=512",
+      "src": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=512&h=512&q=80",
       "sizes": "512x512",
       "type": "image/png"
     }

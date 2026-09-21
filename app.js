@@ -1360,12 +1360,6 @@ const UniversalApp = {
         </div>
         <div class="g_id_signin" data-type="standard" data-size="medium" data-shape="pill"></div>
       `;
-      if (window.google && window.google.accounts) {
-        window.google.accounts.id.renderButton(
-          authContainer,
-          { theme: this.theme === 'dark' ? 'filled_black' : 'outline', size: 'medium', shape: 'pill' }
-        );
-      }
     }
   },
 
