@@ -416,12 +416,145 @@ const MoveXBookingModule = {
   },
 
   failedOtpAttempts: {},
+  uploadedMovexScreenshotData: null,
 
-  async confirmBooking() {
+  handleScreenshotUpload(input) {
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      if (!file.type.startsWith('image/')) {
+        UniversalApp.showToast('⚠️ Please upload a valid image file.', 'error');
+        return;
+      }
+      if (file.size > 4 * 1024 * 1024) {
+        UniversalApp.showToast('⚠️ Screenshot must be under 4MB.', 'error');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.uploadedMovexScreenshotData = e.target.result;
+        const prev = document.getElementById('movex_screenshot_preview');
+        if (prev) {
+          prev.style.display = 'block';
+          prev.innerHTML = `<img src="${e.target.result}" class="screenshot-preview-thumb" alt="Payment Proof" />`;
+        }
+        UniversalApp.showToast('✅ Payment screenshot attached!', 'success');
+      };
+      reader.readAsDataURL(file);
+    }
+  },
+
+  toggleUpiFields(val) {
+    const box = document.getElementById('movex_upi_proof_box');
+    const txn = document.getElementById('movex_txn_id');
+    const file = document.getElementById('movex_screenshot_file');
+    if (!box) return;
+    if (val.includes('UPI')) {
+      box.style.display = 'block';
+      if (txn) txn.required = true;
+      if (file) file.required = true;
+    } else {
+      box.style.display = 'none';
+      if (txn) txn.required = false;
+      if (file) file.required = false;
+    }
+  },
+
+  confirmBooking() {
+    // 1. Enforce Google Auth Gate
+    if (!UniversalApp.currentUser) {
+      UniversalApp.showGoogleLoginPrompt("Please sign in with Google to dispatch a MOVE-X vehicle.", () => {
+        this.confirmBooking();
+      });
+      return;
+    }
+
+    const pickup = SecurityGuard.escapeHTML(document.getElementById('movex_pickup').value.trim());
+    const drop = SecurityGuard.escapeHTML(document.getElementById('movex_drop').value.trim());
+    const custName = SecurityGuard.escapeHTML(document.getElementById('movex_cust_name').value.trim());
+    const custPhone = SecurityGuard.escapeHTML(document.getElementById('movex_cust_phone').value.trim());
+    const fareTotalStr = document.getElementById('fare_total').innerText.replace(/[^0-9]/g, '');
+    const finalFare = parseInt(fareTotalStr) || 0;
+
+    if (!pickup || !drop || !custName || !custPhone) {
+      UniversalApp.showToast('⚠️ Please fill in all required route and contact details.', 'error');
+      return;
+    }
+
+    const config = window.MASTER_CONFIG;
+    const customQr = config.customQr || localStorage.getItem('custom_upi_qr');
+    const upiUri = `upi://pay?pa=${config.upiId}&pn=${encodeURIComponent("MOVE-X Logistics")}&am=${finalFare}&cu=INR&tn=MOVE-X_Booking`;
+    const dynamicQr = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiUri)}`;
+    const qrDisplayUrl = customQr || dynamicQr;
+    this.uploadedMovexScreenshotData = null;
+
+    UniversalApp.showModal(`
+      <div style="text-align: center;">
+        <h3 style="color: var(--primary-color); font-size: 1.35rem; margin-bottom: 4px;">⚡ Confirm Dispatch & Payment</h3>
+        <p style="color: var(--text-muted); font-size: 13px;">${SecurityGuard.escapeHTML(this.selectedVehicle.title)} &bull; ${this.calcState.distanceKm} km</p>
+        <div style="font-size: 2.2rem; font-weight: 900; color: var(--primary-color); margin: 8px 0;">₹${finalFare}</div>
+
+        <div style="background: var(--bg-secondary); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 14px;">
+          <p style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px;">
+            ${customQr ? '🏢 OFFICIAL MERCHANT STAND-IN QR' : '⚡ SCAN WITH GPAY / PHONEPE / PAYTM'}
+          </p>
+          <img src="${qrDisplayUrl}" style="max-height: 180px; max-width: 180px; background: #fff; padding: 6px; border-radius: 8px; border: 1.5px solid var(--border-color); object-fit: contain;" alt="UPI QR" />
+          <div style="display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 6px;">
+            <span style="font-size: 12px; color: var(--text-muted);">VPA: <strong>${config.upiId}</strong></span>
+            <button class="pill-btn" style="background: var(--surface-card); color: var(--text-main); font-size: 10px;" onclick="navigator.clipboard.writeText('${config.upiId}'); UniversalApp.showToast('UPI ID Copied!', 'success');">📋 Copy</button>
+          </div>
+        </div>
+
+        <form onsubmit="MoveXBookingModule.executeDispatch(event, ${finalFare})">
+          <div class="form-group" style="text-align: left;">
+            <label>Payment Method *</label>
+            <select id="movex_payment_mode" class="form-control" onchange="MoveXBookingModule.toggleUpiFields(this.value)">
+              <option value="UPI Instant Payment">UPI Instant Advance Payment (Zero Surcharge)</option>
+              <option value="Cash / Pay on Delivery">Cash / Pay to Driver at Unloading</option>
+            </select>
+          </div>
+
+          <div id="movex_upi_proof_box" style="margin-top: 10px;">
+            <div class="form-group" style="text-align: left;">
+              <label>UPI Transaction / UTR ID *</label>
+              <input type="text" id="movex_txn_id" class="form-control" required placeholder="Enter 12-digit UTR or Txn Ref" />
+            </div>
+            <div class="form-group" style="text-align: left;">
+              <label>Upload Payment Screenshot *</label>
+              <input type="file" id="movex_screenshot_file" class="form-control" accept="image/*" required onchange="MoveXBookingModule.handleScreenshotUpload(this)" />
+              <div id="movex_screenshot_preview" style="display: none; margin-top: 8px;"></div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 14px; font-weight: 800; font-size: 15px;">
+            🚀 Lock Booking & Dispatch Vehicle
+          </button>
+        </form>
+      </div>
+    `);
+  },
+
+  async executeDispatch(e, finalFare) {
+    e.preventDefault();
     const rateCheck = RateLimiter.checkLimit();
     if (!rateCheck.allowed) {
       UniversalApp.showToast(`⚠️ Rate limit reached. Please wait ${rateCheck.waitSeconds}s.`, 'error');
       return;
+    }
+
+    const payMode = document.getElementById('movex_payment_mode')?.value || 'UPI Instant Payment';
+    let txnId = "COD_PENDING";
+
+    if (payMode.includes('UPI')) {
+      const txnEl = document.getElementById('movex_txn_id');
+      txnId = txnEl ? SecurityGuard.escapeHTML(txnEl.value.trim()) : '';
+      if (!txnId) {
+        UniversalApp.showToast('⚠️ Please provide the UPI Transaction / UTR ID.', 'error');
+        return;
+      }
+      if (!this.uploadedMovexScreenshotData) {
+        UniversalApp.showToast('⚠️ Please attach the payment confirmation screenshot.', 'error');
+        return;
+      }
     }
 
     const bookingId = "MOV-" + new Date().getFullYear() + "-" + Math.floor(1000 + Math.random() * 9000);
@@ -430,8 +563,6 @@ const MoveXBookingModule = {
     const drop = SecurityGuard.escapeHTML(document.getElementById('movex_drop').value.trim());
     const custName = SecurityGuard.escapeHTML(document.getElementById('movex_cust_name').value.trim());
     const custPhone = SecurityGuard.escapeHTML(document.getElementById('movex_cust_phone').value.trim());
-    const fareTotalStr = document.getElementById('fare_total').innerText.replace(/[^0-9]/g, '');
-    const finalFare = parseInt(fareTotalStr) || 0;
     const driverPayout = Math.round(finalFare * 0.85);
 
     const record = {
@@ -447,6 +578,7 @@ const MoveXBookingModule = {
       finalFare: finalFare,
       driverNetPayout: `₹${driverPayout}`,
       deliveryOtp: otp,
+      transactionRef: txnId,
       returnLoadPairing: this.calcState.isReturnLoadPairing ? "Yes (15% Saver)" : "Standard One-Way",
       tripStatus: "Dispatched / En Route"
     };
@@ -458,7 +590,7 @@ const MoveXBookingModule = {
       orderId: bookingId,
       timestamp: record.timestamp,
       appType: "movex_booking",
-      customer: { name: custName, phone: custPhone, email: "dispatch@movex.io", authProvider: UniversalApp.currentUser ? "google" : "guest" },
+      customer: { name: custName, phone: custPhone, email: UniversalApp.currentUser ? UniversalApp.currentUser.email : "dispatch@movex.io", authProvider: UniversalApp.currentUser ? "google" : "guest" },
       cart: {
         items: [{ id: this.selectedVehicle.id, title: this.selectedVehicle.title, price: finalFare, quantity: 1, subtotal: finalFare }],
         finalTotal: finalFare,
@@ -472,10 +604,13 @@ const MoveXBookingModule = {
         helpers: record.helpers,
         driverNetPayout: record.driverNetPayout,
         deliveryOtp: record.deliveryOtp,
+        transactionRef: txnId,
+        paymentMode: payMode,
+        paymentScreenshot: this.uploadedMovexScreenshotData ? "[Screenshot Attached]" : "None",
         returnLoadPairing: record.returnLoadPairing,
         tripStatus: record.tripStatus
       },
-      payment: { method: "cod_or_upi", status: "pending" }
+      payment: { method: payMode.includes('UPI') ? "upi" : "cod", status: payMode.includes('UPI') ? "paid" : "pending" }
     };
 
     UniversalApp.showToast("Dispatching MOVE-X Vehicle...", "info");
@@ -488,7 +623,7 @@ const MoveXBookingModule = {
     UniversalApp.playSound('victory');
 
     UniversalApp.showModal(`
-      <div class="receipt-box">
+      <div class="receipt-box" id="printableReceipt">
         <div class="receipt-header">
           <span style="font-size: 3.2rem;">🚚</span>
           <h3 style="color: var(--primary-color); margin-top: 4px;">MOVE-X Vehicle Dispatched!</h3>
@@ -503,11 +638,12 @@ const MoveXBookingModule = {
 
         <div class="receipt-row"><span>Vehicle:</span><strong>${SecurityGuard.escapeHTML(this.selectedVehicle.title)}</strong></div>
         <div class="receipt-row"><span>Route:</span><strong>${pickup} ➔ ${drop}</strong></div>
+        <div class="receipt-row"><span>UPI / Txn Ref:</span><strong style="color: var(--primary-color);">${txnId}</strong></div>
         <div class="receipt-row"><span>Customer All-In Fare:</span><strong style="color: var(--primary-color); font-size: 17px;">₹${finalFare}</strong></div>
         <div class="receipt-row"><span>Driver Net Payout:</span><strong style="color: var(--success-color);">₹${driverPayout} (85%)</strong></div>
         
         <div style="display: flex; gap: 10px; margin-top: 20px;">
-          <button class="btn btn-primary" style="flex: 1;" onclick="window.print()">🖨️ Print Docket</button>
+          <button class="btn btn-primary" style="flex: 1;" onclick="UniversalApp.printActiveReceipt()">🖨️ Print Docket</button>
           <button class="btn btn-accent" style="flex: 1;" onclick="MoveXBookingModule.shareOnWhatsApp('${SecurityGuard.sanitizeAttr(bookingId)}', '${SecurityGuard.sanitizeAttr(pickup)}', '${SecurityGuard.sanitizeAttr(drop)}', ${finalFare}, ${otp})">📲 WhatsApp</button>
         </div>
       </div>

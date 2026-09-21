@@ -613,6 +613,14 @@ const AdminDashboard = {
     }
     this.saveProfiles(profiles);
 
+    // Sync active assets for immediate browser testing
+    if (data.customQrData) {
+      localStorage.setItem('custom_upi_qr', data.customQrData);
+    }
+    if (data.customLogoData) {
+      localStorage.setItem('custom_brand_logo', data.customLogoData);
+    }
+
     // Compute Dedicated URLs
     const dedicatedUrl = this.getDedicatedBusinessUrl(slug);
     const deepLaunchUrl = this.getDeepLaunchUrl(slug);

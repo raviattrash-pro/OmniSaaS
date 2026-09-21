@@ -30,7 +30,7 @@
       <form onsubmit="AdminDashboard.handleLogin(event)">
         <div class="admin-form-group">
           <label>Enter Master Security PIN</label>
-          <input type="password" id="admin_pin_input" class="admin-input" placeholder="Enter PIN (Default: 1234)" autofocus required />
+          <input type="password" id="admin_pin_input" class="admin-input" placeholder="Enter PIN " autofocus required />
         </div>
         <div id="login_error_msg" style="color: var(--admin-danger); font-size: 12px; margin-bottom: 12px; display: none;"></div>
         <button type="submit" class="btn-admin btn-admin-primary" style="width: 100%; padding: 12px; font-size: 14px;">
@@ -436,6 +436,63 @@
       <section id="tab_panel_backup" class="admin-tab-panel" style="display: none;">
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
           
+          <!-- LIVE CONNECTED GOOGLE SHEETS FOR ALL 5 APPS -->
+          <div class="stat-card" style="flex-direction: column; align-items: stretch; text-align: left; grid-column: 1 / -1;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+              <div>
+                <h3 style="font-size: 17px; font-weight: 800; color: var(--admin-primary); margin-bottom: 4px;">📊 Connected Google Spreadsheets (Auto Tab Creation)</h3>
+                <p style="font-size: 12px; color: var(--admin-text-muted);">
+                  Each vertical writes to its official spreadsheet. For every new business onboarded, Google Apps Script automatically creates a <strong>separate dedicated sheet tab</strong> named after the business and logs the entry into <code>_Master_Directory</code>.
+                </p>
+              </div>
+              <span style="background: rgba(16, 185, 129, 0.15); color: var(--admin-success); padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 800;">
+                🟢 5 Spreadsheets Connected
+              </span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; margin-top: 6px;">
+              <a href="https://docs.google.com/spreadsheets/d/1z1K_O8vl9ftwTlJmnLMzLrjC5V7sfhEMbToWjPuCL-w/edit?usp=sharing" target="_blank" style="text-decoration: none; background: var(--admin-bg-surface); border: 1px solid var(--admin-border); padding: 12px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                  <div style="font-weight: 800; font-size: 13px; color: var(--admin-text-main);">🎓 School & Students</div>
+                  <div style="font-size: 11px; color: var(--admin-text-muted);">Admissions, Fees, Activities</div>
+                </div>
+                <span class="btn-admin btn-admin-outline" style="padding: 4px 10px; font-size: 11px;">Open Sheet ↗</span>
+              </a>
+
+              <a href="https://docs.google.com/spreadsheets/d/1Mnb-CnvAhb8bTr5dulfzHZTEoD1rs2BbwgwkGKZxnnY/edit?usp=sharing" target="_blank" style="text-decoration: none; background: var(--admin-bg-surface); border: 1px solid var(--admin-border); padding: 12px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                  <div style="font-weight: 800; font-size: 13px; color: var(--admin-text-main);">🚚 MOVE-X Logistics</div>
+                  <div style="font-size: 11px; color: var(--admin-text-muted);">V0 Operating Ledger, Dispatches, OTP</div>
+                </div>
+                <span class="btn-admin btn-admin-outline" style="padding: 4px 10px; font-size: 11px;">Open Sheet ↗</span>
+              </a>
+
+              <a href="https://docs.google.com/spreadsheets/d/1G1Z3GKyzP9Y_s8av1GSHj1UKwctlwhLuvW9L8FO0zGk/edit?usp=sharing" target="_blank" style="text-decoration: none; background: var(--admin-bg-surface); border: 1px solid var(--admin-border); padding: 12px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                  <div style="font-weight: 800; font-size: 13px; color: var(--admin-text-main);">🛍️ E-Commerce Retail</div>
+                  <div style="font-size: 11px; color: var(--admin-text-muted);">Store Orders, Customer Deliveries</div>
+                </div>
+                <span class="btn-admin btn-admin-outline" style="padding: 4px 10px; font-size: 11px;">Open Sheet ↗</span>
+              </a>
+
+              <a href="https://docs.google.com/spreadsheets/d/1YYurMFHrew8GZtfXsoJetuAEjd58t58LSVb6QogrW1k/edit?usp=sharing" target="_blank" style="text-decoration: none; background: var(--admin-bg-surface); border: 1px solid var(--admin-border); padding: 12px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                  <div style="font-weight: 800; font-size: 13px; color: var(--admin-text-main);">🏨 Hotel & Resorts</div>
+                  <div style="font-size: 11px; color: var(--admin-text-muted);">Room Bookings, Guest Vouchers</div>
+                </div>
+                <span class="btn-admin btn-admin-outline" style="padding: 4px 10px; font-size: 11px;">Open Sheet ↗</span>
+              </a>
+
+              <a href="https://docs.google.com/spreadsheets/d/1YYurMFHrew8GZtfXsoJetuAEjd58t58LSVb6QogrW1k/edit?usp=sharing" target="_blank" style="text-decoration: none; background: var(--admin-bg-surface); border: 1px solid var(--admin-border); padding: 12px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                  <div style="font-weight: 800; font-size: 13px; color: var(--admin-text-main);">🍔 Food & Dining</div>
+                  <div style="font-size: 11px; color: var(--admin-text-muted);">Kitchen Orders, Table Deliveries</div>
+                </div>
+                <span class="btn-admin btn-admin-outline" style="padding: 4px 10px; font-size: 11px;">Open Sheet ↗</span>
+              </a>
+            </div>
+          </div>
+
           <div class="stat-card" style="flex-direction: column; align-items: stretch; text-align: left;">
             <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 6px;">🐙 GitHub Pages Account Config</h3>
             <p style="font-size: 12px; color: var(--admin-text-muted); margin-bottom: 14px;">Set your GitHub Username or Org to automatically compute business URLs.</p>

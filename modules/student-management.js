@@ -82,11 +82,27 @@ const StudentManagementModule = {
                 <div class="form-group">
                   <label>Applying for Grade / Class *</label>
                   <select id="wiz_grade" class="form-control" required>
-                    <option value="Kindergarten / Nursery">Kindergarten / Nursery</option>
-                    <option value="Grade 1 - 5 (Primary)">Grade 1 - 5 (Primary)</option>
-                    <option value="Grade 6 - 8 (Middle School)" selected>Grade 6 - 8 (Middle School)</option>
-                    <option value="Grade 9 - 10 (Secondary ICSE/CBSE)">Grade 9 - 10 (Secondary)</option>
-                    <option value="Grade 11 - 12 (Science / Commerce)">Grade 11 - 12 (Senior Secondary)</option>
+                    <option value="">-- Select Specific Class --</option>
+                    <option value="Playgroup / Pre-Nursery">Playgroup / Pre-Nursery</option>
+                    <option value="Nursery">Nursery</option>
+                    <option value="LKG (Lower Kindergarten)">LKG (Lower Kindergarten)</option>
+                    <option value="UKG (Upper Kindergarten)">UKG (Upper Kindergarten)</option>
+                    <option value="Class 1">Class 1</option>
+                    <option value="Class 2">Class 2</option>
+                    <option value="Class 3">Class 3</option>
+                    <option value="Class 4">Class 4</option>
+                    <option value="Class 5">Class 5</option>
+                    <option value="Class 6">Class 6</option>
+                    <option value="Class 7" selected>Class 7</option>
+                    <option value="Class 8">Class 8</option>
+                    <option value="Class 9">Class 9</option>
+                    <option value="Class 10">Class 10</option>
+                    <option value="Class 11 (Science - PCM/PCB)">Class 11 (Science - PCM/PCB)</option>
+                    <option value="Class 11 (Commerce)">Class 11 (Commerce)</option>
+                    <option value="Class 11 (Arts / Humanities)">Class 11 (Arts / Humanities)</option>
+                    <option value="Class 12 (Science - PCM/PCB)">Class 12 (Science - PCM/PCB)</option>
+                    <option value="Class 12 (Commerce)">Class 12 (Commerce)</option>
+                    <option value="Class 12 (Arts / Humanities)">Class 12 (Arts / Humanities)</option>
                   </select>
                 </div>
               </div>
@@ -216,8 +232,8 @@ const StudentManagementModule = {
               <input type="file" id="id_photo_upload" class="form-control" accept="image/*" onchange="StudentManagementModule.handlePhotoUpload(this)" />
             </div>
 
-            <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="window.print()">
-              🖨️ Print Student Identity Card
+            <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="UniversalApp.printIdCard()">
+              🖨️ Print Student Identity Card (Single Page Badge)
             </button>
           </div>
 
@@ -419,6 +435,13 @@ const StudentManagementModule = {
 
   async handleWizardSubmit(e) {
     e.preventDefault();
+
+    // Mandatory Google Sign-In Gate
+    if (!UniversalApp.currentUser) {
+      UniversalApp.showGoogleLoginPrompt("Please sign in with Google to submit student admission.", () => this.handleWizardSubmit(e));
+      return;
+    }
+
     const rateCheck = RateLimiter.checkLimit();
     if (!rateCheck.allowed) {
       UniversalApp.showToast(`⚠️ Rate limit reached. Please wait ${rateCheck.waitSeconds}s.`, 'error');
@@ -504,7 +527,7 @@ const StudentManagementModule = {
         </div>
         
         <div style="display: flex; gap: 10px;">
-          <button class="btn btn-primary" style="flex: 1;" onclick="window.print()">🖨️ Print Slip</button>
+          <button class="btn btn-primary" style="flex: 1;" onclick="UniversalApp.printActiveReceipt()">🖨️ Print Slip</button>
           <button class="btn btn-outline" style="flex: 1;" onclick="UniversalApp.closeModal()">Done</button>
         </div>
       </div>
@@ -577,14 +600,50 @@ const StudentManagementModule = {
     }
   },
 
+  uploadedFeeScreenshotData: null,
+
+  handleFeeScreenshotUpload(input) {
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      if (!file.type.startsWith('image/')) {
+        UniversalApp.showToast('⚠️ Please upload a valid image file.', 'error');
+        return;
+      }
+      if (file.size > 4 * 1024 * 1024) {
+        UniversalApp.showToast('⚠️ Screenshot must be under 4MB.', 'error');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.uploadedFeeScreenshotData = e.target.result;
+        const prev = document.getElementById('fee_screenshot_preview');
+        if (prev) {
+          prev.style.display = 'block';
+          prev.innerHTML = `<img src="${e.target.result}" class="screenshot-preview-thumb" alt="Payment Proof" />`;
+        }
+        UniversalApp.showToast('✅ Fee payment screenshot attached!', 'success');
+      };
+      reader.readAsDataURL(file);
+    }
+  },
+
   openFeePaymentModal(feeId, feeTitle, amount) {
+    // Enforce Google Sign-In Gate before paying fees
+    if (!UniversalApp.currentUser) {
+      UniversalApp.showGoogleLoginPrompt("Please sign in with Google to pay institutional fees.", () => {
+        this.openFeePaymentModal(feeId, feeTitle, amount);
+      });
+      return;
+    }
+
     const config = window.MASTER_CONFIG;
     const currency = config.verticals.student_management.currency;
-    const customQr = localStorage.getItem('custom_upi_qr');
+    const customQr = config.customQr || localStorage.getItem('custom_upi_qr');
     const upiUri = `upi://pay?pa=${config.upiId}&pn=${encodeURIComponent(config.verticals.student_management.businessName)}&am=${amount}&cu=INR&tn=Fee_${feeId}`;
     const dynamicQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=190x190&data=${encodeURIComponent(upiUri)}`;
     const qrDisplayUrl = customQr || dynamicQrUrl;
     const defaultName = UniversalApp.currentUser ? UniversalApp.currentUser.name : "";
+    this.uploadedFeeScreenshotData = null;
 
     UniversalApp.showModal(`
       <div style="text-align: center;">
@@ -616,8 +675,17 @@ const StudentManagementModule = {
             <label>Parent Contact Phone *</label>
             <input type="tel" id="fee_phone" class="form-control" required placeholder="+91 98765 43210" />
           </div>
-          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 12px; font-size: 15px;">
-            ✅ Confirm & Generate Official Receipt
+          <div class="form-group" style="text-align: left;">
+            <label>UPI Transaction / UTR ID *</label>
+            <input type="text" id="fee_txn_id" class="form-control" required placeholder="Enter 12-digit UTR or Transaction Ref" />
+          </div>
+          <div class="form-group" style="text-align: left;">
+            <label>Upload Payment Confirmation Screenshot *</label>
+            <input type="file" id="fee_screenshot_file" class="form-control" accept="image/*" required onchange="StudentManagementModule.handleFeeScreenshotUpload(this)" />
+            <div id="fee_screenshot_preview" style="display: none; margin-top: 8px;"></div>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 14px; font-size: 15px; font-weight: 800;">
+            ✅ Verify Payment & Generate Official Receipt
           </button>
         </form>
       </div>
@@ -637,7 +705,17 @@ const StudentManagementModule = {
     const studentName = SecurityGuard.escapeHTML(document.getElementById('fee_student_name').value.trim());
     const rollNo = SecurityGuard.escapeHTML(document.getElementById('fee_roll_no').value.trim());
     const phone = SecurityGuard.escapeHTML(document.getElementById('fee_phone').value.trim());
+    const txnId = SecurityGuard.escapeHTML(document.getElementById('fee_txn_id').value.trim());
     const sanitizedFeeTitle = SecurityGuard.escapeHTML(feeTitle);
+
+    if (!txnId) {
+      UniversalApp.showToast('⚠️ Please enter the UPI Transaction Reference / UTR ID.', 'error');
+      return;
+    }
+    if (!this.uploadedFeeScreenshotData) {
+      UniversalApp.showToast('⚠️ Please upload the payment confirmation screenshot.', 'error');
+      return;
+    }
 
     const feeRecord = {
       receiptNo: receiptNo,
@@ -648,6 +726,7 @@ const StudentManagementModule = {
       particulars: sanitizedFeeTitle,
       amount: amount,
       currency: config.verticals.student_management.currency,
+      transactionRef: txnId,
       status: "Paid (Verified)"
     };
 
@@ -672,13 +751,14 @@ const StudentManagementModule = {
       },
       customFields: {
         studentRollNo: rollNo,
-        transactionRef: "UPI_AUTO_VERIFIED",
-        paymentMode: "UPI Instant"
+        transactionRef: txnId,
+        paymentMode: "UPI Instant",
+        paymentScreenshot: "[Screenshot Attached]"
       },
       payment: { method: "upi", status: "paid" }
     };
 
-    UniversalApp.showToast("Recording Fee Payment...", "info");
+    UniversalApp.showToast("Recording Fee Payment in Ledger...", "info");
     try {
       await UniversalApp.dispatchWebhook(payload);
     } catch (err) {
@@ -698,19 +778,29 @@ const StudentManagementModule = {
         <div class="receipt-row"><span>Student Name:</span><strong>${studentName}</strong></div>
         <div class="receipt-row"><span>Roll / Student ID:</span><strong>${rollNo}</strong></div>
         <div class="receipt-row"><span>Fee Particulars:</span><strong>${sanitizedFeeTitle}</strong></div>
+        <div class="receipt-row"><span>UPI Transaction / UTR:</span><strong style="color: var(--primary-color);">${txnId}</strong></div>
         <div class="receipt-row"><span>Payment Date:</span><strong>${new Date().toLocaleDateString()}</strong></div>
         <div class="receipt-row" style="border-top: 1.5px solid var(--border-color); padding-top: 8px; margin-top: 8px;">
           <span style="font-weight: 800; font-size: 15px;">Amount Paid:</span>
           <strong style="color: var(--primary-color); font-size: 17px;">${feeRecord.currency}${amount.toLocaleString()}</strong>
         </div>
-        <div style="text-align: center; margin-top: 20px;">
-          <button class="btn btn-primary" style="width: 100%;" onclick="window.print()">🖨️ Download / Print Receipt</button>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button class="btn btn-primary" style="flex: 1;" onclick="UniversalApp.printActiveReceipt()">🖨️ Download / Print Receipt</button>
+          <button class="btn btn-outline" style="flex: 1;" onclick="UniversalApp.closeModal()">Done</button>
         </div>
       </div>
     `);
   },
 
   openActivityModal(title) {
+    // Enforce Google Sign-In Gate before club registration
+    if (!UniversalApp.currentUser) {
+      UniversalApp.showGoogleLoginPrompt("Please sign in with Google to register for clubs & activities.", () => {
+        this.openActivityModal(title);
+      });
+      return;
+    }
+
     const defaultName = UniversalApp.currentUser ? UniversalApp.currentUser.name : "";
     const sanitizedTitle = SecurityGuard.sanitizeAttr(title);
     UniversalApp.showModal(`
@@ -730,7 +820,7 @@ const StudentManagementModule = {
             <label>Parent Contact Phone *</label>
             <input type="tel" id="act_phone" class="form-control" required placeholder="+91 98765 43210" />
           </div>
-          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 14px;">Confirm Enrollment</button>
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 14px; font-weight: 800;">Confirm Enrollment</button>
         </form>
       </div>
     `);
@@ -748,9 +838,10 @@ const StudentManagementModule = {
     const grade = SecurityGuard.escapeHTML(document.getElementById('act_grade').value.trim());
     const phone = SecurityGuard.escapeHTML(document.getElementById('act_phone').value.trim());
     const sanitizedTitle = SecurityGuard.escapeHTML(title);
+    const passId = "ACT-" + Math.floor(1000 + Math.random() * 9000);
 
     const actRecord = {
-      orderId: "ACT-" + Math.floor(1000 + Math.random() * 9000),
+      orderId: passId,
       timestamp: new Date().toISOString(),
       studentName: studentName,
       grade: grade,
@@ -766,7 +857,7 @@ const StudentManagementModule = {
       orderId: actRecord.orderId,
       timestamp: actRecord.timestamp,
       appType: "student_management",
-      customer: { name: studentName, phone: phone, email: "activities@brightstar.edu", authProvider: UniversalApp.currentUser ? "google" : "guest" },
+      customer: { name: studentName, phone: phone, email: UniversalApp.currentUser ? UniversalApp.currentUser.email : "activities@brightstar.edu", authProvider: UniversalApp.currentUser ? "google" : "guest" },
       cart: { items: [{ id: "act_reg", title: "Club: " + sanitizedTitle, price: 0, quantity: 1, subtotal: 0 }], finalTotal: 0, currency: "₹" },
       customFields: { activityName: sanitizedTitle, grade: grade },
       payment: { method: "free_club_reg", status: "enrolled" }
@@ -780,8 +871,24 @@ const StudentManagementModule = {
     }
     UniversalApp.triggerConfetti();
     UniversalApp.playSound('victory');
-    UniversalApp.closeModal();
-    UniversalApp.showToast(`✅ Successfully registered ${studentName} for ${sanitizedTitle}!`, "success");
+
+    UniversalApp.showModal(`
+      <div class="receipt-box" id="printableReceipt">
+        <div class="receipt-header">
+          <span style="font-size: 3rem;">🏆</span>
+          <h3 style="color: var(--primary-color); margin-top: 4px;">Club Enrollment Pass</h3>
+          <p style="font-size: 13px; color: var(--text-muted);">Pass ID: <strong>${passId}</strong></p>
+        </div>
+        <div class="receipt-row"><span>Student Name:</span><strong>${studentName}</strong></div>
+        <div class="receipt-row"><span>Club / Activity:</span><strong>${sanitizedTitle}</strong></div>
+        <div class="receipt-row"><span>Grade / Section:</span><strong>${grade}</strong></div>
+        <div class="receipt-row"><span>Status:</span><strong style="color: var(--success-color);">● Active Member</strong></div>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button class="btn btn-primary" style="flex: 1;" onclick="UniversalApp.printActiveReceipt()">🖨️ Print Pass</button>
+          <button class="btn btn-outline" style="flex: 1;" onclick="UniversalApp.closeModal()">Done</button>
+        </div>
+      </div>
+    `);
 
     const container = document.getElementById('vertical-container');
     this.render(container, window.MASTER_CONFIG);
